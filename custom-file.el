@@ -14,21 +14,23 @@
    [default bold shadow italic underline bold bold-italic bold])
  '(ansi-color-names-vector
    ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
+ '(auto-save-default nil)
  '(background-color "#202020")
  '(background-mode dark)
  '(cursor-color "#cccccc")
  '(custom-enabled-themes (quote (manoj-dark)))
  '(custom-safe-themes
    (quote
-    ("030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" "f81a9aabc6a70441e4a742dfd6d10b2bae1088830dc7aba9c9922f4b1bd2ba50" "4980e5ddaae985e4bae004280bd343721271ebb28f22b3e3b2427443e748cd3f" default)))
+    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" "f81a9aabc6a70441e4a742dfd6d10b2bae1088830dc7aba9c9922f4b1bd2ba50" "4980e5ddaae985e4bae004280bd343721271ebb28f22b3e3b2427443e748cd3f" default)))
  '(delete-selection-mode t)
  '(electric-pair-mode t)
  '(foreground-color "#cccccc")
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
+ '(make-backup-files nil)
  '(package-selected-packages
    (quote
-    (cyberpunk-theme noctilux-theme use-package company tide)))
+    (web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(truncate-lines t))
