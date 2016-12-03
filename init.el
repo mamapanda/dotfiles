@@ -40,6 +40,7 @@
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (setq company-idle-delay 0.3)
+  (setq company-tooltip-align-annotations t)
   (add-to-list 'company-backends 'company-omnisharp))
 
 (use-package csharp-mode
@@ -65,15 +66,13 @@
     (tide-hl-identifier-mode +1)
     (company-mode +1))
   (add-hook 'before-save-hook 'tide-format-before-save)
-  (add-hook 'typescript-mode-hook #'setup-tide-mode)
-  :config
-  (setq company-tooltip-align-annotations t))
+  (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
 (use-package web-mode
   :ensure t
   :init
   (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
