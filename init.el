@@ -22,6 +22,9 @@
   :init
   (load-theme 'monokai t))
 
+(use-package pacmacs ; M-x pacmacs-start
+  :ensure t)
+
 (use-package ido
   :ensure t
   :init

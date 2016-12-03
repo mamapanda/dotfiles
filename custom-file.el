@@ -30,7 +30,7 @@
  '(make-backup-files nil)
  '(package-selected-packages
    (quote
-    (web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
+    (pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(truncate-lines t))
