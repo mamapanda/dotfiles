@@ -37,6 +37,13 @@
   :init
   (ido-mode t))
 
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-mode)
+  :config
+  (setq projectile-indexing-method 'alien))
+
 (use-package flycheck
   :ensure t
   :init
