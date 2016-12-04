@@ -13,15 +13,21 @@
 (global-auto-revert-mode t) ;reloads file if changed externally
 (setq disabled-command-function nil) ;enables disabled commands
 
-(load "server")
+(load "server") ;emacsclient server
 (unless (server-running-p) (server-start))
 
 (require 'use-package)
 
+(use-package ample-theme
+  :ensure t)
+
 (use-package monokai-theme
-  :ensure t
-  :init
-  (load-theme 'monokai t))
+  :ensure t)
+
+(use-package solarized-theme
+  :ensure t)
+
+(load-theme 'monokai t)
 
 (use-package pacmacs ; M-x pacmacs-start
   :ensure t)
@@ -65,7 +71,6 @@
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line))
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1)
     (company-mode +1))
