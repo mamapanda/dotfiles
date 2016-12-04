@@ -12,6 +12,7 @@
 (w32-send-sys-command 61488) ;fullscreen
 (global-auto-revert-mode t) ;reloads file if changed externally
 (setq disabled-command-function nil) ;enables disabled commands
+(set-frame-font "Consolas-10") ;why emacs keep resetting my font
 
 (load "server") ;emacsclient server
 (unless (server-running-p) (server-start))
