@@ -40,11 +40,8 @@
 (use-package multiple-cursors
   :ensure t
   :init
-  (global-unset-key (kbd "C-m")) ;it's return anyways
-  (global-set-key (kbd "C-m C-l") 'mc/edit-lines)
-  (global-set-key (kbd "C-m C-n") 'mc/mark-next-like-this)
-  (global-set-key (kbd "C-m C-p") 'mc/mark-previous-like-this)
-  (global-set-key (kbd "C-m C-a") 'mc/mark-all-like-this))
+  (global-set-key (kbd "C-c m l") 'mc/edit-lines)
+  (global-set-key (kbd "C-c m a") 'mc/mark-all-like-this))
 
 (use-package projectile
   :ensure t
