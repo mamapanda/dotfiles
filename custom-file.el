@@ -66,6 +66,7 @@
     (ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
+ '(ring-bell-function (quote ignore))
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
  '(term-default-bg-color "#fdf6e3")
@@ -95,6 +96,7 @@
      (340 . "#2790C3")
      (360 . "#66D9EF"))))
  '(vc-annotate-very-old-color nil)
+ '(visible-bell nil)
  '(weechat-color-list
    (unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
  '(xterm-color-names
@@ -107,4 +109,4 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Consolas" :foundry "outline" :slant normal :weight normal :height 98 :width normal)))))
+ '(default ((((class color) (min-colors 257)) (:foreground "#F8F8F2" :background "#272822")) (((class color) (min-colors 89)) (:foreground "#F5F5F5" :background "#1B1E1C")))))
