@@ -9,10 +9,10 @@
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
 
-(w32-send-sys-command 61488) ;fullscreen
 (global-auto-revert-mode t) ;reloads file if changed externally
 (setq disabled-command-function nil) ;enables disabled commands
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
+(w32-send-sys-command 61488) ;fullscreen
 
 (load "server") ;emacsclient server
 (unless (server-running-p) (server-start))
@@ -63,7 +63,7 @@
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (setq company-idle-delay 0.3)
+  (setq company-idle-delay 0.1)
   (setq company-tooltip-align-annotations t)
   (add-to-list 'company-backends 'company-omnisharp))
 
