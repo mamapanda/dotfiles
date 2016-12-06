@@ -36,7 +36,20 @@
 (use-package ido
   :ensure t
   :init
-  (ido-mode t))
+  (ido-mode t)
+  (ido-everywhere t))
+
+(use-package ido-ubiquitous
+  :ensure t
+  :init
+  (ido-ubiquitous-mode t))
+
+(use-package smex
+  :ensure t
+  :init
+  (smex-initialize)
+  :config
+  (global-set-key (kbd "M-x") 'smex))
 
 (use-package multiple-cursors
   :ensure t
@@ -77,6 +90,12 @@
   :config
   (setq omnisharp-server-executable-path
         "C:\\Users\\Danniel\\Github\\omnisharp-roslyn\\artifacts\\publish\\OmniSharp\\default\\net46\\omnisharp.exe"))
+
+;(use-package clojure-mode
+;  :ensure t)
+;
+;(use-package cider
+;  :ensure t)
 
 (use-package tide
   :ensure t
