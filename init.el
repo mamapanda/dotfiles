@@ -39,6 +39,13 @@
   (ido-mode t)
   (ido-everywhere t))
 
+(use-package ido-vertical-mode
+  :ensure t
+  :init
+  (ido-vertical-mode 1)
+  :config
+  (setq ido-vertical-define-keys 'C-n-and-C-p-only))
+
 (use-package ido-ubiquitous
   :ensure t
   :init
@@ -91,11 +98,14 @@
   (setq omnisharp-server-executable-path
         "C:\\Users\\Danniel\\Github\\omnisharp-roslyn\\artifacts\\publish\\OmniSharp\\default\\net46\\omnisharp.exe"))
 
-;(use-package clojure-mode
+(use-package clojure-mode
+  :ensure t)
+
+;(use-package cider ;so lags
 ;  :ensure t)
-;
-;(use-package cider
-;  :ensure t)
+
+(use-package haskell-mode
+  :ensure t)
 
 (use-package tide
   :ensure t
