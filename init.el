@@ -87,6 +87,14 @@
   (setq company-tooltip-align-annotations t)
   (add-to-list 'company-backends 'company-omnisharp))
 
+(use-package yasnippet
+  :ensure t
+  :init
+  (yas-global-mode t)
+  :config
+  (add-to-list 'yas-snippet-dirs "c:\\users\\Danniel\\AppData\\Roaming\\.emacs.d\\yasnippet-snippets")
+  (yas-reload-all))
+
 (use-package csharp-mode
   :ensure t)
 
