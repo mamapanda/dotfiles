@@ -1,8 +1,8 @@
-#contributor : Jostein Kjønigsen <jostein@kjonigsen.net>
-#name : foreach { ... }
+# -*- mode: snippet -*-
+# name: foreach
 # key: fore
 # --
-foreach (${1:var} ${2:item} in ${3:list})
+foreach (${1:Object o} in ${2:Enumerable})
 {
     $0
 }

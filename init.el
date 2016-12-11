@@ -93,6 +93,7 @@
   :init
   (yas-global-mode t)
   :config
+  (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
   (add-to-list 'yas-snippet-dirs "c:\\users\\Danniel\\AppData\\Roaming\\.emacs.d\\yasnippet-snippets")
   (yas-reload-all))
 

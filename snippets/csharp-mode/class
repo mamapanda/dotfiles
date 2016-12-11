@@ -1,22 +1,8 @@
-#contributor : Alejandro Espinoza Esparza <aespinoza@structum.com.mx>
-#name : class ... { ... }
+# -*- mode: snippet -*-
+# name: class
 # key: class
 # --
-${5:public} class ${1:Name}
+${1:public} class ${2:Class}
 {
-    #region Ctor & Destructor
-    /// <summary>
-    /// ${3:Standard Constructor}
-    /// </summary>
-    public $1($2)
-    {
-    }
-
-    /// <summary>
-    /// ${4:Default Destructor}
-    /// </summary>    
-    public ~$1()
-    {
-    }
-    #endregion
+    $0
 }

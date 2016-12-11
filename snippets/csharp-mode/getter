@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: getter
+# key: g
+# --
+public ${1:Object} Get${2:O}()
+{
+       return ${3:o};
+}
