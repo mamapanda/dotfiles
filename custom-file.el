@@ -69,6 +69,7 @@
  '(ring-bell-function (quote ignore))
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
+ '(tab-width 4)
  '(term-default-bg-color "#fdf6e3")
  '(term-default-fg-color "#657b83")
  '(tool-bar-mode nil)

@@ -2,6 +2,6 @@
 # name: equals
 # key: eq
 # --
-public boolean equals(${1:Class} other) {
-       $0
+public boolean equals(${1:Object o}) {
+       return ${0:condition};
 }

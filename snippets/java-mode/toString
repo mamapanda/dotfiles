@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: toString
-# key: toStr
+# key: tos
 # --
 public String toString() {
-       $0
+       return ${1:string};
 }
