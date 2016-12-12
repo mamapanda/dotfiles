@@ -33,6 +33,22 @@
 (use-package pacmacs ; M-x pacmacs-start
   :ensure t)
 
+(use-package company
+  :ensure t
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (setq company-idle-delay 0.1)
+  (setq company-tooltip-align-annotations t)
+  (add-to-list 'company-backends 'company-omnisharp))
+
+(use-package flycheck
+  :ensure t
+  :init
+  (add-hook 'after-init-hook #'global-flycheck-mode)
+  :config
+  (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
+
 (use-package ido
   :ensure t
   :init
@@ -51,13 +67,6 @@
   :init
   (ido-ubiquitous-mode t))
 
-(use-package smex
-  :ensure t
-  :init
-  (smex-initialize)
-  :config
-  (global-set-key (kbd "M-x") 'smex))
-
 (use-package multiple-cursors
   :ensure t
   :init
@@ -71,21 +80,17 @@
   :config
   (setq projectile-indexing-method 'alien))
 
-(use-package flycheck
+(use-package rainbow-delimiters
   :ensure t
   :init
-  (add-hook 'after-init-hook #'global-flycheck-mode)
-  :config
-  (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
-(use-package company
+(use-package smex
   :ensure t
   :init
-  (add-hook 'after-init-hook 'global-company-mode)
+  (smex-initialize)
   :config
-  (setq company-idle-delay 0.1)
-  (setq company-tooltip-align-annotations t)
-  (add-to-list 'company-backends 'company-omnisharp))
+  (global-set-key (kbd "M-x") 'smex))
 
 (use-package yasnippet
   :ensure t
@@ -93,7 +98,7 @@
   (yas-global-mode t)
   :config
   (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
-  (add-to-list 'yas-snippet-dirs "c:\\users\\Danniel\\AppData\\Roaming\\.emacs.d\\yasnippet-snippets")
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
   (yas-reload-all))
 
 (use-package csharp-mode
