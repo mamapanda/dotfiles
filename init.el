@@ -22,6 +22,9 @@
 (use-package ample-theme
   :ensure t)
 
+(use-package atom-one-dark-theme
+  :ensure t)
+
 (use-package monokai-theme
   :ensure t)
 
