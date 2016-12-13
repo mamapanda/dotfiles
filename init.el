@@ -31,7 +31,10 @@
 (use-package solarized-theme
   :ensure t)
 
-(load-theme 'monokai t)
+(use-package spacemacs-theme
+  :ensure t)
+
+(load-theme 'spacemacs-dark t)
 
 (use-package pacmacs ; M-x pacmacs-start
   :ensure t)

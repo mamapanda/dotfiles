@@ -63,12 +63,14 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
+    (spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(ring-bell-function (quote ignore))
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
+ '(spacemacs-theme-comment-bg nil)
+ '(spacemacs-theme-custom-colors (quote ((comment-bg . "#292b2e"))))
  '(tab-width 4)
  '(term-default-bg-color "#fdf6e3")
  '(term-default-fg-color "#657b83")
