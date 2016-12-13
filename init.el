@@ -34,7 +34,7 @@
 (use-package spacemacs-theme
   :ensure t)
 
-(load-theme 'spacemacs-dark t)
+(load-theme 'monokai t)
 
 (use-package pacmacs ; M-x pacmacs-start
   :ensure t)
@@ -102,6 +102,16 @@
   :ensure t
   :init
   (yas-global-mode t)
+  (defun company-yasnippet-or-completion ()
+    (interactive)
+    (let ((yas-fallback-behavior nil))
+      (unless (yas-expand)
+        (call-interactively #'company-complete-common))))
+  (add-hook 'company-mode-hook
+            (lambda ()
+              (substitute-key-definition 'company-complete-common
+                                         'company-yasnippet-or-completion
+                                         company-active-map)))
   :config
   (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
