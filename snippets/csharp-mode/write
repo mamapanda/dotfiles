@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Console.Write();
+# key: write
+# --
+Console.Write($1);
