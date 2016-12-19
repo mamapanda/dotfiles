@@ -115,7 +115,8 @@
   :config
   (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
-  (yas-reload-all))
+  (yas-reload-all)
+  (setq yas-triggers-in-field t))
 
 (use-package csharp-mode
   :ensure t)

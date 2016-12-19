@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: StreamWriter
+# key: fw
+# --
+StreamWriter sw = new StreamWriter(${1:source});
