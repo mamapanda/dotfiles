@@ -3,5 +3,5 @@
 # key: eq
 # --
 public boolean equals(${1:Object o}) {
-       return ${0:condition};
+       return ${2:condition};
 }
