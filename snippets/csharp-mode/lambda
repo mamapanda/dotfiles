@@ -2,4 +2,4 @@
 # name: lambda
 # key: \
 # --
-${1:args} => ${0:expression}
+${1:args} => ${2:expression}
