@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: switch case
+# key: ca
+# --
+case ${1:value}:
+     $2
+     break;

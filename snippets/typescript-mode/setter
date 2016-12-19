@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: setter
+# key: s
+# --
+${1:public} set${2:O}(${3:o: Object}): void {
+       this.${4:o} = $4;
+}

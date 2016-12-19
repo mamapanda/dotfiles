@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: constructor
+# key: c
+# --
+${1:public} constructor (${2:args}) {
+            $0
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: equals
+# key: eq
+# --
+public equals(${1:o: Object}): boolean {
+       return ${2:condition};
+}

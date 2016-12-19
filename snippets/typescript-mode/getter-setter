@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: getter-setter
+# key: gs
+# --
+public get${1:O}(): ${2:Object} {
+       return this.${3:o};
+}
+
+${4:public} set$1($3: $2): void {
+       this.$3 = $3;
+}
