@@ -17,6 +17,12 @@
  '(auto-save-default nil)
  '(background-color "#202020")
  '(background-mode dark)
+ '(c-basic-offset 4)
+ '(c-default-style
+   (quote
+    ((java-mode . "java")
+     (awk-mode . "awk")
+     (other . "linux"))))
  '(compilation-message-face (quote default))
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#657b83")
