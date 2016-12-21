@@ -2,6 +2,7 @@
 # name: toString
 # key: tos
 # --
+@Override
 public String toString() {
        return ${1:string};
 }

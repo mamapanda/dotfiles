@@ -2,6 +2,7 @@
 # name: equals
 # key: eq
 # --
+@Override
 public boolean equals(${1:Object o}) {
        return ${2:condition};
 }
