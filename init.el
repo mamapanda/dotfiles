@@ -36,7 +36,7 @@
 
 (load-theme 'monokai t)
 
-(use-package fireplace
+(use-package fireplace ; lol
   :ensure t)
 
 (use-package pacmacs ; M-x pacmacs-start
@@ -79,11 +79,10 @@
 
 (use-package multiple-cursors
   :ensure t
-  :bind
-  (("C-c m p" . mc/mark-previous-like-this)
-   ("C-c m n" . mc/mark-next-like-this)
-   ("C-c m l" . mc/edit-lines)
-   ("C-c m a" . mc/mark-all-like-this)))
+  :bind (("C-c m p" . mc/mark-previous-like-this)
+         ("C-c m n" . mc/mark-next-like-this)
+         ("C-c m l" . mc/edit-lines)
+         ("C-c m a" . mc/mark-all-like-this)))
 
 (use-package projectile
   :ensure t
@@ -99,8 +98,7 @@
 
 (use-package smex
   :ensure t
-  :bind
-  (("M-x" . smex))
+  :bind (("M-x" . smex))
   :init
   (smex-initialize))
 
@@ -159,14 +157,13 @@
 
 (use-package web-mode
   :ensure t
-  :mode
-  (("\\.phtml\\'" . web-mode)
-  ("\\.php\\'" . web-mode)
-  ("\\.[agj]sp\\'" . web-mode)
-  ("\\.as[cp]x\\'" . web-mode)
-  ("\\.erb\\'" . web-mode)
-  ("\\.djhtml\\'" . web-mode)
-  ("\\.html?\\'" . web-mode))
+  :mode (("\\.phtml\\'" . web-mode)
+         ("\\.php\\'" . web-mode)
+         ("\\.[agj]sp\\'" . web-mode)
+         ("\\.as[cp]x\\'" . web-mode)
+         ("\\.erb\\'" . web-mode)
+         ("\\.djhtml\\'" . web-mode)
+         ("\\.html?\\'" . web-mode))
   :config
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-style-padding 4)
