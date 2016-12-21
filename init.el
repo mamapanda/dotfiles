@@ -36,6 +36,9 @@
 
 (load-theme 'monokai t)
 
+(use-package fireplace
+  :ensure t)
+
 (use-package pacmacs ; M-x pacmacs-start
   :ensure t)
 
