@@ -76,9 +76,10 @@
 
 (use-package multiple-cursors
   :ensure t
-  :init
-  (global-set-key (kbd "C-c m l") 'mc/edit-lines)
-  (global-set-key (kbd "C-c m a") 'mc/mark-all-like-this))
+  :bind
+  (("C-c m n" . mc/mark-next-like-this)
+   ("C-c m l" . mc/edit-lines)
+   ("C-c m a" . mc/mark-all-like-this)))
 
 (use-package projectile
   :ensure t
@@ -94,10 +95,10 @@
 
 (use-package smex
   :ensure t
+  :bind
+  (("M-x" . smex))
   :init
-  (smex-initialize)
-  :config
-  (global-set-key (kbd "M-x") 'smex))
+  (smex-initialize))
 
 (use-package yasnippet
   :ensure t
@@ -154,14 +155,14 @@
 
 (use-package web-mode
   :ensure t
-  :init
-  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  :mode
+  (("\\.phtml\\'" . web-mode)
+  ("\\.php\\'" . web-mode)
+  ("\\.[agj]sp\\'" . web-mode)
+  ("\\.as[cp]x\\'" . web-mode)
+  ("\\.erb\\'" . web-mode)
+  ("\\.djhtml\\'" . web-mode)
+  ("\\.html?\\'" . web-mode))
   :config
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-style-padding 4)
