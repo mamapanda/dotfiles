@@ -3,4 +3,5 @@
 !/snippets/*/
 !/snippets/*/*
 !.gitignore
+!custom-file.el
 !init.el
