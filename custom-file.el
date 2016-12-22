@@ -69,7 +69,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (spaceline monokai-theme atom-one-dark-theme ace-window expand-region fireplace spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
+    (winner-mode spaceline monokai-theme atom-one-dark-theme ace-window expand-region fireplace spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(ring-bell-function (quote ignore))
@@ -108,6 +108,7 @@
  '(visible-bell nil)
  '(weechat-color-list
    (unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
+ '(winner-mode t)
  '(xterm-color-names
    ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#073642"])
  '(xterm-color-names-bright

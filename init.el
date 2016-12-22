@@ -88,6 +88,10 @@
   :init
   (smex-initialize))
 
+(use-package winner
+  :init
+  (winner-mode t))
+
 (use-package yasnippet
   :init
   (yas-global-mode t)
