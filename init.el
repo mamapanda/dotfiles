@@ -18,32 +18,25 @@
 (unless (server-running-p) (server-start))
 
 (require 'use-package)
+(setq use-package-always-ensure t)
 
-(use-package ample-theme
-  :ensure t)
+(use-package ample-theme)
 
-(use-package atom-one-dark-theme
-  :ensure t)
+(use-package atom-one-dark-theme)
 
-(use-package monokai-theme
-  :ensure t)
+(use-package monokai-theme)
 
-(use-package solarized-theme
-  :ensure t)
+(use-package solarized-theme)
 
-(use-package spacemacs-theme
-  :ensure t)
+(use-package spacemacs-theme)
 
 (load-theme 'monokai t)
 
-(use-package fireplace
-  :ensure t)
+(use-package fireplace)
 
-(use-package pacmacs ; M-x pacmacs-start
-  :ensure t)
+(use-package pacmacs)
 
 (use-package company
-  :ensure t
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
@@ -53,57 +46,48 @@
   (add-to-list 'company-backends 'company-omnisharp))
 
 (use-package flycheck
-  :ensure t
   :init
   (add-hook 'after-init-hook #'global-flycheck-mode)
   :config
   (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
 
 (use-package ido
-  :ensure t
   :init
   (ido-mode t)
   (ido-everywhere t))
 
 (use-package ido-vertical-mode
-  :ensure t
   :init
   (ido-vertical-mode 1)
   :config
   (setq ido-vertical-define-keys 'C-n-and-C-p-only))
 
 (use-package ido-ubiquitous
-  :ensure t
   :init
   (ido-ubiquitous-mode t))
 
 (use-package multiple-cursors
-  :ensure t
   :bind (("C-c m p" . mc/mark-previous-like-this)
          ("C-c m n" . mc/mark-next-like-this)
          ("C-c m l" . mc/edit-lines)
          ("C-c m a" . mc/mark-all-like-this)))
 
 (use-package projectile
-  :ensure t
   :init
   (projectile-mode)
   :config
   (setq projectile-indexing-method 'alien))
 
 (use-package rainbow-delimiters
-  :ensure t
   :init
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 (use-package smex
-  :ensure t
   :bind (("M-x" . smex))
   :init
   (smex-initialize))
 
 (use-package yasnippet
-  :ensure t
   :init
   (yas-global-mode t)
   (defun company-yasnippet-or-completion ()
@@ -122,28 +106,22 @@
   (yas-reload-all)
   (setq yas-triggers-in-field t))
 
-(use-package csharp-mode
-  :ensure t)
+(use-package csharp-mode)
 
 (use-package omnisharp
-  :ensure t
   :init
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
   :config
   (setq omnisharp-server-executable-path
         "C:\\Users\\Danniel\\Github\\omnisharp-roslyn\\artifacts\\publish\\OmniSharp\\default\\net46\\omnisharp.exe"))
 
-(use-package clojure-mode
-  :ensure t)
+(use-package clojure-mode)
 
-;(use-package cider ;so lags
-;  :ensure t)
+;(use-package cider) ;lag
 
-(use-package haskell-mode
-  :ensure t)
+(use-package haskell-mode)
 
 (use-package tide
-  :ensure t
   :init
   (defun setup-tide-mode ()
     (interactive)
@@ -156,7 +134,6 @@
   (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
 (use-package web-mode
-  :ensure t
   :mode (("\\.phtml\\'" . web-mode)
          ("\\.php\\'" . web-mode)
          ("\\.[agj]sp\\'" . web-mode)
