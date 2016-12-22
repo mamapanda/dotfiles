@@ -111,11 +111,11 @@
     (let ((yas-fallback-behavior nil))
       (unless (yas-expand)
         (call-interactively #'company-complete-common))))
-  (add-hook 'company-mode-hook
-            (lambda ()
-              (substitute-key-definition 'company-complete-common
-                                         'company-yasnippet-or-completion
-                                         company-active-map)))
+  (defun company-yas-tab ()
+    (substitute-key-definition 'company-complete-common
+                               'company-yasnippet-or-completion
+                               company-active-map))
+  (add-hook 'company-mode-hook #'company-yas-tab)
   :config
   (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
