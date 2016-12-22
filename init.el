@@ -41,6 +41,9 @@
   (setq company-tooltip-align-annotations t)
   (add-to-list 'company-backends 'company-omnisharp))
 
+(use-package expand-region
+  :bind (("C-;" . er/expand-region)))
+
 (use-package flycheck
   :init
   (add-hook 'after-init-hook #'global-flycheck-mode)
