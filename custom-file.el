@@ -35,7 +35,7 @@
     ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" "f81a9aabc6a70441e4a742dfd6d10b2bae1088830dc7aba9c9922f4b1bd2ba50" "4980e5ddaae985e4bae004280bd343721271ebb28f22b3e3b2427443e748cd3f" default)))
  '(delete-selection-mode t)
  '(electric-pair-mode t)
- '(fci-rule-color "#3C3D37")
+ '(fci-rule-color "#3E4451")
  '(foreground-color "#cccccc")
  '(highlight-changes-colors (quote ("#FD5FF0" "#AE81FF")))
  '(highlight-symbol-colors
@@ -69,7 +69,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (expand-region fireplace spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
+    (monokai-theme atom-one-dark-theme ace-window expand-region fireplace spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(ring-bell-function (quote ignore))

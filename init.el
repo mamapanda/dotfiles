@@ -29,8 +29,10 @@
 (load-theme 'monokai t)
 
 (use-package fireplace)
-
 (use-package pacmacs)
+
+(use-package ace-window
+  :bind (("C-c a" . ace-window)))
 
 (use-package company
   :init
