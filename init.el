@@ -21,13 +21,9 @@
 (setq use-package-always-ensure t)
 
 (use-package ample-theme)
-
 (use-package atom-one-dark-theme)
-
 (use-package monokai-theme)
-
 (use-package solarized-theme)
-
 (use-package spacemacs-theme)
 
 (load-theme 'monokai t)
