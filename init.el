@@ -118,7 +118,7 @@
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
   :config
   (setq omnisharp-server-executable-path
-        "~/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe"))
+        "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe"))
 
 (use-package clojure-mode)
 
