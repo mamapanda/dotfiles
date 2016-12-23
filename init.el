@@ -126,6 +126,8 @@
 
 (use-package haskell-mode)
 
+(use-package typescript-mode)
+
 (use-package tide
   :init
   (defun setup-tide-mode ()
