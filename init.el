@@ -3,7 +3,7 @@
   (package-initialize)
   (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t))
 
-(when (not package-archive-contents) ;refresh package list if it's empty
+(unless package-archive-contents ;refresh package list if it's empty
   (package-refresh-contents))
 
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
@@ -15,7 +15,8 @@
 (w32-send-sys-command 61488) ;fullscreen
 
 (load "server") ;emacsclient server
-(unless (server-running-p) (server-start))
+(unless (server-running-p)
+  (server-start))
 
 (require 'use-package)
 (setq use-package-always-ensure t)
