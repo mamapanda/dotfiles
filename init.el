@@ -41,8 +41,7 @@
   :config
   (setq company-idle-delay 0.1)
   (setq company-minimum-prefix-length 1)
-  (setq company-tooltip-align-annotations t)
-  (add-to-list 'company-backends 'company-omnisharp))
+  (setq company-tooltip-align-annotations t))
 
 (use-package expand-region
   :bind (("C-;" . er/expand-region)))
@@ -139,6 +138,12 @@
   (eval-after-load 'flycheck
     '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
 
+(use-package company-irony-c-headers
+  :init
+  (delete 'company-irony company-backends)
+  (eval-after-load 'company
+    '(add-to-list 'company-backends '(company-irony-c-headers company-irony))))
+
 (use-package csharp-mode)
 
 (use-package omnisharp
@@ -146,7 +151,9 @@
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
   :config
   (setq omnisharp-server-executable-path
-        "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe"))
+        "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe")
+  (eval-after-load 'company
+    '(add-to-list 'company-backends 'company-omnisharp)))
 
 (use-package clojure-mode)
 
