@@ -33,7 +33,7 @@
 (use-package pacmacs)
 
 (use-package ace-window
-  :bind (("C-c a" . ace-window)))
+  :bind (("C-x o" . ace-window)))
 
 (use-package company
   :init

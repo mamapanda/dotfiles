@@ -2,7 +2,7 @@
 # name: main
 # key: main
 # --
-int main()
+int main(void)
 {
     $0
     return 0;
