@@ -35,6 +35,9 @@
 (use-package ace-window
   :bind (("C-x o" . ace-window)))
 
+(use-package avy
+  :bind (("C-c a" . avy-goto-word-1)))
+
 (use-package company
   :init
   (add-hook 'after-init-hook 'global-company-mode)
