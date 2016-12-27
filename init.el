@@ -24,6 +24,8 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+(use-package hydra)
+
 (use-package ample-theme)
 (use-package atom-one-dark-theme)
 (use-package monokai-theme)
@@ -74,10 +76,12 @@
   (ido-ubiquitous-mode t))
 
 (use-package multiple-cursors
-  :bind (("C-c m p" . mc/mark-previous-like-this)
-         ("C-c m n" . mc/mark-next-like-this)
-         ("C-c m l" . mc/edit-lines)
-         ("C-c m a" . mc/mark-all-like-this)))
+  :init
+  (defhydra hydra-multiple-cursors (global-map "C-c m")
+    ("p" mc/mark-previous-like-this)
+    ("n" mc/mark-next-like-this)
+    ("l" mc/edit-lines)
+    ("a" mc/mark-all-like-this)))
 
 (use-package projectile
   :init
