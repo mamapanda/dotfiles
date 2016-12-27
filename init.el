@@ -81,7 +81,8 @@
     ("p" mc/mark-previous-like-this)
     ("n" mc/mark-next-like-this)
     ("l" mc/edit-lines)
-    ("a" mc/mark-all-like-this)))
+    ("a" mc/mark-all-like-this)
+    ("q" nil)))
 
 (use-package projectile
   :init
@@ -141,20 +142,20 @@
     (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
 
 (use-package company-irony
+  :after company
   :init
-  (eval-after-load 'company
-    '(add-to-list 'company-backends 'company-irony)))
+  (add-to-list 'company-backends 'company-irony))
 
 (use-package flycheck-irony
+  :after flycheck
   :init
-  (eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
+  (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
 
 (use-package company-irony-c-headers
+  :after company
   :init
   (delete 'company-irony company-backends)
-  (eval-after-load 'company
-    '(add-to-list 'company-backends '(company-irony-c-headers company-irony))))
+  (add-to-list 'company-backends '(company-irony-c-headers company-irony)))
 
 (use-package csharp-mode)
 
