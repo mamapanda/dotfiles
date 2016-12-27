@@ -18,6 +18,9 @@
 (unless (server-running-p)
   (server-start))
 
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
 (require 'use-package)
 (setq use-package-always-ensure t)
 
@@ -98,6 +101,13 @@
 (use-package yasnippet
   :init
   (yas-global-mode t)
+  :config
+  (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
+  (yas-reload-all)
+  (setq yas-triggers-in-field t)
+  (setq yas-indent-line 'auto)
+  (setq yas-also-auto-indent-first-line t)
   (defun company-yasnippet-or-completion ()
     (interactive)
     (let ((yas-fallback-behavior nil))
@@ -107,12 +117,7 @@
     (substitute-key-definition 'company-complete-common
                                'company-yasnippet-or-completion
                                company-active-map))
-  (add-hook 'company-mode-hook #'company-yas-tab)
-  :config
-  (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
-  (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
-  (yas-reload-all)
-  (setq yas-triggers-in-field t))
+  (add-hook 'company-mode-hook #'company-yas-tab))
 
 (use-package irony
   :init
