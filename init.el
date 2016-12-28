@@ -91,6 +91,7 @@
   (defhydra hydra-multiple-cursors (global-map "C-c m")
     ("p" mc/mark-previous-like-this)
     ("n" mc/mark-next-like-this)
+    ("l" mc/edit-lines)
     ("a" mc/mark-all-like-this :exit t)
     ("q" nil)))
 
