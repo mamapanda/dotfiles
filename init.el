@@ -1,3 +1,10 @@
+;;; init.el --- panda's emacs init.el file
+
+;;; Commentary:
+;;; pls shut up flycheck
+
+;;; Code:
+
 (when (>= emacs-major-version 24)
   (require 'package)
   (package-initialize)
@@ -207,3 +214,5 @@
   (setq web-mode-style-padding 4)
   (setq web-mode-script-padding 4)
   (setq web-mode-block-padding 4))
+
+(provide 'init)
