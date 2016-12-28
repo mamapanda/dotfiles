@@ -37,6 +37,7 @@
  '(electric-pair-mode t)
  '(fci-rule-color "#3E4451")
  '(foreground-color "#cccccc")
+ '(global-undo-tree-mode t)
  '(highlight-changes-colors (quote ("#FD5FF0" "#AE81FF")))
  '(highlight-symbol-colors
    (--map
