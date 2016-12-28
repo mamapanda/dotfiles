@@ -40,6 +40,10 @@
 (use-package ace-window
   :bind (("C-x o" . ace-window)))
 
+(use-package aggressive-indent
+  :init
+  (global-aggressive-indent-mode t))
+
 (use-package avy
   :bind (("C-c a" . avy-goto-word-1)))
 
@@ -80,8 +84,8 @@
   (defhydra hydra-multiple-cursors (global-map "C-c m")
     ("p" mc/mark-previous-like-this)
     ("n" mc/mark-next-like-this)
-    ("l" mc/edit-lines)
-    ("a" mc/mark-all-like-this)
+    ("l" mc/edit-lines :exit t)
+    ("a" mc/mark-all-like-this :exit t)
     ("q" nil)))
 
 (use-package projectile
@@ -98,6 +102,13 @@
   :bind (("M-x" . smex))
   :init
   (smex-initialize))
+
+(use-package undo-tree
+  :bind (:map undo-tree-map
+              ("C-." . undo-tree-redo)
+              ("C-?" . nil))
+  :init
+  (global-undo-tree-mode))
 
 (use-package winner
   :init
@@ -189,10 +200,8 @@
 (use-package web-mode
   :mode (("\\.phtml\\'" . web-mode)
          ("\\.php\\'" . web-mode)
-         ("\\.[agj]sp\\'" . web-mode)
          ("\\.as[cp]x\\'" . web-mode)
          ("\\.erb\\'" . web-mode)
-         ("\\.djhtml\\'" . web-mode)
          ("\\.html?\\'" . web-mode))
   :config
   (setq web-mode-markup-indent-offset 2)

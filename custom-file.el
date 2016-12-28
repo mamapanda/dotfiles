@@ -69,7 +69,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (hydra company-irony-c-headers flycheck-irony company-irony irony company-eldoc winner-mode spaceline monokai-theme atom-one-dark-theme ace-window expand-region fireplace spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
+    (undo-tree aggressive-indent hydra company-irony-c-headers flycheck-irony company-irony irony company-eldoc winner-mode spaceline monokai-theme atom-one-dark-theme ace-window expand-region fireplace spacemacs-theme rainbow-delimiters yasnippet haskell-mode ido-vertical-mode cider clojure-mode smex ido-ubiquitous robe multiple-cursors projectile ample-theme pacmacs web-mode omnisharp csharp-mode solarized-theme cyberpunk-theme noctilux-theme use-package company tide)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(ring-bell-function (quote ignore))
@@ -113,7 +113,7 @@
    ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#073642"])
  '(xterm-color-names-bright
    ["#fdf6e3" "#cb4b16" "#93a1a1" "#839496" "#657b83" "#6c71c4" "#586e75" "#002b36"]))
- ;; hide toolbar
+;; hide toolbar
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
