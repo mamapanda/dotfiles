@@ -192,6 +192,12 @@
 
 (use-package haskell-mode)
 
+(use-package elpy
+  :init
+  (elpy-enable)
+  :config
+  (delete 'highlight-indentation-mode elpy-modules))
+
 (use-package typescript-mode)
 
 (use-package tide
