@@ -87,6 +87,8 @@
   :init
   (ido-ubiquitous-mode t))
 
+(use-package magit)
+
 (use-package multiple-cursors
   :init
   (defhydra hydra-multiple-cursors (global-map "C-c m")
