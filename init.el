@@ -87,7 +87,8 @@
   :init
   (ido-ubiquitous-mode t))
 
-(use-package magit)
+(use-package magit
+  :bind (("C-c g" . magit-status)))
 
 (use-package multiple-cursors
   :init
