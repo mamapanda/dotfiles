@@ -97,6 +97,18 @@
   :init
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
+(use-package smartparens
+  :bind (("C-c s s" . sp-forward-slurp-sexp)
+         ("C-c s b" . sp-forward-barf-sexp)
+         ("C-c s k" . sp-splice-sexp))
+  :init
+  (require 'smartparens-config)
+  (smartparens-global-mode)
+  :config
+  (sp-pair "'" nil :actions :rem)
+  (sp-pair "\"" nil :actions :rem)
+  (sp-pair "\\\"" nil :actions :rem))
+
 (use-package smex
   :bind (("M-x" . smex))
   :init
