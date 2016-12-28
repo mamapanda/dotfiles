@@ -20,6 +20,7 @@
 (setq disabled-command-function nil) ;enables disabled commands
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
 (w32-send-sys-command 61488) ;fullscreen
+(add-hook 'before-save-hook 'delete-trailing-whitespace) ;self-explanatory
 
 (load "server") ;emacsclient server
 (unless (server-running-p)
@@ -192,11 +193,15 @@
 
 (use-package haskell-mode)
 
-(use-package elpy
+(use-package anaconda-mode
   :init
-  (elpy-enable)
-  :config
-  (delete 'highlight-indentation-mode elpy-modules))
+  (add-hook 'python-mode-hook 'anaconda-mode)
+  (add-hook 'python-mode-hook 'anaconda-eldoc-mode))
+
+(use-package company-anaconda
+  :after company
+  :init
+  (add-to-list 'company-backends 'company-anaconda))
 
 (use-package typescript-mode)
 
