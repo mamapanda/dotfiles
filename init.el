@@ -95,6 +95,17 @@
     ("a" mc/mark-all-like-this :exit t)
     ("q" nil)))
 
+(use-package nlinum
+  :init
+  (global-nlinum-mode))
+
+(use-package origami
+  :bind (("C-c o o" . origami-toggle-node)
+         ("C-c o a" . origami-toggle-all-nodes)
+         ("C-c o p" . origami-show-only-node))
+  :init
+  (global-origami-mode))
+
 (use-package projectile
   :init
   (projectile-mode)
