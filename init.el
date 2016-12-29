@@ -48,10 +48,6 @@
 (use-package ace-window
   :bind (("C-x o" . ace-window)))
 
-(use-package aggressive-indent
-  :init
-  (global-aggressive-indent-mode t))
-
 (use-package avy
   :bind (("C-c a" . avy-goto-word-1)))
 
