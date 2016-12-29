@@ -96,8 +96,14 @@
     ("q" nil)))
 
 (use-package nlinum
+  :bind (("C-c n" . toggle-nlinum-mode))
   :init
-  (global-nlinum-mode))
+  (defun toggle-nlinum-mode ()
+    (interactive)
+    (if (bound-and-true-p nlinum-mode)
+        (nlinum-mode -1)
+      (nlinum-mode 1)))
+  (add-hook 'prog-mode-hook 'nlinum-mode))
 
 (use-package origami
   :bind (("C-c o o" . origami-toggle-node)
@@ -159,10 +165,10 @@
   (add-hook 'c++-mode-hook 'irony-mode)
   :config
   (defun my-irony-mode-hook ()
-  (define-key irony-mode-map [remap completion-at-point]
-    'irony-completion-at-point-async)
-  (define-key irony-mode-map [remap complete-symbol]
-    'irony-completion-at-point-async))
+    (define-key irony-mode-map [remap completion-at-point]
+      'irony-completion-at-point-async)
+    (define-key irony-mode-map [remap complete-symbol]
+      'irony-completion-at-point-async))
   (add-hook 'irony-mode-hook 'my-irony-mode-hook)
   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
   (when (boundp 'w32-pipe-read-delay)
@@ -199,7 +205,7 @@
 
 (use-package clojure-mode)
 
-;(use-package cider) ;lag
+                                        ;(use-package cider) ;lag
 
 (use-package haskell-mode)
 
