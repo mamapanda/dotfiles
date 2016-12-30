@@ -105,9 +105,10 @@
   :bind (("C-c n" . nlinum-mode)))
 
 (use-package origami
-  :bind (("C-c o o" . origami-toggle-node)
-         ("C-c o a" . origami-toggle-all-nodes)
-         ("C-c o p" . origami-show-only-node))
+  :bind (:map origami-mode-map
+              ("C-c o o" . origami-toggle-node)
+              ("C-c o a" . origami-toggle-all-nodes)
+              ("C-c o p" . origami-show-only-node))
   :init
   (global-origami-mode))
 
@@ -182,17 +183,17 @@
 
 (use-package company-irony
   :after company-irony-c-headers
-  :init
+  :config
   (add-to-list 'company-backends 'company-irony))
 
 (use-package flycheck-irony
   :after flycheck
-  :init
+  :config
   (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
 
 (use-package company-irony-c-headers
   :after company
-  :init
+  :config
   (add-to-list 'company-backends 'company-irony-c-headers))
 
 (use-package omnisharp
@@ -211,7 +212,7 @@
 
 (use-package company-anaconda
   :after company
-  :init
+  :config
   (add-to-list 'company-backends 'company-anaconda))
 
 (use-package tide
