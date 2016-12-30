@@ -102,14 +102,7 @@
     ("q" nil)))
 
 (use-package nlinum
-  :bind (("C-c n" . toggle-nlinum-mode))
-  :init
-  (defun toggle-nlinum-mode ()
-    (interactive)
-    (if (bound-and-true-p nlinum-mode)
-        (nlinum-mode -1)
-      (nlinum-mode 1)))
-  (add-hook 'prog-mode-hook 'nlinum-mode))
+  :bind (("C-c n" . nlinum-mode)))
 
 (use-package origami
   :bind (("C-c o o" . origami-toggle-node)
@@ -188,7 +181,7 @@
     (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
 
 (use-package company-irony
-  :after company
+  :after company-irony-c-headers
   :init
   (add-to-list 'company-backends 'company-irony))
 
@@ -200,8 +193,7 @@
 (use-package company-irony-c-headers
   :after company
   :init
-  (delete 'company-irony company-backends)
-  (add-to-list 'company-backends '(company-irony-c-headers company-irony)))
+  (add-to-list 'company-backends 'company-irony-c-headers))
 
 (use-package omnisharp
   :init
