@@ -30,9 +30,17 @@
 (unless package-archive-contents ;refresh package list if it's empty
   (package-refresh-contents))
 
-(dolist (package panda-packages)
-  (unless (package-installed-p package)
-    (package-install package)))
+(defun panda-ensure-packages (packages)
+  "PACKAGES Shut up flycheck."
+  (let ((refreshed? nil))
+    (dolist (package packages)
+      (unless (package-installed-p package)
+        (unless refreshed?
+          (package-refresh-contents)
+          (setq refreshed? t))
+        (package-install package)))))
+
+(panda-ensure-packages panda-packages)
 
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
@@ -61,9 +69,9 @@
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (setq company-idle-delay 0.1)
-  (setq company-minimum-prefix-length 1)
-  (setq company-tooltip-align-annotations t))
+  (setq company-idle-delay 0.1
+        company-minimum-prefix-length 1
+        company-tooltip-align-annotations t))
 
 (use-package expand-region
   :bind (("C-;" . er/expand-region)))
@@ -124,8 +132,8 @@
 
 (use-package smart-mode-line
   :config
-  (setq sml/no-confirm-load-theme t)
-  (setq sml/name-width 0)
+  (setq sml/no-confirm-load-theme t
+        sml/name-width 0)
   (sml/setup))
 
 (use-package smex
@@ -150,9 +158,9 @@
   :config
   (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-reload-all)
-  (setq yas-triggers-in-field t)
-  (setq yas-indent-line 'auto)
-  (setq yas-also-auto-indent-first-line t)
+  (setq yas-triggers-in-field t
+        yas-indent-line 'auto
+        yas-also-auto-indent-first-line t)
   (defun company-yasnippet-or-completion ()
     (interactive)
     (let ((yas-fallback-behavior nil))
@@ -243,4 +251,5 @@
         web-mode-block-padding 4))
 
 (w32-send-sys-command 61488) ;fullscreen
+
 (provide 'init)
