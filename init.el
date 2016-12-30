@@ -5,10 +5,30 @@
 
 ;;; Code:
 
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (package-initialize)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+
+(defvar panda-packages
+  '(ample-theme
+    atom-one-dark-theme
+    clojure-mode
+    csharp-mode
+    esup
+    fireplace
+    haskell-mode
+    hydra
+    monokai-theme
+    pacmacs
+    solarized-theme
+    spacemacs-theme
+    typescript-mode
+    use-package))
+
+(package-initialize)
+
+(dolist (package panda-packages)
+  (unless (package-installed-p package)
+    (package-install package)))
 
 (unless package-archive-contents ;refresh package list if it's empty
   (package-refresh-contents))
@@ -26,24 +46,10 @@
 (unless (server-running-p)
   (server-start))
 
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+(load-theme 'monokai t)
 
 (require 'use-package)
 (setq use-package-always-ensure t)
-
-(use-package hydra)
-
-(use-package ample-theme)
-(use-package atom-one-dark-theme)
-(use-package monokai-theme)
-(use-package solarized-theme)
-(use-package spacemacs-theme)
-
-(load-theme 'monokai t)
-
-(use-package fireplace)
-(use-package pacmacs)
 
 (use-package ace-window
   :bind (("C-x o" . ace-window)))
@@ -122,6 +128,12 @@
   :init
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
+(use-package smart-mode-line
+  :config
+  (setq sml/no-confirm-load-theme t)
+  (setq sml/name-width 0)
+  (sml/setup))
+
 (use-package smex
   :bind (("M-x" . smex))
   :init
@@ -143,7 +155,6 @@
   (yas-global-mode t)
   :config
   (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
-  (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
   (yas-reload-all)
   (setq yas-triggers-in-field t)
   (setq yas-indent-line 'auto)
@@ -192,8 +203,6 @@
   (delete 'company-irony company-backends)
   (add-to-list 'company-backends '(company-irony-c-headers company-irony)))
 
-(use-package csharp-mode)
-
 (use-package omnisharp
   :init
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
@@ -202,12 +211,6 @@
         "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe")
   (eval-after-load 'company
     '(add-to-list 'company-backends 'company-omnisharp)))
-
-(use-package clojure-mode)
-
-                                        ;(use-package cider) ;lag
-
-(use-package haskell-mode)
 
 (use-package anaconda-mode
   :init
@@ -218,8 +221,6 @@
   :after company
   :init
   (add-to-list 'company-backends 'company-anaconda))
-
-(use-package typescript-mode)
 
 (use-package tide
   :init
