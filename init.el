@@ -24,14 +24,15 @@
     typescript-mode
     use-package))
 
+(setq package-enable-at-startup nil) ;so it doesn't run twice
 (package-initialize)
+
+(unless package-archive-contents ;refresh package list if it's empty
+  (package-refresh-contents))
 
 (dolist (package panda-packages)
   (unless (package-installed-p package)
     (package-install package)))
-
-(unless package-archive-contents ;refresh package list if it's empty
-  (package-refresh-contents))
 
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
@@ -39,9 +40,6 @@
 (global-auto-revert-mode t) ;reloads file if changed externally
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
 (setq disabled-command-function nil)
-(menu-bar-mode -1)
-(toggle-scroll-bar nil) ;enables disabled commands
-(w32-send-sys-command 61488) ;fullscreen
 (add-hook 'before-save-hook 'delete-trailing-whitespace) ;self-explanatory
 
 (load "server") ;emacsclient server
@@ -83,7 +81,7 @@
 
 (use-package ido-vertical-mode
   :init
-  (ido-vertical-mode 1)
+  (ido-vertical-mode t)
   :config
   (setq ido-vertical-define-keys 'C-n-and-C-p-only))
 
@@ -167,6 +165,7 @@
   (add-hook 'company-mode-hook #'company-yas-tab))
 
 (use-package irony
+  :defer t
   :init
   (add-hook 'c-mode-hook 'irony-mode)
   (add-hook 'c++-mode-hook 'irony-mode)
@@ -184,21 +183,22 @@
     (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
 
 (use-package company-irony
-  :after company-irony-c-headers
+  :after (company company-irony-c-headers irony)
   :config
   (add-to-list 'company-backends 'company-irony))
 
 (use-package flycheck-irony
-  :after flycheck
+  :after (flycheck irony)
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
 
 (use-package company-irony-c-headers
-  :after company
+  :after (company irony)
   :config
   (add-to-list 'company-backends 'company-irony-c-headers))
 
 (use-package omnisharp
+  :defer t
   :init
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
   :config
@@ -208,16 +208,18 @@
     '(add-to-list 'company-backends 'company-omnisharp)))
 
 (use-package anaconda-mode
+  :defer t
   :init
   (add-hook 'python-mode-hook 'anaconda-mode)
   (add-hook 'python-mode-hook 'anaconda-eldoc-mode))
 
 (use-package company-anaconda
-  :after company
+  :after (anaconda company)
   :config
   (add-to-list 'company-backends 'company-anaconda))
 
 (use-package tide
+  :defer t
   :init
   (defun setup-tide-mode ()
     (interactive)
@@ -228,15 +230,17 @@
   (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
 (use-package web-mode
+  :defer t
   :mode (("\\.phtml\\'" . web-mode)
          ("\\.php\\'" . web-mode)
          ("\\.as[cp]x\\'" . web-mode)
          ("\\.erb\\'" . web-mode)
          ("\\.html?\\'" . web-mode))
   :config
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-style-padding 4)
-  (setq web-mode-script-padding 4)
-  (setq web-mode-block-padding 4))
+  (setq web-mode-markup-indent-offset 2
+        web-mode-style-padding 4
+        web-mode-script-padding 4
+        web-mode-block-padding 4))
 
+(w32-send-sys-command 61488) ;fullscreen
 (provide 'init)

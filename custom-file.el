@@ -65,6 +65,7 @@
  '(inhibit-startup-screen t)
  '(magit-diff-use-overlays nil)
  '(make-backup-files nil)
+ '(menu-bar-mode nil)
  '(nrepl-message-colors
    (quote
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
@@ -74,6 +75,7 @@
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(ring-bell-function (quote ignore))
+ '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
  '(spacemacs-theme-comment-bg nil)
