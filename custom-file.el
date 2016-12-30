@@ -71,7 +71,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (use-package smart-mode-powerline-theme smart-mode-line irony-eldoc nlinum origami magit company-anaconda anaconda-mode smartparens undo-tree hydra company-irony-c-headers flycheck-irony company-irony irony company-eldoc winner-mode spaceline monokai-theme atom-one-dark-theme ace-window expand-region spacemacs-theme rainbow-delimiters yasnippet ido-vertical-mode smex ido-ubiquitous robe multiple-cursors projectile pacmacs web-mode omnisharp solarized-theme cyberpunk-theme noctilux-theme company tide)))
+    (god-mode control-mode use-package smart-mode-powerline-theme smart-mode-line irony-eldoc nlinum origami magit company-anaconda anaconda-mode smartparens undo-tree hydra company-irony-c-headers flycheck-irony company-irony irony company-eldoc winner-mode spaceline monokai-theme atom-one-dark-theme ace-window expand-region spacemacs-theme rainbow-delimiters yasnippet ido-vertical-mode smex ido-ubiquitous robe multiple-cursors projectile pacmacs web-mode omnisharp solarized-theme cyberpunk-theme noctilux-theme company tide)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(ring-bell-function (quote ignore))
