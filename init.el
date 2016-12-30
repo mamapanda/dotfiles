@@ -37,8 +37,10 @@
 (load custom-file 'noerror)
 
 (global-auto-revert-mode t) ;reloads file if changed externally
-(setq disabled-command-function nil) ;enables disabled commands
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
+(setq disabled-command-function nil)
+(menu-bar-mode -1)
+(toggle-scroll-bar nil) ;enables disabled commands
 (w32-send-sys-command 61488) ;fullscreen
 (add-hook 'before-save-hook 'delete-trailing-whitespace) ;self-explanatory
 
