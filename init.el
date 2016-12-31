@@ -8,7 +8,7 @@
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
-(defvar panda-packages
+(defvar panda/packages
   '(ample-theme
     atom-one-dark-theme
     clojure-mode
@@ -22,7 +22,8 @@
     solarized-theme
     spacemacs-theme
     typescript-mode
-    use-package))
+    use-package
+    zenburn-theme))
 
 (setq package-enable-at-startup nil) ;so it doesn't run twice
 (package-initialize)
@@ -30,7 +31,7 @@
 (unless package-archive-contents ;refresh package list if it's empty
   (package-refresh-contents))
 
-(defun panda-ensure-packages (packages)
+(defun panda/ensure-packages (packages)
   "PACKAGES Shut up flycheck."
   (let ((refreshed? nil))
     (dolist (package packages)
@@ -40,7 +41,7 @@
           (setq refreshed? t))
         (package-install package)))))
 
-(panda-ensure-packages panda-packages)
+(panda/ensure-packages panda/packages)
 
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
@@ -63,7 +64,23 @@
   :bind (("C-x o" . ace-window)))
 
 (use-package avy
-  :bind (("C-c a" . avy-goto-word-1)))
+  :bind (("C-c a" . avy-goto-word-1))
+  :config
+  (defun panda/change-avy-faces ()
+  (dolist (avy-face avy-lead-faces)
+    (set-face-attribute avy-face nil
+                        :background (face-attribute 'default :background)
+                        :weight 'bold))
+  (set-face-attribute 'avy-lead-face nil
+                      :foreground "#39FF14")
+  (set-face-attribute 'avy-lead-face-0 nil
+                      :foreground "#67C8FF")
+  (set-face-attribute 'avy-lead-face-1 nil ;this face isn't even used
+                      :foreground "#BF5FFF")
+  (set-face-attribute 'avy-lead-face-2 nil
+                      :foreground "#FF9933"))
+  (panda/change-avy-faces)
+  (setq avy-background t))
 
 (use-package company
   :init
@@ -83,7 +100,7 @@
   (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
 
 (use-package god-mode
-  :bind (("C-c e" . panda-god-mode)
+  :bind (("C-c e" . panda/god-mode)
          :map god-local-mode-map
          ("C-x C-b" . ido-switch-buffer)
          ("C-x C-o" . ace-window)
@@ -92,7 +109,7 @@
          ("C-x C-2" . split-window-below)
          ("C-x C-3" . split-window-right)
          ("C-c C-a" . avy-goto-word-1)
-         ("C-c C-e" . panda-god-mode)
+         ("C-c C-e" . panda/god-mode)
          ("C-c C-n" . nlinum-mode)
          ("C-c C-o C-o" . origami-toggle-node)
          ("C-c C-o C-a" . origami-toggle-all-nodes)
@@ -101,14 +118,14 @@
          ("C-c C-p C-k" . projectile-kill-buffers)
          ("C-c C-p C-p" . projectile-switch-project))
   :init
-  (defvar panda-emacs-cursor (face-attribute 'cursor :background))
-  (defvar panda-god-cursor "magenta")
-  (defun panda-god-mode()
+  (defvar panda/emacs-cursor (face-attribute 'cursor :background))
+  (defvar panda/god-cursor "magenta")
+  (defun panda/god-mode()
     (interactive)
     (god-mode-all)
     (if (bound-and-true-p god-local-mode)
-        (set-cursor-color panda-god-cursor)
-      (set-cursor-color panda-emacs-cursor))))
+        (set-cursor-color panda/god-cursor)
+      (set-cursor-color panda/emacs-cursor))))
 
 (use-package ido
   :init
@@ -267,8 +284,7 @@
 
 (use-package web-mode
   :defer t
-  :mode (("\\.phtml\\'" . web-mode)
-         ("\\.php\\'" . web-mode)
+  :mode (("\\.php\\'" . web-mode)
          ("\\.as[cp]x\\'" . web-mode)
          ("\\.erb\\'" . web-mode)
          ("\\.html?\\'" . web-mode))
