@@ -83,14 +83,23 @@
   (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
 
 (use-package god-mode
-  :after (avy origami)
   :bind (("C-c e" . panda-god-mode)
          :map god-local-mode-map
+         ("C-x C-b" . ido-switch-buffer)
+         ("C-x C-o" . ace-window)
+         ("C-x C-0" . delete-window)
+         ("C-x C-1" . delete-other-windows)
+         ("C-x C-2" . split-window-below)
+         ("C-x C-3" . split-window-right)
          ("C-c C-a" . avy-goto-word-1)
          ("C-c C-e" . panda-god-mode)
+         ("C-c C-n" . nlinum-mode)
          ("C-c C-o C-o" . origami-toggle-node)
          ("C-c C-o C-a" . origami-toggle-all-nodes)
-         ("C-c C-o C-p" . origami-show-only-node))
+         ("C-c C-o C-p" . origami-show-only-node)
+         ("C-c C-p C-f" . projectile-find-file)
+         ("C-c C-p C-k" . projectile-kill-buffers)
+         ("C-c C-p C-p" . projectile-switch-project))
   :init
   (defvar panda-emacs-cursor (face-attribute 'cursor :background))
   (defvar panda-god-cursor "magenta")
