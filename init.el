@@ -1,7 +1,7 @@
 ;;; init.el --- panda's emacs init.el file
 
 ;;; Commentary:
-;;; pls shut up flycheck
+;;; bamboo
 
 ;;; Code:
 
@@ -25,7 +25,7 @@
 (package-initialize)
 
 (defun panda/ensure-packages (packages)
-  "PACKAGES Shut up flycheck."
+  "Ensures all packages in PACKAGES are installed."
   (let ((refreshed? nil))
     (dolist (package packages)
       (unless (package-installed-p package)
@@ -42,7 +42,7 @@
 (global-auto-revert-mode t) ;reloads file if changed externally
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
 (setq disabled-command-function nil)
-(add-hook 'before-save-hook 'delete-trailing-whitespace) ;self-explanatory
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 (global-set-key (kbd "C-c s") 'occur)
 (global-set-key (kbd "C-c d") 'multi-occur)
@@ -64,6 +64,7 @@
   :config
   (defvar panda/avy-fg-colors '("#39FF14" "#67C8FF" "#FF9933"))
   (defun panda/set-avy-faces (fg-colors)
+    "Changes avy faces based on current background color & FG-COLORS."
     (let ((avy-face-count (length avy-lead-faces))
           (fg-color-count (length fg-colors)))
       (dotimes (n avy-face-count)
@@ -115,6 +116,7 @@
   (defvar panda/emacs-cursor (face-attribute 'cursor :background))
   (defvar panda/god-cursor "magenta")
   (defun panda/god-mode()
+    "Basically god-mode, but with cursor color changing."
     (interactive)
     (god-mode-all)
     (if (bound-and-true-p god-local-mode)
@@ -201,11 +203,13 @@
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t)
   (defun company-yasnippet-or-completion ()
+    "Gives priority to yas completion over company completion."
     (interactive)
     (let ((yas-fallback-behavior nil))
       (unless (yas-expand)
         (call-interactively #'company-complete-common))))
   (defun company-yas-tab ()
+    "Substitutes company's key def to allow priority for yas completion."
     (substitute-key-definition 'company-complete-common
                                'company-yasnippet-or-completion
                                company-active-map))
@@ -218,6 +222,7 @@
   (add-hook 'c++-mode-hook 'irony-mode)
   :config
   (defun my-irony-mode-hook ()
+    "Replaces completion functions with irony's completion functions."
     (define-key irony-mode-map [remap completion-at-point]
       'irony-completion-at-point-async)
     (define-key irony-mode-map [remap complete-symbol]
@@ -269,6 +274,7 @@
   :defer t
   :init
   (defun setup-tide-mode ()
+    "Sets up tide-mode."
     (interactive)
     (tide-setup)
     (eldoc-mode +1)
