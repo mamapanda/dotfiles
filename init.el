@@ -9,9 +9,7 @@
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
 (defvar panda/packages
-  '(ample-theme
-    atom-one-dark-theme
-    clojure-mode
+  '(clojure-mode
     csharp-mode
     esup
     fireplace
@@ -19,17 +17,12 @@
     hydra
     monokai-theme
     pacmacs
-    solarized-theme
     spacemacs-theme
     typescript-mode
-    use-package
-    zenburn-theme))
+    use-package))
 
 (setq package-enable-at-startup nil) ;so it doesn't run twice
 (package-initialize)
-
-(unless package-archive-contents ;refresh package list if it's empty
-  (package-refresh-contents))
 
 (defun panda/ensure-packages (packages)
   "PACKAGES Shut up flycheck."
@@ -298,3 +291,4 @@
 (w32-send-sys-command 61488) ;fullscreen
 
 (provide 'init)
+;;; init.el ends here
