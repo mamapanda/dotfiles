@@ -51,6 +51,9 @@
 (setq disabled-command-function nil)
 (add-hook 'before-save-hook 'delete-trailing-whitespace) ;self-explanatory
 
+(global-set-key (kbd "C-c s") 'occur)
+(global-set-key (kbd "C-c d") 'multi-occur)
+
 (load "server") ;emacsclient server
 (unless (server-running-p)
   (server-start))
@@ -67,18 +70,18 @@
   :bind (("C-c a" . avy-goto-word-1))
   :config
   (defun panda/change-avy-faces ()
-  (dolist (avy-face avy-lead-faces)
-    (set-face-attribute avy-face nil
-                        :background (face-attribute 'default :background)
-                        :weight 'bold))
-  (set-face-attribute 'avy-lead-face nil
-                      :foreground "#39FF14")
-  (set-face-attribute 'avy-lead-face-0 nil
-                      :foreground "#67C8FF")
-  (set-face-attribute 'avy-lead-face-1 nil ;this face isn't even used
-                      :foreground "#BF5FFF")
-  (set-face-attribute 'avy-lead-face-2 nil
-                      :foreground "#FF9933"))
+    (dolist (avy-face avy-lead-faces)
+      (set-face-attribute avy-face nil
+                          :background (face-attribute 'default :background)
+                          :weight 'bold))
+    (set-face-attribute 'avy-lead-face nil
+                        :foreground "#39FF14")
+    (set-face-attribute 'avy-lead-face-0 nil
+                        :foreground "#67C8FF")
+    (set-face-attribute 'avy-lead-face-1 nil ;this face isn't even used
+                        :foreground "#BF5FFF")
+    (set-face-attribute 'avy-lead-face-2 nil
+                        :foreground "#FF9933"))
   (panda/change-avy-faces)
   (setq avy-background t))
 
@@ -110,6 +113,8 @@
          ("C-x C-3" . split-window-right)
          ("C-c C-a" . avy-goto-word-1)
          ("C-c C-e" . panda/god-mode)
+         ("C-c C-s" . occur)
+         ("C-c C-d" . multi-occur)
          ("C-c C-n" . nlinum-mode)
          ("C-c C-o C-o" . origami-toggle-node)
          ("C-c C-o C-a" . origami-toggle-all-nodes)
