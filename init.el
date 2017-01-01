@@ -69,20 +69,16 @@
 (use-package avy
   :bind (("C-c a" . avy-goto-word-1))
   :config
-  (defun panda/change-avy-faces ()
-    (dolist (avy-face avy-lead-faces)
-      (set-face-attribute avy-face nil
-                          :background (face-attribute 'default :background)
-                          :weight 'bold))
-    (set-face-attribute 'avy-lead-face nil
-                        :foreground "#39FF14")
-    (set-face-attribute 'avy-lead-face-0 nil
-                        :foreground "#67C8FF")
-    (set-face-attribute 'avy-lead-face-1 nil ;this face isn't even used
-                        :foreground "#BF5FFF")
-    (set-face-attribute 'avy-lead-face-2 nil
-                        :foreground "#FF9933"))
-  (panda/change-avy-faces)
+  (defvar panda/avy-fg-colors '("#39FF14" "#67C8FF" "#FF9933"))
+  (defun panda/set-avy-faces (fg-colors)
+    (let ((avy-face-count (length avy-lead-faces))
+          (fg-color-count (length fg-colors)))
+      (dotimes (n avy-face-count)
+        (set-face-attribute (nth n avy-lead-faces) nil
+                            :foreground (nth (mod n fg-color-count) fg-colors)
+                            :background (face-attribute 'default :background)
+                            :weight 'bold))))
+  (panda/set-avy-faces panda/avy-fg-colors)
   (setq avy-background t))
 
 (use-package company
