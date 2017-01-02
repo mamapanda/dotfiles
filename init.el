@@ -45,6 +45,14 @@
 (setq disabled-command-function nil)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+(defun panda/C-w ()
+  "If a region is active, kill it; else, kill the current line."
+  (interactive)
+  (call-interactively (if (region-active-p)
+                          'kill-region
+                        'kill-whole-line)))
+
+(global-set-key (kbd "C-w") 'panda/C-w)
 (global-set-key (kbd "C-c s") 'occur)
 (global-set-key (kbd "C-c d") 'multi-occur)
 
@@ -100,6 +108,7 @@
   :bind (("C-c e" . panda/god-mode)
          :map god-local-mode-map
          ("C-x C-b" . ido-switch-buffer)
+         ("C-x C-k" . ido-kill-buffer)
          ("C-x C-o" . ace-window)
          ("C-x C-0" . delete-window)
          ("C-x C-1" . delete-other-windows)

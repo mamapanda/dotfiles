@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: dll
+# key: dll
+# --
+#define EXPORT __declspec(dllexport)
