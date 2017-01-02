@@ -209,11 +209,9 @@
   (winner-mode t))
 
 (use-package yasnippet
-  :init
-  (yas-global-mode t)
   :config
-  (setq-default yas-snippet-dirs '("~/.emacs.d/snippets"))
-  (yas-reload-all)
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas-global-mode t)
   (setq yas-triggers-in-field t
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t))
@@ -253,6 +251,7 @@
   (add-to-list 'company-backends 'company-irony-c-headers))
 
 (use-package omnisharp
+  :disabled t
   :defer t
   :init
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
