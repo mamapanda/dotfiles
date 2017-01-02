@@ -236,17 +236,17 @@
     (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
 
 (use-package company-irony
-  :after (company company-irony-c-headers irony)
+  :after company-irony-c-headers
   :config
   (add-to-list 'company-backends 'company-irony))
 
 (use-package flycheck-irony
-  :after (flycheck irony)
+  :after irony
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
 
 (use-package company-irony-c-headers
-  :after (company irony)
+  :after irony
   :config
   (add-to-list 'company-backends 'company-irony-c-headers))
 
@@ -268,7 +268,7 @@
   (add-hook 'python-mode-hook 'anaconda-eldoc-mode))
 
 (use-package company-anaconda
-  :after (anaconda company)
+  :after anaconda-mode
   :config
   (add-to-list 'company-backends 'company-anaconda))
 
