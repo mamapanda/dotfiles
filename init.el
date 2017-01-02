@@ -19,7 +19,8 @@
     pacmacs
     spacemacs-theme
     typescript-mode
-    use-package))
+    use-package)
+  "A list of packages that don't require setting up.")
 
 (setq package-enable-at-startup nil) ;so it doesn't run twice
 (package-initialize)
@@ -34,7 +35,7 @@
           (setq refreshed? t))
         (package-install package)))))
 
-(panda/ensure-packages panda/packages)
+(panda/ensure-packages panda/packages) ;panda/packages only require installation
 
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
@@ -62,7 +63,8 @@
 (use-package avy
   :bind (("C-c a" . avy-goto-word-1))
   :config
-  (defvar panda/avy-fg-colors '("#39FF14" "#67C8FF" "#FF9933"))
+  (defvar panda/avy-fg-colors '("#39FF14" "#67C8FF" "#FF9933")
+    "The foreground colors to use for avy's lead faces.")
   (defun panda/set-avy-faces (fg-colors)
     "Changes avy faces based on current background color & FG-COLORS."
     (let ((avy-face-count (length avy-lead-faces))
@@ -76,6 +78,8 @@
   (setq avy-background t))
 
 (use-package company
+  :bind (:map company-active-map
+              ("<tab>" . nil)) ;make company play nicer with yasnippet
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
@@ -113,8 +117,10 @@
          ("C-c C-p C-k" . projectile-kill-buffers)
          ("C-c C-p C-p" . projectile-switch-project))
   :init
-  (defvar panda/emacs-cursor (face-attribute 'cursor :background))
-  (defvar panda/god-cursor "magenta")
+  (defvar panda/emacs-cursor (face-attribute 'cursor :background)
+    "The cursor color to use in regular mode.")
+  (defvar panda/god-cursor "magenta"
+    "The cursor color to use in god-mode")
   (defun panda/god-mode()
     "Basically god-mode, but with cursor color changing."
     (interactive)
@@ -201,19 +207,7 @@
   (yas-reload-all)
   (setq yas-triggers-in-field t
         yas-indent-line 'auto
-        yas-also-auto-indent-first-line t)
-  (defun company-yasnippet-or-completion ()
-    "Gives priority to yas completion over company completion."
-    (interactive)
-    (let ((yas-fallback-behavior nil))
-      (unless (yas-expand)
-        (call-interactively #'company-complete-common))))
-  (defun company-yas-tab ()
-    "Substitutes company's key def to allow priority for yas completion."
-    (substitute-key-definition 'company-complete-common
-                               'company-yasnippet-or-completion
-                               company-active-map))
-  (add-hook 'company-mode-hook #'company-yas-tab))
+        yas-also-auto-indent-first-line t))
 
 (use-package irony
   :defer t
