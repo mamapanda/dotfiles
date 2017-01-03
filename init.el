@@ -17,7 +17,6 @@
     hydra
     monokai-theme
     pacmacs
-    spaceline
     spacemacs-theme
     typescript-mode
     use-package)
@@ -36,7 +35,7 @@
           (setq refreshed? t))
         (package-install package)))))
 
-(panda/ensure-packages panda/packages) ;panda/packages only require installation
+(panda/ensure-packages panda/packages)
 
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
@@ -63,15 +62,16 @@
 
 (load-theme 'monokai t)
 
-(require 'spaceline-config)
-(spaceline-emacs-theme)
-(spaceline-toggle-buffer-size-off)
-
 (require 'use-package)
 (setq use-package-always-ensure t)
 
 (use-package ace-window
   :bind (("C-x o" . ace-window)))
+
+(use-package anzu
+  :bind (("C-c r" . anzu-query-replace))
+  :init
+  (global-anzu-mode t))
 
 (use-package avy
   :bind (("C-c a" . avy-goto-word-1))
@@ -195,6 +195,13 @@
   :bind (("M-x" . smex))
   :init
   (smex-initialize))
+
+(use-package spaceline-config
+  :ensure spaceline
+  :config
+  (spaceline-emacs-theme)
+  (spaceline-toggle-buffer-size-off)
+  (spaceline-toggle-buffer-modified-off))
 
 (use-package undo-tree
   :bind (:map undo-tree-map
