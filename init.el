@@ -17,10 +17,11 @@
     hydra
     monokai-theme
     pacmacs
+    spaceline
     spacemacs-theme
     typescript-mode
     use-package)
-  "A list of packages that don't require setting up.")
+  "A list of packages to ensure are installed.")
 
 (setq package-enable-at-startup nil) ;so it doesn't run twice
 (package-initialize)
@@ -61,6 +62,10 @@
   (server-start))
 
 (load-theme 'monokai t)
+
+(require 'spaceline-config)
+(spaceline-emacs-theme)
+(spaceline-toggle-buffer-size-off)
 
 (require 'use-package)
 (setq use-package-always-ensure t)
@@ -185,12 +190,6 @@
 (use-package rainbow-delimiters
   :init
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-
-(use-package smart-mode-line
-  :config
-  (setq sml/no-confirm-load-theme t
-        sml/name-width 0)
-  (sml/setup))
 
 (use-package smex
   :bind (("M-x" . smex))
