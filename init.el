@@ -19,6 +19,7 @@
 (defvar panda/packages
   '(clojure-mode
     csharp-mode
+    ensime
     esup
     fireplace
     haskell-mode
@@ -29,6 +30,8 @@
     typescript-mode
     use-package)
   "A list of packages to ensure are installed.")
+
+(setq package-pinned-packages '((ensime . "melpa-stable")))
 
 (setq package-enable-at-startup nil) ;so it doesn't run twice
 (package-initialize)
@@ -276,7 +279,6 @@
     '(add-to-list 'company-backends 'company-omnisharp)))
 
 (use-package ensime
-  :pin melpa-stable
   :defer t
   :init
   (add-hook 'java-mode-hook 'ensime)
@@ -296,6 +298,12 @@
   :config
   (eval-after-load 'company
     '(add-to-list 'company-backends 'company-anaconda)))
+
+(use-package org
+  :defer t
+  :config
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t))
 
 (use-package tide
   :defer t

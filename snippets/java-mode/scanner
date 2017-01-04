@@ -2,4 +2,4 @@
 # name: Scanner
 # key: scan
 # --
-Scanner in = new Scanner(System.in);
+in = new Scanner(System.in);
