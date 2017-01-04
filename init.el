@@ -6,7 +6,15 @@
 ;;; Code:
 
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+
+(setq-default package-archives
+              '(("gnu"     . "http://elpa.gnu.org/packages/")
+                ("melpa"        . "http://melpa.org/packages/")
+                ("melpa-stable" . "http://stable.melpa.org/packages/"))
+              package-archive-priorities
+              '(("gnu" . 1)
+                ("melpa" . 10)
+                ("melpa-stable" . 0)))
 
 (defvar panda/packages
   '(clojure-mode
@@ -267,6 +275,16 @@
   (eval-after-load 'company
     '(add-to-list 'company-backends 'company-omnisharp)))
 
+(use-package ensime
+  :pin melpa-stable
+  :defer t
+  :init
+  (add-hook 'java-mode-hook 'ensime)
+  :config
+  (setq ensime-completion-style nil)
+  (eval-after-load 'company
+    '(add-to-list 'company-backends 'ensime-company)))
+
 (use-package anaconda-mode
   :defer t
   :init
@@ -276,7 +294,8 @@
 (use-package company-anaconda
   :after anaconda-mode
   :config
-  (add-to-list 'company-backends 'company-anaconda))
+  (eval-after-load 'company
+    '(add-to-list 'company-backends 'company-anaconda)))
 
 (use-package tide
   :defer t
