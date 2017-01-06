@@ -107,6 +107,17 @@
         company-minimum-prefix-length 1
         company-tooltip-align-annotations t))
 
+(use-package corral
+  :defer t
+  :init
+  (defhydra hydra-corral (global-map "C-c c")
+    ("{" corral-braces-backward)
+    ("}" corral-braces-forward)
+    ("[" corral-brackets-backward)
+    ("]" corral-brackets-forward)
+    ("(" corral-parentheses-backward)
+    (")" corral-parentheses-forward)))
+
 (use-package expand-region
   :bind (("C-;" . er/expand-region)))
 
@@ -114,6 +125,10 @@
   :init
   (add-hook 'after-init-hook #'global-flycheck-mode)
   :config
+  (defhydra hydra-flycheck (global-map "C-c f")
+    ("p" flycheck-previous-error)
+    ("n" flycheck-next-error)
+    ("q" nil))
   (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
 
 (use-package god-mode
@@ -171,6 +186,7 @@
   (setq magit-auto-revert-mode -1))
 
 (use-package multiple-cursors
+  :defer t
   :init
   (defhydra hydra-multiple-cursors (global-map "C-c m")
     ("p" mc/mark-previous-like-this)
@@ -301,7 +317,6 @@
 (use-package org
   :defer t
   :config
-  (yas-minor-mode -1)
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t))
 
