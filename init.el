@@ -67,10 +67,6 @@
 (global-set-key (kbd "C-c s") 'occur)
 (global-set-key (kbd "C-c d") 'multi-occur)
 
-(load "server") ;emacsclient server
-(unless (server-running-p)
-  (server-start))
-
 (load-theme 'monokai t)
 
 (require 'use-package)
@@ -170,7 +166,9 @@
   (ido-ubiquitous-mode t))
 
 (use-package magit
-  :bind (("C-c g" . magit-status)))
+  :bind (("C-c g" . magit-status))
+  :config
+  (setq magit-auto-revert-mode -1))
 
 (use-package multiple-cursors
   :init
@@ -275,17 +273,19 @@
   :config
   (setq omnisharp-server-executable-path
         "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe")
-  (eval-after-load 'company
-    '(add-to-list 'company-backends 'company-omnisharp)))
+  (add-to-list 'company-backends 'company-omnisharp))
 
 (use-package ensime
   :defer t
   :init
-  (add-hook 'java-mode-hook 'ensime)
+  (defun panda/maven-ensime()
+    "Activates ensime only if .ensime file is present."
+    (when (file-exists-p "../../../.ensime")
+      (ensime)))
+  (add-hook 'java-mode-hook 'panda/maven-ensime)
   :config
   (setq ensime-completion-style nil)
-  (eval-after-load 'company
-    '(add-to-list 'company-backends 'ensime-company)))
+  (add-to-list 'company-backends 'ensime-company))
 
 (use-package anaconda-mode
   :defer t
@@ -296,12 +296,12 @@
 (use-package company-anaconda
   :after anaconda-mode
   :config
-  (eval-after-load 'company
-    '(add-to-list 'company-backends 'company-anaconda)))
+  (add-to-list 'company-backends 'company-anaconda))
 
 (use-package org
   :defer t
   :config
+  (yas-minor-mode -1)
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t))
 
