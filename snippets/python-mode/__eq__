@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: __eq__
+# key: eq
+# --
+def __eq__(self, other):
+    return ${1:cond}
+
+def __ne__(self, other):
+    return not self.__eq__(other)

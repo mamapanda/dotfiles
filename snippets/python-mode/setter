@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: setter
+# key: s
+# --
+@${1:var}.setter
+def $1(self, $1):
+    self._$1 = $1

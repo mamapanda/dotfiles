@@ -116,7 +116,8 @@
     ("[" corral-brackets-backward)
     ("]" corral-brackets-forward)
     ("(" corral-parentheses-backward)
-    (")" corral-parentheses-forward)))
+    (")" corral-parentheses-forward)
+    ("q" nil)))
 
 (use-package expand-region
   :bind (("C-;" . er/expand-region)))
@@ -183,7 +184,7 @@
 (use-package magit
   :bind (("C-c g" . magit-status))
   :config
-  (setq magit-auto-revert-mode -1))
+  (setq magit-auto-revert-mode nil))
 
 (use-package multiple-cursors
   :defer t
@@ -243,9 +244,13 @@
   :config
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode t)
+  (add-hook 'org-mode-hook (lambda () (yas-minor-mode -1)))
   (setq yas-triggers-in-field t
         yas-indent-line 'auto
-        yas-also-auto-indent-first-line t))
+        yas-also-auto-indent-first-line t)
+  (add-hook 'python-mode-hook (lambda ()
+                                (set (make-local-variable 'yas-indent-line) 'fixed)
+                                (set (make-local-variable 'yas-also-auto-indent-first-line) 'nil))))
 
 (use-package irony
   :defer t
