@@ -22,11 +22,13 @@
     ensime
     esup
     fireplace
+    git-timemachine
     haskell-mode
     hydra
     monokai-theme
     pacmacs
     spacemacs-theme
+    rust-mode
     typescript-mode
     use-package)
   "A list of packages to ensure are installed.")
@@ -73,7 +75,11 @@
 (setq use-package-always-ensure t)
 
 (use-package ace-window
-  :bind (("C-x o" . ace-window)))
+  :bind (("C-x o" . ace-window))
+  :config
+  (set-face-attribute 'aw-leading-char-face nil
+                      :foreground "#39FF14"
+                      :weight 'bold))
 
 (use-package anzu
   :bind (("C-c r" . anzu-query-replace))
@@ -181,6 +187,12 @@
   :init
   (ido-ubiquitous-mode t))
 
+(use-package imenu
+  :defer t
+  :bind (("C-c i" . imenu))
+  :config
+  (setq imenu-auto-rescan t))
+
 (use-package magit
   :bind (("C-c g" . magit-status))
   :config
@@ -198,6 +210,10 @@
 
 (use-package nlinum
   :bind (("C-c n" . nlinum-mode)))
+
+(use-package nyan-mode
+  :init
+  (nyan-mode t))
 
 (use-package origami
   :bind (:map origami-mode-map
@@ -308,6 +324,16 @@
   (setq ensime-completion-style nil)
   (add-to-list 'company-backends 'ensime-company))
 
+(use-package racer
+  :defer t
+  :init
+  (add-hook 'rust-mode-hook #'racer-mode))
+
+(use-package flycheck-rust
+  :after rust-mode
+  :config
+  (flycheck-rust-setup))
+
 (use-package anaconda-mode
   :defer t
   :init
@@ -322,8 +348,8 @@
 (use-package org
   :defer t
   :config
-  (setq org-src-fontify-natively t)
-  (setq org-src-tab-acts-natively t))
+  (setq org-src-fontify-natively t
+        org-src-tab-acts-natively t))
 
 (use-package tide
   :defer t
