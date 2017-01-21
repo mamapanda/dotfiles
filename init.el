@@ -23,7 +23,6 @@
     esup
     fireplace
     git-timemachine
-    haskell-mode
     hydra
     monokai-theme
     pacmacs
@@ -264,9 +263,10 @@
   (setq yas-triggers-in-field t
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t)
-  (add-hook 'python-mode-hook (lambda ()
-                                (set (make-local-variable 'yas-indent-line) 'fixed)
-                                (set (make-local-variable 'yas-also-auto-indent-first-line) 'nil))))
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (set (make-local-variable 'yas-indent-line) 'fixed)
+              (set (make-local-variable 'yas-also-auto-indent-first-line) 'nil))))
 
 (use-package irony
   :defer t
@@ -312,6 +312,18 @@
         "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe")
   (add-to-list 'company-backends 'company-omnisharp))
 
+(use-package haskell-mode
+  :defer t
+  :config
+  (add-hook 'haskell-mode-hook
+            (lambda ()
+              (setq flycheck-disabled-checkers '(haskell-stack-ghc)))))
+
+(use-package company-ghc
+  :after haskell-mode
+  :config
+  (add-to-list 'company-backends 'company-ghc))
+
 (use-package ensime
   :defer t
   :init
@@ -332,7 +344,7 @@
 (use-package flycheck-rust
   :after rust-mode
   :config
-  (flycheck-rust-setup))
+  (add-hook 'flycheck-mode-hook 'flycheck-rust-setup))
 
 (use-package anaconda-mode
   :defer t
