@@ -5,13 +5,6 @@
 
 ;;; Code:
 
-(use-package ace-window
-  :bind (("C-x o" . ace-window))
-  :config
-  (set-face-attribute 'aw-leading-char-face nil
-                      :foreground "#39FF14"
-                      :weight 'bold))
-
 (use-package anzu
   :bind (("C-c r" . anzu-query-replace))
   :init

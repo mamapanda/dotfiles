@@ -70,5 +70,5 @@
 
 (load-theme 'monokai t)
 
-(provide 'base-core.el)
+(provide 'base-core)
 ;;; base-core.el ends here
