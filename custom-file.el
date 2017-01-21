@@ -61,6 +61,7 @@
  '(hl-fg-colors
    (quote
     ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
+ '(imenu-auto-rescan t)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(magit-diff-use-overlays nil)
