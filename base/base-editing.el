@@ -12,7 +12,8 @@
 
 (use-package company
   :bind (:map company-active-map
-              ("<tab>" . nil)) ;make company play nicer with yasnippet
+              ("<tab>" . nil) ;make company play nicer with yasnippet
+              ("C-w" . nil)) ;kill-line annoyance
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config

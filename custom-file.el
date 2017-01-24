@@ -72,7 +72,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (company-ghc flycheck-rust racer nyan-mode nyan-cat corral ace-window anzu spaceline omnisharp god-mode use-package smart-mode-powerline-theme smart-mode-line irony-eldoc nlinum origami magit company-anaconda anaconda-mode undo-tree hydra company-irony-c-headers flycheck-irony company-irony irony company-eldoc winner-mode monokai-theme expand-region spacemacs-theme rainbow-delimiters yasnippet ido-vertical-mode smex ido-ubiquitous robe multiple-cursors projectile pacmacs web-mode company tide)))
+    (company-go go-eldoc go-mode company-ghc flycheck-rust racer nyan-mode nyan-cat corral ace-window anzu spaceline omnisharp god-mode use-package smart-mode-powerline-theme smart-mode-line irony-eldoc nlinum origami magit company-anaconda anaconda-mode undo-tree hydra company-irony-c-headers flycheck-irony company-irony irony company-eldoc winner-mode monokai-theme expand-region spacemacs-theme rainbow-delimiters yasnippet ido-vertical-mode smex ido-ubiquitous robe multiple-cursors projectile pacmacs web-mode company tide)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")

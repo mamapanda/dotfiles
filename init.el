@@ -20,6 +20,7 @@
 
 (require 'lang-c)
 (require 'lang-csharp)
+(require 'lang-go)
 (require 'lang-haskell)
 (require 'lang-java)
 (require 'lang-org)
