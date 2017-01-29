@@ -51,8 +51,9 @@
 
 (global-auto-revert-mode t) ;reloads file if changed externally
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
-(setq disabled-command-function nil)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'prog-mode-hook (lambda () (abbrev-mode -1))) ;annoying
+(setq disabled-command-function nil)
 
 (defun panda/C-w ()
   "If a region is active, kill it; else, kill the current line."
