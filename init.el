@@ -5,7 +5,7 @@
 
 ;;; Code:
 
-;(package-initialize) ;; pls go away
+;;(package-initialize) ;; pls go away
 
 (add-to-list 'load-path (concat user-emacs-directory "base"))
 (add-to-list 'load-path (concat user-emacs-directory "lang"))
@@ -14,7 +14,8 @@
 
 (require 'base-appearance)
 (require 'base-editing)
-(require 'base-ido)
+;;(require 'base-ido)
+(require 'base-ivy)
 (require 'base-navigation)
 (require 'base-misc)
 
