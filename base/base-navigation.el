@@ -13,7 +13,7 @@
                       :weight 'bold))
 
 (use-package avy
-  :bind (("C-c a" . avy-goto-word-1))
+  :bind (("C-c SPC" . avy-goto-word-1))
   :config
   (defvar panda/avy-fg-colors '("#39FF14" "#67C8FF" "#FF9933")
     "The foreground colors to use for avy's lead faces.")

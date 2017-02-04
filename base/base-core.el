@@ -69,7 +69,7 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-(load-theme 'monokai t)
+(load-theme 'spacemacs-dark t)
 
 (provide 'base-core)
 ;;; base-core.el ends here

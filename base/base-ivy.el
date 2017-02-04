@@ -7,13 +7,15 @@
 
 (use-package ivy
   :ensure counsel
+  :diminish ivy-mode
   :bind (("C-x b" . ivy-switch-buffer)
          ("C-x C-f" . counsel-find-file)
          ("C-s" . swiper)
          ("C-r" . ivy-resume)
          ("M-x" . counsel-M-x)
+         ("M-y" . counsel-yank-pop)
          :map ivy-minibuffer-map
-         (("<return>" . ivy-alt-done)))
+         ("<return>" . ivy-alt-done))
   :init
   (ivy-mode 1)
   :config
@@ -37,7 +39,9 @@
         (set-face-attribute (nth n ivy-minibuffer-match-faces) nil
                             :foreground (nth (mod n minibuffer-match-color-count) match-colors)
                             :weight 'bold))))
-  (panda/set-ivy-minibuffer-match-faces panda/ivy-match-colors))
+  (panda/set-ivy-minibuffer-match-faces panda/ivy-match-colors)
+  (set-face-attribute 'ivy-confirm-face nil
+                      :foreground "#39FF14"))
 
 (provide 'base-ivy)
 ;;; base-ivy.el ends here

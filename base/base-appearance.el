@@ -21,7 +21,8 @@
   :config
   (spaceline-emacs-theme)
   (spaceline-toggle-buffer-size-off)
-  (spaceline-toggle-buffer-modified-off))
+  (spaceline-toggle-buffer-modified-off)
+  (spaceline-toggle-hud-off))
 
 (provide 'base-appearance)
 ;;; base-appearance.el ends here
