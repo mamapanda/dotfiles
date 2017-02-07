@@ -11,6 +11,7 @@
   :bind (("C-x b" . ivy-switch-buffer)
          ("C-x C-f" . counsel-find-file)
          ("C-s" . swiper)
+         ("C-c s" . counsel-rg)
          ("C-r" . ivy-resume)
          ("M-x" . counsel-M-x)
          ("M-y" . counsel-yank-pop)

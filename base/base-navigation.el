@@ -35,6 +35,18 @@
   :config
   (setq imenu-auto-rescan t))
 
+(use-package neotree
+  :bind (("C-c t" . neotree-toggle))
+  :config
+  (setq neo-theme 'arrow
+        neo-smart-open t
+        neo-window-width 30
+        neo-window-position 'left)
+  (eval-after-load 'projectile
+    '(defadvice neotree-show (after neotree-show activate)
+       (when (projectile-project-root)
+         (neotree-dir (projectile-project-root))))))
+
 (use-package projectile
   :init
   (projectile-mode)

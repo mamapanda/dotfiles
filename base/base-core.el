@@ -21,6 +21,7 @@
     ensime
     esup
     fireplace
+    flx
     git-timemachine
     hydra
     monokai-theme
@@ -52,7 +53,6 @@
 (global-auto-revert-mode t) ;reloads file if changed externally
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
-(add-hook 'prog-mode-hook (lambda () (abbrev-mode -1))) ;annoying
 (setq disabled-command-function nil)
 
 (defun panda/C-w ()
@@ -63,11 +63,23 @@
                         'kill-whole-line)))
 
 (global-set-key (kbd "C-w") 'panda/C-w)
-(global-set-key (kbd "C-c s") 'occur)
-(global-set-key (kbd "C-c d") 'multi-occur)
+
+(defun panda/whitespace-killer ()
+  "Deletes all spaces, newlines, and tabs before cursor.
+Stops when a non-whitespace char is encountered."
+  (interactive)
+  (while (string-match (char-to-string (char-before)) " \r\n\t")
+    (call-interactively 'delete-backward-char)))
+
+(global-set-key "\M-\d" 'panda/whitespace-killer)
 
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+(require 'diminish)
+
+(diminish 'abbrev-mode)
+(diminish 'auto-revert-mode)
 
 (load-theme 'spacemacs-dark t)
 

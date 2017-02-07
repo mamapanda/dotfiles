@@ -22,9 +22,9 @@
         company-tooltip-align-annotations t))
 
 (use-package corral
-  :defer t
+  :bind (("C-c c" . hydra-corral/body))
   :init
-  (defhydra hydra-corral (global-map "C-c c")
+  (defhydra hydra-corral ()
     ("{" corral-braces-backward)
     ("}" corral-braces-forward)
     ("[" corral-brackets-backward)
@@ -37,22 +37,24 @@
   :bind (("C-;" . er/expand-region)))
 
 (use-package flycheck
+  :bind (("C-c f" . hydra-flycheck/body))
   :init
   (add-hook 'after-init-hook #'global-flycheck-mode)
   :config
-  (defhydra hydra-flycheck (global-map "C-c f")
+  (defhydra hydra-flycheck ()
     ("p" flycheck-previous-error)
     ("n" flycheck-next-error)
     ("q" nil))
-  (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change new-line)))
+  (setq flycheck-check-syntax-automatically
+        '(mode-enabled save idle-change new-line)))
 
 (use-package multiple-cursors
-  :defer t
+  :bind (("C-c m" . hydra-multiple-cursors/body))
   :init
-  (defhydra hydra-multiple-cursors (global-map "C-c m")
+  (defhydra hydra-multiple-cursors ()
     ("p" mc/mark-previous-like-this)
     ("n" mc/mark-next-like-this)
-    ("l" mc/edit-lines)
+    ("l" mc/edit-lines :exit t)
     ("a" mc/mark-all-like-this :exit t)
     ("q" nil)))
 

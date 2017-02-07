@@ -10,7 +10,7 @@
   :init
   (defun panda/maven-ensime()
     "Activates ensime only if .ensime file is present."
-    (when (file-exists-p "../../../.ensime")
+    (when (locate-dominating-file default-directory ".ensime")
       (ensime)))
   (add-hook 'java-mode-hook 'panda/maven-ensime)
   :config

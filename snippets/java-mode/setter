@@ -3,5 +3,5 @@
 # key: s
 # --
 ${1:public} void set${2:O}(${3:Object o}) {
-       this.${4:o} = $4;
+       ${4:o}_ = $4;
 }
