@@ -5,6 +5,15 @@
 
 ;;; Code:
 
+(defun panda/c-style-setup ()
+  "Set up c/c++ format style."
+  (c-set-style "linux")
+  (c-set-offset 'inline-open '0)
+  (setq c-basic-offset 4))
+
+(add-hook 'c-mode-hook 'panda/c-style-setup)
+(add-hook 'c++-mode-hook 'panda/c-style-setup)
+
 (use-package irony
   :defer t
   :init
@@ -16,7 +25,9 @@
     (define-key irony-mode-map [remap completion-at-point]
       'irony-completion-at-point-async)
     (define-key irony-mode-map [remap complete-symbol]
-      'irony-completion-at-point-async))
+      'irony-completion-at-point-async)
+    (if (equal major-mode 'c++-mode)
+        (setq-local irony-additional-clang-options '("-std=c++14"))))
   (add-hook 'irony-mode-hook 'my-irony-mode-hook)
   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
   (when (boundp 'w32-pipe-read-delay)

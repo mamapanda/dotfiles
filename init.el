@@ -24,6 +24,7 @@
 (require 'lang-go)
 (require 'lang-haskell)
 (require 'lang-java)
+(require 'lang-javascript)
 (require 'lang-org)
 (require 'lang-rust)
 (require 'lang-python)

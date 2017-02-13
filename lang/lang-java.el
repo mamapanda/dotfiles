@@ -13,6 +13,7 @@
     (when (locate-dominating-file default-directory ".ensime")
       (ensime)))
   (add-hook 'java-mode-hook 'panda/maven-ensime)
+  (add-hook 'scala-mode-hook 'panda/maven-ensime)
   :config
   (setq ensime-completion-style nil)
   (add-to-list 'company-backends 'ensime-company))

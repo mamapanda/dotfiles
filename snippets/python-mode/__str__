@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: __str__
+# key: tos
+# --
+def __str__(self):
+    $0

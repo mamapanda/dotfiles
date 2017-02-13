@@ -1,0 +1,394 @@
+;;; -*- coding: utf-8 -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("c:/Users/Danniel/Code/rs/corrode/" . "vector/")
+ ("c:/Users/Danniel/Code/c/util/src/" . "linkedlist/")
+ ("c:/Users/Danniel/Code/c/util/" . "src/")
+ ("c:/Users/Danniel/Code/java/Help/sqltesting/" . "src/")
+ ("c:/Users/Danniel/Code/java/Help/" . "sqltesting/")
+ ("c:/Users/Danniel/Code/c/snake/" . "src/")
+ ("c:/Users/Danniel/Code/go/" . "exercises/")
+ ("c:/Users/Danniel/Github/corrode/src/Language/Rust/" . "Corrode/")
+ ("c:/Users/Danniel/Github/corrode/src/Language/" . "Rust/")
+ ("c:/Users/Danniel/Github/corrode/src/" . "Language/")
+ ("c:/Users/Danniel/Github/corrode/" . "src/")
+ ("c:/Users/Danniel/Github/" . "corrode/")
+ ("c:/Users/Danniel/Code/java/blackjack/src/" . "game/")
+ ("c:/Users/Danniel/Code/java/blackjack/" . "src/")
+ ("c:/Users/Danniel/Code/java/scratch/blackjack/src/" . "game/")
+ ("c:/Users/Danniel/Code/java/scratch/blackjack/" . "src/")
+ ("c:/Users/Danniel/Code/rs/" . "corrode/")
+ ("c:/Users/Danniel/Code/cpp/Exercises/BracketingSearch/" . "BracketingSearch/")
+ ("c:/Program Files/" . "Vim/")
+ ("c:/Users/Danniel/Code/py/python_koans/python3/" . "koans/")
+ ("c:/Users/Danniel/Code/py/python_koans/" . "python3/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Notes/src/main/" . "java/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Notes/src/" . "main/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Notes/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/src/test/" . "java/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/src/main/" . "java/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/src/" . "main/")
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS2/" . "Sort/")
+ ("c:/Users/Danniel/Code/java/mvn_test/src/main/" . "java/")
+ ("c:/Users/Danniel/Code/java/mvn_test/src/" . "main/")
+ ("c:/Users/Danniel/Code/java/mvn_test/" . "src/")
+ ("c:/Users/Danniel/Code/cpp/EulerUtils/" . "EulerUtils/")
+ ("c:/Users/Danniel/Documents/English 2A Final/" . "Other Stuff/")
+ ("c:/Users/Danniel/Code/html/" . "helloworld/")
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/vendor/" . "omnisharp-emacs/")
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/manual-packages/" . "omnisharp-emacs/")
+ ("c:/Users/Danniel/Documents/College Essays/" . "out/")
+ ("c:/" . "Users/")
+ ("c:/Users/Danniel/Pictures/Stuff/idk/Pixiv/" . "Umi/")
+ ("c:/Users/Danniel/Pictures/Stuff/idk/" . "Pixiv/")
+ ("c:/Users/Danniel/Pictures/Stuff/" . "idk/")
+ ("c:/Users/Danniel/Pictures/" . "Stuff/")
+ ("c:/Users/Danniel/Code/cs/scratch/AsyncTest/" . "AsyncTest/")
+ ("c:/Users/Danniel/Code/cs/scratch/" . "AsyncTest/")
+ ("c:/Users/Danniel/Code/el/spacemacs/layers/+lang/" . "python/")
+ ("c:/Users/Danniel/Code/el/spacemacs/layers/" . "+lang/")
+ ("c:/Users/Danniel/Code/el/spacemacs/" . "layers/")
+ ("c:/Users/Danniel/Code/java/MavenTest/src/main/" . "java/")
+ ("c:/Users/Danniel/Code/java/MavenTest/src/" . "main/")
+ ("c:/Users/Danniel/Code/java/MavenTest/" . "src/")
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/irony/" . "bin/")
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/elpa/" . "irony-eldoc-20141226.2219/")
+ ("c:/Users/Danniel/Code/aspx/Tutorial/HelloWorld/HelloWorld/" . "App_Data/")
+ ("c:/Users/Danniel/Code/aspx/Tutorial/HelloWorld/" . "HelloWorld/")
+ ("c:/Users/Danniel/Code/aspx/Tutorial/" . "HelloWorld/")
+ ("c:/Users/Danniel/Code/aspx/" . "Tutorial/")
+ ("c:/Users/Danniel/Code/ts/scratch/" . "switch/")
+ ("c:/Users/Danniel/Code/java/scratch/Threads/" . "src/")
+ ("c:/Users/Danniel/Code/java/scratch/" . "blackjack/")
+ ("c:/Users/Danniel/Code/cs/Project Euler/69_TotientMaximum/" . "69_TotientMaximum/")
+ ("c:/Users/Danniel/Code/cs/Project Euler/57_SquareRootConvergents/" . "57_SquareRootConvergents/")
+ ("c:/Users/Danniel/Code/cs/Project Euler/" . "69_TotientMaximum/")
+ ("c:/Users/Danniel/Code/el/configs/1/" . "elisp/")
+ ("c:/Users/Danniel/Code/el/configs/" . "1/")
+ ("c:/Users/Danniel/Code/el/" . "configs/")
+ ("c:/Users/Danniel/Code/cs/project euler problems/97_LargestNonMersennePrime/" . "97_LargestNonMersennePrime/")
+ ("c:/Users/Danniel/Code/cpp/Exercises/Bunnies/" . "Bunnies/")
+ ("c:/Users/Danniel/Code/cpp/Exercises/" . "Bunnies/")
+ ("c:/Users/Danniel/Code/cs/project euler problems/3_LargestPrimeFactor/" . "3_LargestPrimeFactor/")
+ ("c:/Users/Danniel/Code/cs/project euler problems/" . "97_LargestNonMersennePrime/")
+ ("c:/Users/Danniel/Code/cpp/Nav/" . "Nav/")
+ ("c:/Users/Danniel/Code/_misc/" . "intsize/")
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/" . "python-mode/")
+ ("c:/Users/Danniel/Code/hs/Exercises/" . "Tutorial/")
+ ("c:/Users/Danniel/Code/py/" . "scratch/")
+ ("c:/Users/Danniel/Code/rkt/" . "Project Euler/")
+ ("c:/Users/Danniel/Code/hs/" . "Exercises/")
+ ("c:/Users/Danniel/Code/clj/hello_world/src/" . "hello_world/")
+ ("c:/Users/Danniel/Code/clj/hello_world/" . "src/")
+ ("c:/Users/Danniel/Code/clj/" . "hello_world/")
+ ("c:/Users/Danniel/Code/cs/Crazy8/" . "Crazy8/")
+ ("c:/Users/Danniel/Code/c/" . "util/")
+ ("c:/Users/Danniel/Code/java/_APCS/Ticket/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS/Hotel/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS/PR2004/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS/Pet/" . "src/")
+ ("c:/Users/Danniel/Code/ts/Pong/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS/Employee/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS/IntersectionRectangle/" . "src/")
+ ("c:/Users/Danniel/Code/js/pacman/" . "js/")
+ ("c:/Users/Danniel/Code/js/" . "pacman/")
+ ("c:/Users/Danniel/Code/php/" . "Erb Test/")
+ ("c:/Users/Danniel/Documents/" . "ERWC/")
+ ("c:/Users/Danniel/Code/java/_APCS/Worker/" . "src/")
+ ("c:/Users/Danniel/Code/cs/EssayDecryption/" . "EssayDecryption/")
+ ("c:/Users/Danniel/Code/cs/EssayEncryption/" . "EssayEncryption/")
+ ("c:/Users/Danniel/Code/cs/FacebookSpam/" . "FacebookSpam/")
+ ("c:/Users/Danniel/Code/cs/EulerUtils/" . "EulerUtils/")
+ ("c:/Users/Danniel/Code/cs/Copy & Paste/DeckClass/" . "DeckClass/")
+ ("c:/Users/Danniel/Code/cs/Copy & Paste/" . "DeckClass/")
+ ("c:/Users/Danniel/Code/cs/" . "scratch/")
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/" . "base/")
+ ("c:/Users/Danniel/AppData/Roaming/" . ".emacs.d/")
+ ("c:/Users/Danniel/Code/java/_APCS/Balloon/" . "src/")
+ ("c:/Users/Danniel/Code/java/_APCS/" . "Ticket/")
+ ("c:/Users/Danniel/Code/java/" . "Help/")
+ ("c:/Users/Danniel/Code/cpp/Uno/" . "Uno/")
+ ("c:/Users/Danniel/Code/cpp/" . "Exercises/")
+ ("c:/Users/" . "Danniel/")
+ ("c:/Users/Danniel/AppData/" . "Roaming/")
+ ("c:/Users/Danniel/" . "Documents/")
+ ("c:/Users/Danniel/Code/ts/" . "scratch/")
+ ("c:/Users/Danniel/Code/rb/" . "Airplane/")
+ ("c:/Users/Danniel/Code/" . "rs/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "c:/Users/Danniel/AppData/Roaming/.emacs.d/base/"
+ "c:/Users/Danniel/Code/rs/corrode/vector/"
+ "c:/Users/Danniel/Code/cpp/Exercises/Bunnies/Bunnies/"
+ "c:/Users/Danniel/Code/c/util/"
+ "c:/Users/Danniel/Code/org/"
+ "c:/Users/Danniel/Code/c/snake/src/"
+ "c:/Users/Danniel/Code/go/exercises/"
+ "c:/Users/Danniel/Code/c/util/src/linkedlist/"
+ "c:/Users/Danniel/Code/c/util/src/"
+ "c:/Users/Danniel/Code/c/util/src/vector/"
+ "c:/Users/Danniel/Code/java/Help/sqltesting/src/"
+ "c:/Users/Danniel/Documents/ERWC/"
+ "c:/Users/Danniel/Code/c/snake/"
+ "c:/Users/Danniel/Code/ps1/"
+ "c:/Users/Danniel/AppData/Roaming/.emacs.d/lang/"
+ "c:/Users/Danniel/Code/hs/Crazy8/"
+ "c:/Users/Danniel/Code/hs/Exercises/"
+ "c:/Users/Danniel/Code/rs/exercises/"
+ "c:/Users/Danniel/Github/corrode/src/Language/Rust/Corrode/"
+ "c:/Users/Danniel/Code/c/HelloWorld/"
+ "c:/Users/Danniel/AppData/Roaming/.emacs.d/"
+ "c:/Users/Danniel/Code/el/configs/1/"
+ "c:/Users/Danniel/Code/el/configs/1/elisp/"
+ "c:/Users/Danniel/Code/java/blackjack/src/game/"
+ "c:/Users/Danniel/Code/py/python_koans/python3/koans/"
+ "c:/Users/Danniel/Code/java/_APCS2/Sort/"
+ "c:/Users/Danniel/Code/java/_APCS2/"
+ "c:/Users/Danniel/Code/java/scratch/blackjack/src/game/"
+ "c:/Users/Danniel/Code/java/"
+ "c:/Users/Danniel/Code/java/blackjack/"
+ "c:/Users/Danniel/Code/java/scratch/msort/"
+ "c:/Users/Danniel/Code/java/_APCS2/Sort/src/main/java/"
+ "c:/Users/Danniel/Code/rb/Airplane/"
+ "c:/Users/Danniel/Code/c/K&R/"
+ "c:/Users/Danniel/Code/java/scratch/isort/"
+ "c:/Users/Danniel/Code/c/scratch/"
+ "c:/Users/Danniel/Code/java/Airplane/"
+ "c:/Users/Danniel/Pictures/Stuff/idk/Pixiv/"
+ "c:/Users/Danniel/Code/py/scratch/"
+ "c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/python-mode/"
+ "c:/Users/Danniel/Code/py/python_koans/python3/"
+ "c:/Users/Danniel/Code/py/LINQ/"
+ "c:/Program Files/Vim/"
+ "c:/Users/Danniel/Code/java/_APCS2/_org/"
+ "c:/Users/Danniel/Code/_misc/intsize/"
+ "c:/Users/Danniel/Code/java/_APCS2/Notes/src/main/java/"
+ "c:/Users/Danniel/Code/java/mvn_test/src/main/java/"
+ "c:/Users/Danniel/Code/java/_APCS2/Sort/src/test/java/"
+ "c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/java-mode/"
+ "c:/Users/Danniel/Code/c/py_test/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "base-ido.el"
+ "base-misc.el"
+ "base-ivy.el"
+ "vectormain.c"
+ "Bunny.cpp"
+ "Bunnies.cpp"
+ "base-editing.el"
+ "test.org"
+ "snake.c"
+ "makefile"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/" (22670 45122 0 0) "yasnippet-snippets/" "viper" "url/" "snippets/" "smex-items" "server/" "projectile.cache" "projectile-bookmarks.eld" "omnisharp-roslyn/" "lang/" "irony/" "init.el" "ido.last" "flycheck_init.el" "eshell/" "ensime/" "elpa/" "custom-file.el" "base/" "auto-save-list/" "anaconda-mode/" "ac-comphist.dat" ".mc-lists.el" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/base/" (22670 45075 0 0) "base-navigation.el" "base-misc.el" "base-ivy.el" "base-ido.el" "base-editing.el" "base-core.el" "base-appearance.el" "../" "./")
+
+ ("c:/Users/Danniel/Code/rs/corrode/vector/" (22670 38519 0 0) "vectormain.c" "vector.h" "vector.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/rs/corrode/" (22670 38428 0 0) "vector/" "../" "./")
+
+ ("c:/Users/Danniel/Code/rs/" (22670 38331 0 0) "exercises/" "corrode/" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/Exercises/Bunnies/Bunnies/" (22612 36979 0 0) "targetver.h" "stdafx.h" "stdafx.cpp" "ReadMe.txt" "Farm.h" "Farm.cpp" "Enums.h" "Debug/" "Bunny.h" "Bunny.cpp" "Bunnies.vcxproj.filters" "Bunnies.vcxproj" "Bunnies.cpp" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/Exercises/Bunnies/" (22558 7289 0 0) "ipch/" "Debug/" "Bunnies.VC.db" "Bunnies.sln" "Bunnies/" ".vs/" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/" (22622 53665 0 0) "Uno/" "scratch/" "Project Euler/" "primesieve/" "Palace/" "Exercises/" "EulerUtils/" "../" "./")
+
+ ("c:/Users/Danniel/Code/org/" (22639 9809 0 0) "test.org" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/snake/" (22666 59630 0 0) "src/" "makefile" "bin/" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/util/" (22668 12210 0 0) "src/" "makefile" "bin/" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/util/src/linkedlist/" (22668 13152 0 0) "linkedlist.h" "linkedlist.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/util/src/" (22668 12190 0 0) "vectormain.c" "vector/" "linkedlistmain.c" "linkedlist/" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/util/src/vector/" (22668 5228 0 0) "vector.h" "vector.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/" (22667 34815 0 0) "util/" "snake/" "scratch/" "py_test/" "Nav/" "K&R/" "HelloWorld/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/Help/sqltesting/src/" (22666 56759 0 0) "Database.java" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/Help/sqltesting/" (22666 58056 0 0) "testing.db" "src/" "sqlite-jdbc-3.16.1.jar" "out/" "makefile" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/Help/" (22666 58082 0 0) "sqltesting/" "Geometry/" "Airplane/" "../" "./")
+
+ ("c:/Users/Danniel/Documents/ERWC/" (22667 27955 0 0) "Fucking Menu/" "../" "./")
+
+ ("c:/Users/Danniel/Documents/" (22667 27955 0 0) "~$USH Summer Q.docx" "_DFO_permission_NPK_change.lnk" "_DFO Security.txt" "Zoom Zoom Graph.docx" "WHAP U2 Essay.docx" "Visual Studio 2015/" "Unity Games/" "This Land is Your Land Essay.docx" "TEWWG Essay.docx" "Sprite Sheets/" "sketchtest.skp" "sketchtest.skb" "SEGA Genesis Classics/" "SavedGames/" "Projects/" "plot.log" "Notepad Code/" "My Web Sites/" "My Videos/" "My Pictures/" "My Music/" "my act better than yours.pdf" "JuliusCaesarFallaciesEssay.docx" "Info.docx" "IISExpress/" "ERWC/" "English 2A Final/" "EMI Lab.dwg" "EMI Lab.bak" "DFO/" "desktop.ini" "Dental Office Site Plan.lnk" "Dental Office Floor Plan.dwg" "Dental Office Floor Plan.bak" "Default.rdp" "Crucible Narrative.docx" "CommonAppEssay.docx" "College Essays/" "CBS.log" "Bakal DDR.txt" "ASP.NET/" "APUSH Summer RRL.docx" "APUSH Summer Q.docx" "Amnesia/" "ACT Admission Ticket.pdf" "../" "./")
+
+ ("c:/Users/Danniel/" (22666 49815 0 0) "_viminfo" "_.swp" "workspace/" "VirtualBox VMs/" "vimfiles/" "Videos/" "Tracing/" "Templates/" "Strawberry/" "Start Menu/" "SendTo/" "Searches/" "Saved Games/" "Recent/" "README.md" "Rails/" "PrintHood/" "Pictures/" "omnisharp-tmp-file.cs" "ntuser.ini" "NTUSER.DAT{6cced2f1-6e01-11de-8bed-001e0bcd1824}.TMContainer00000000000000000002.regtrans-ms" "NTUSER.DAT{6cced2f1-6e01-11de-8bed-001e0bcd1824}.TMContainer00000000000000000001.regtrans-ms" "NTUSER.DAT{6cced2f1-6e01-11de-8bed-001e0bcd1824}.TM.blf" "ntuser.dat.LOG2" "ntuser.dat.LOG1" "NTUSER.DAT" "NetHood/" "My Documents/" "Music/" "Local Settings/" "Links/" "langserver.log" "javaworkspace/" "go/" "Github/" "Favorites/" "Eclipse CDT/" "eclipse/" "Downloads/" "Documents/" "Desktop/" "Crazy8/" "Cookies/" "Contacts/" "Code/" "bluej/" "Application Data/" "AppData/" ".vscode/" ".VirtualBox/" ".viminfo" ".vim/" ".tooling/" ".ssh/" ".sbt/" ".rustup/" ".PyCharm2016.2/" ".p2/" ".oracle_jre_usage/" ".nuget/" ".multirust/" ".m2/" ".lesshst" ".lein/" ".ivy2/" ".idlerc/" ".IdeaIC2016.2/" ".idea/" ".gitignore" ".gitconfig" ".gimp-2.8/" ".gemrc" ".gem/" ".fzf/" ".emacs.d/" ".eclipse/" ".dnx/" ".cargo/" ".cache/" ".bundle/" ".bash_history" ".android/" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/snake/src/" (22666 59482 0 0) "snakeio.h" "snakeio.c" "snake.h" "snake.c" "main.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/scratch/" (22666 59430 0 0) "strcpy.c" "linkedlist.c" "ColorCodes.txt" "a.exe" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/src/main/java/" (22665 39474 0 0) "SelectionSort.java" "MergeSort.java" "InsertionSort.java" "BarMSortMain.java" "BarMergeSorter.java" "BarGraphSorter.java" "BarGraphMain.java" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/blackjack/" (22666 12447 0 0) "src/" "res/" "README.md" "out/" "nbproject/" "LICENSE" "blackjack.iml" ".idea/" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/" (22666 58035 0 0) "_APCS2/" "_APCS/" "spaceinvaders/" "scratch/" "mvn_test/" "Matrix/" "Help/" "blackjack/" "Airplane/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/" (22665 39346 0 0) "target/" "src/" "Sort.iml" "pom.xml" "doc/" ".ensime_cache/" ".ensime" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/blackjack/src/game/" (22666 12447 0 0) "Test.java" "Suit.java" "Rank.java" "Player.java" "Hand.java" "Gamespecs.md" "Game.java" "Deck.java" "Dealer.java" "Card.java" "BlackJackCli.java" "../" "./")
+
+ ("c:/Users/Danniel/Code/hs/Crazy8/" (22665 30884 0 0) "Main.hs" "Deck.hs" "Crazy8.hs" "Card.hs" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/lang/" (22666 19919 0 0) "lang-web.el" "lang-typescript.el" "lang-rust.el" "lang-python.el" "lang-powershell.el" "lang-org.el" "lang-java.el" "lang-haskell.el" "lang-go.el" "lang-csharp.el" "lang-c.el" "../" "./")
+
+ ("c:/Users/Danniel/Code/go/exercises/" (22666 53892 0 0) "hello.go" "../" "./")
+
+ ("c:/Users/Danniel/Code/cs/FacebookSpam/FacebookSpam/" (22665 21290 0 0) "Properties/" "Program.cs" "packages.config" "obj/" "FBSpammer.cs~" "FBSpammer.cs" "FacebookSpam.csproj" "bin/" "../" "./")
+
+ ("c:/Users/Danniel/Documents/English 2A Final/Other Stuff/" (22664 13346 0 0) "いやらしいリナ会長 [5]_files/" "いやらしいリナ会長 [5].html" "「しづるさんのひみつ道具発売中」_「PlusEta」のうごイラ [pixiv]_files/" "「しづるさんのひみつ道具発売中」_「PlusEta」のうごイラ [pixiv].html" "「うごくイラストテスト」_「剛田幸村」のうごイラ [pixiv]_files/" "「うごくイラストテスト」_「剛田幸村」のうごイラ [pixiv].html" "Thumbs.db" "Teme Benkyou OshiERO yo!/" "Minenaga_Anna_04.gif" "Maid2.jpg" "Konachan_com%20-%20116326%20sample.jpg" "image6_002.jpg" "HPC.jpg" "60808526_p0.jpg" "60793373_p0.jpg" "60649364_p2.png" "60610360_p0.jpg" "60484771_p0.jpg" "60256828_p0.jpg" "60095473_p0.jpg" "59143430_p0.png" "58760308_p0.png" "58735381_p0.png" "58601516_p0.png" "58433964_p0.jpg" "58313890_p0.png" "58214925_p11.png" "58149848_p0.jpg" "58148247_p0.jpg" "58135273_p0.png" "57863928_p1_master1200.jpg" "57863928_p0.jpg" "57546096_p4.png" "57546096_p3.png" "57314183_p0.jpg" "57230020_p1.jpg" "57229396_p0.jpg" "57163460_p0.jpg" "57135912_p0.png" "56479392_p4.jpg" "56479392_p2.jpg" "56479392_p1.jpg" "56479392_p0.jpg" "56403170_p0.png" "56368893_p0.png" "56261475_p0.png" "55482765_p0.jpg" "55400835_p0.jpg" "55364696.gif" "55219340_p2.jpg" "55170139_p0.jpg" "55075555_p2.jpg" "54722474_p0.jpg" "54627939_p0.jpg" "54164352_p0.jpg" "54142542_p0.jpg" "53183426_p0.png" "52753346_p0.jpg" "52269665_p0.jpg" "51561303_p0.png" "50808063_p0.jpg" "50495355_p0.jpg" "50412589_p0_master1200.jpg" "49966477_p0.png" "49550043_p0.jpg" "49464138_p0.jpg" "48090175_p0.jpg" "47437654_p0.png" "46966535_p0.jpg" "46829319_p0.jpg" "45983836_p0.jpg" "44775136_p0.jpg" "44502495_p0.jpg" "43750198_p0.jpg" "43560959_p0.jpg" "42460352_p0.jpg" "42134370_p0.jpg" "41431393_p0.jpg" "40652175_p0.jpg" "40558239_p0.jpg" "40055923_p0.jpg" "39639800_p1.jpg" "39482085_p0.jpg" "39469079_p0.jpg" "38868138_p0.png" "38585560_p0.jpg" "37854561_p0.jpg" "37137199_p0.jpg" "34254657.jpg" "32966548_p0.jpg" "32117359_p1.jpg" "31994911_p0.jpg" "30918401_p0.jpg" "28891580_p1.jpg" "28891580_p0.jpg" "25167672_p0.jpg" "24207348_p0.jpg" "23003933_p0.jpg" "19058497_p0.jpg" "16495280_p0.jpg" "14124802_p0.jpg" "140731b_as001.jpg" "133.jpg" "11979776_p0.jpg" "0L6DD7QPU.jpg" "081WEHKAD.jpg" "013.jpg" "0.jpg" "../" "./")
+
+ ("c:/Users/Danniel/Code/ps1/" (22664 17364 0 0) "Spam.ps1" "../" "./")
+
+ ("c:/Users/Danniel/Code/" (22664 15014 0 0) "_misc/" "ts/" "scm/" "rs/" "rkt/" "rb/" "py/" "ps1/" "php/" "org/" "js/" "java/" "html/" "hs/" "go/" "fs/" "el/" "cs/" "cpp/" "clj/" "c/" "aspx/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/java-mode/" (22637 14420 0 0) "while" "try" "toString" "switch" "setter" "scanner" "println" "printf" "main" "lambda" "if-else-if-else" "if-else" "if" "getter-setter" "getter" "foreach" "for" "equals" "else-if" "do-while" "constructor" "class" "case" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/Airplane/" (22662 60388 0 0) "Seat.java" "Seat.class" "README.md" "Program.java" "Program.class" "Plane.java" "plane.jar" "Plane.class" "Passenger.java" "Passenger.class" "AutoSeater.java" "AutoSeater.class" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/" (22662 56184 0 0) "XamarinStudio-6.0/" "XamarinStudio-5.0/" "WinRAR/" "Unity/" "Trimble Connect for SketchUp/" "SUPERAntiSpyware.com/" "Sun/" "Subversion/" "stetic/" "stack/" "Skype/" "SketchUp/" "RenPy/" "Raptr/" "Racket/" "NuGet/" "npm-cache/" "npm/" "Notepad++/" "NexonLauncher/" "Mozilla/" "Microsoft/" "Media Center Programs/" "Macromedia/" "local/" "LINQPad/" "library_dir/" "JetBrains/" "Jedi/" "Identities/" "GitHub/" "ghc/" "CodeBlocks/" "Code/" "cabal/" "BitTorrent/" "Autodesk/" "ATI/" "Apple Computer/" "AMD/" "Adobe/" ".pacmacs-score" ".emacs.d/" "../" "./")
+
+ ("c:/Users/Danniel/Code/go/" (22662 56733 0 0) "exercises/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/c-mode/" (22634 51317 0 0) "main-args" "main" "dll-export" ".yas-parents" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/cc-mode/" (22634 51297 0 0) "while" "switch" "if-else-if-else" "if-else" "if" "for" "else-if" "do-while" "case" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/EulerUtils/EulerUtils/" (22634 51361 0 0) "targetver.h" "stdafx.h" "stdafx.cpp" "ReadMe.txt" "EulerUtils.vcxproj.filters" "EulerUtils.vcxproj" "EulerUtils.cpp" "Euler.h" "Euler.cpp" "Debug/" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/Beginning/" (22634 55070 0 0) "Text_Adventure.py" "Test.py" "Python_notes.py" "Pyglatin.py" "Prompting.py" "ProjectEuler48.py" "Password2.py" "Password.py" "Hello.py" "fibonacci.py" "DigitSum.py" "DFO_Leveling.py" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/py_test/" (22635 2569 0 0) "dice.py" "dice.dll" "dice.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/LINQ/" (22634 53904 0 0) "LINQ.py" ".idea/" "../" "./")
+
+ ("c:/Users/Danniel/Pictures/Stuff/idk/Pixiv/" (22661 38079 0 0) "Umi/" "more idk/" "hYdONDb.jpg" "60680252_p0.jpg" "60022117_p0.png" "59612003_p0.png" "59466513_p0.jpg" "59328040_p0.jpg" "59208523_p0.png" "59201983_p3.jpg" "58996358_p5.jpg" "58996358_p0.jpg" "58024280_p0.jpg" "57907744_p0.jpg" "57848258_p0.jpg" "57699727_p2.jpg" "57699727_p0.jpg" "56573119_p9.jpg" "56066120_p0.jpg" "56033861_p0.png" "54150145_p0.jpg" "54021816_p0.png" "52404568_p0.png" "51450224_p0.png" "51146108_p0.png" "48838179_p3.jpg" "46695403_p3.jpg" "46695403_p2.jpg" "46695403_p1.jpg" "39135345_p4.jpg" "39135345_p3.jpg" "39135345_p2.jpg" "39135345_p1.jpg" "39135345_p0.jpg" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/HelloWorld/" (22659 44376 0 0) "HelloWorld.c" "a.exe" ".projectile" "../" "./")
+
+ ("c:/Users/Danniel/Github/corrode/src/Language/Rust/Corrode/" (22659 46458 0 0) "CFG.lhs" "C.lhs" "../" "./")
+
+ ("c:/Users/Danniel/Code/rs/exercises/" (22661 35130 0 0) "hello.rs" "hello.pdb" "hello.exe" "../" "./")
+
+ ("c:/Users/Danniel/Code/hs/Exercises/" (22662 26141 0 0) "YAHT5.hs" "YAHT4.hs" "YAHT3.hs" "Tutorial/" "SequenceSum.hs" "LCM.hs" "HelloWorld.hs" "99.hs" "../" "./")
+
+ ("c:/Users/Danniel/Code/go/HelloWorld/" (22662 56681 0 0) "../" "./")
+
+ ("c:/Users/Danniel/Github/corrode/src/Language/Rust/" (22659 45211 0 0) "Idiomatic.hs" "Corrode/" "AST.hs" "../" "./")
+
+ ("c:/Users/Danniel/Github/corrode/src/Language/" (22659 45210 0 0) "Rust.hs" "Rust/" "../" "./")
+
+ ("c:/Users/Danniel/Github/corrode/src/" (22659 45210 0 0) "Language/" "../" "./")
+
+ ("c:/Users/Danniel/Github/corrode/" (22659 46005 0 0) "stack.yaml" "src/" "Setup.hs" "scripts/" "README.md" "Makefile" "Main.md" "Main.lhs" "LICENSE" "fixGitSymlinksForWindows.bat" "Dockerfile" "doc/" "dist/" "corrode.cabal" "CONTRIBUTING.md" ".travis.yml" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Github/" (22659 45207 0 0) "_Clones/" "vim-plug/" "tomorrow-theme/" "Matrix-Operations/" "Matrix/" "intellij-colors-solarized/" "Crazy8/" "corrode/" "../" "./")
+
+ ("c:/Users/Danniel/Code/_misc/projects/" (22634 50486 0 0) "RECOGNITION/" "README.md" "LICENSE.md" "CONTRIBUTING.md" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/html/helloworld/" (22632 37769 0 0) "manifest.webapp" "index.html" "icons/" "app.js" "../" "./")
+
+ ("c:/Users/Danniel/Code/_misc/the-love-letter-mystery/" (22632 41055 0 0) "mysteryjs.html" "mysterycs.exe" "mysteryc.exe" "mystery.py" "mystery.java" "mystery.cs" "mystery.class" "mystery.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/blackjack/src/game/" (22650 49481 0 0) "Test.java" "Suit.java" "Rank.java" "Player.java" "Game.java" "Deck.java" "Dealer.java" "Card.java" "BlackJack.java" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/python_koans/python3/koans/" (22657 31317 0 0) "__pycache__/" "__init__.py" "triangle.py" "local_module_with_all_defined.py" "local_module.py" "joes.py" "jims.py" "GREEDS_RULES.txt" "a_package_folder/" "another_local_module.py" "about_with_statements.py" "about_tuples.py" "about_true_and_false.py" "about_triangle_project2.py" "about_triangle_project.py" "about_string_manipulation.py" "about_strings.py" "about_sets.py" "about_scoring_project.py" "about_scope.py" "about_regex.py" "about_proxy_object_project.py" "about_packages.py" "about_none.py" "about_multiple_inheritance.py" "about_monkey_patching.py" "about_modules.py" "about_method_bindings.py" "about_methods.py" "about_list_assignments.py" "about_lists.py" "about_lambdas.py" "about_iteration.py" "about_inheritance.py" "about_generators.py" "about_extra_credit.py" "about_exceptions.py" "about_dictionaries.py" "about_dice_project.py" "about_deleting_objects.py" "about_decorating_with_functions.py" "about_decorating_with_classes.py" "about_control_statements.py" "about_comprehension.py" "about_class_attributes.py" "about_classes.py" "about_attribute_access.py" "about_asserts.py" "../" "./")
+
+ ("c:/Users/Danniel/Code/el/configs/1/elisp/" (22658 59546 0 0) "lang-web.el" "lang-ruby.el" "lang-haskell.el" "lang-c.el" "base.el" "base-theme.el" "base-global-keys.el" "base-functions.el" "base-extensions.el" "../" "./")
+
+ ("c:/Users/Danniel/Code/el/configs/1/" (22658 60154 0 0) "init.el" "elisp/" "../" "./")
+
+ ("c:/Users/Danniel/Code/el/configs/" (22613 32403 0 0) "1/" "../" "./")
+
+ ("c:/Users/Danniel/Code/el/" (22628 11102 0 0) "spacemacs/" "configs/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/blackjack/src/" (22655 47388 0 0) "util/" "gui/" "game/" "../" "./")
+
+ ("c:/Users/Danniel/Code/hs/" (22606 5195 0 0) "Project Euler/" "Exercises/" "Crazy8/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/" (21770 22015 0 0) "Roaming/" "LocalLow/" "Local/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/blackjack/src/" (22650 41497 0 0) "util/" "game/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/blackjack/" (22650 42584 0 0) "src/" "res/" "README.md" "Player.java" "LICENSE" "Game.java" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/" (22650 41430 0 0) "XorSwap/" "Threads/" "src/" "SelectionSort/" "scratch.iml" "out/" "msort/" "isort/" "blackjack/" ".idea/" "../" "./")
+
+ ("c:/Users/Danniel/Pictures/Stuff/idk/" (22648 17287 0 0) "ypnpVRO.png" "Yama Raja.png" "Umi Sonoda.jpg" "Touka Kirishima Minimalist.jpg" "Tactical Trooper.png" "Sword Art Online ALO.jpg" "Swan & Water.jpg" "SR&GA.jpg" "Sniping Ranger.png" "Sket Dance 288.jpg" "Sket Dance 277.jpg" "Sinon.jpg" "Sinon Minimalist.png" "Sinon Avatars.jpg" "Shiho Minato.jpg" "Shana.jpg" "Seisa Mikagura.jpg" "Samurai.jpg" "Saint Snow.png" "Red Hair.jpg" "Pixiv/" "Nico Punch.png" "Mio Akiyama.jpg" "Maki Nishikino.jpg" "Hina.jpg" "Hibi Chouchou 69.PNG" "Hibi Chouchou 21.PNG" "Gunvolt Spring.jpg" "Grand Master.png" "Grand Archer SC.png" "GGO.jpeg" "GE ch38.jpg" "Ga-Rei 49.jpg" "EveCNCry.jpg" "Elementalist.jpg" "EK Tied.PNG" "DK&CrA.jpg" "Diabolic Esper.png" "DFO Power Station.jpg" "DFO FMage.jpg" "Deadly Chaser.jpg" "Code Empress.png" "Chachazero.jpg" "Baldr Sky.jpg" "Bakuman 147.jpg" "Aquors.jpg" "Akame ga Kill.jpg" "Aiz Wallenstein Minimalist.png" "Ageha Himegi.jpg" "../" "./")
+
+ ("c:/Users/Danniel/Code/js/pacman/" (22614 56192 0 0) "tsconfig.json" "ts/" "README.md" "node_modules/" "js/" "index.html" "img/" "css/" ".gitignore" ".git/" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/Project Euler/" (22629 36266 0 0) "3.py" "2.py" "1.py" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/_APCS2/Sort/src/test/java/" (22646 52803 0 0) "SelectionSortTest.java" "MergeSortTest.java" "../" "./")
+
+ ("c:/Users/Danniel/Code/_misc/intsize/" (22629 36635 0 0) "intsizecs.exe" "intsizecpp.exe" "intsizec.exe" "intsize.java" "intsize.cs" "intsize.cpp" "intsize.class" "intsize.c" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/msort/" (22645 57719 0 0) "MergeSort.java" "MergeSort.class" "MergeSort$1TimerListener.class" "../" "./")
+
+ ("c:/Program Files/" (22646 58081 0 0) "Xamarin Studio/" "WinRAR/" "WindowsPowerShell/" "Windows Sidebar/" "Windows Portable Devices/" "Windows Photo Viewer/" "Windows NT/" "Windows Media Player/" "Windows Mail/" "Windows Kits/" "Windows Journal/" "Windows Defender/" "Vim/" "Unity/" "Uninstall Information/" "SUPERAntiSpyware/" "Steam/" "Skype/" "SketchUp/" "ShellDir/" "Sharpkeys/" "scala/" "sbt/" "Reference Assemblies/" "Raptr/" "Racket/" "Qualcomm Atheros/" "Oracle/" "NuGet/" "Notepad++/" "nodejs/" "Nexon/" "Narcissu [Web Edition]/" "MSBuild/" "Mozilla Maintenance Service/" "MonoDevelop/" "Microsoft.NET/" "Microsoft XNA/" "Microsoft Web Tools/" "Microsoft WCF Data Services/" "Microsoft VS Code/" "Microsoft Visual Studio 14.0/" "Microsoft Visual Studio 12.0/" "Microsoft Visual Studio 11.0/" "Microsoft Synchronization Services/" "Microsoft SQL Server Compact Edition/" "Microsoft SQL Server/" "Microsoft Security Client/" "Microsoft SDKs/" "Microsoft Office365 Tools/" "Microsoft Office/" "Microsoft Help Viewer/" "Microsoft Games/" "Microsoft DNX/" "Microsoft ASP.NET/" "Microsoft Analysis Services/" "Malwarebytes Anti-Malware/" "LLVM/" "Katawa Shoujo/" "JetBrains/" "Java/" "iTunes/" "iPod/" "Internet Explorer/" "InstallShield Installation Information/" "IIS Express/" "IIS/" "HTML Help Workshop/" "Hp/" "Hewlett-Packard/" "Haskell Platform/" "GtkSharp/" "Google/" "Git/" "GabbaSoft/" "Firefox Developer Edition/" "DVD Maker/" "desktop.ini" "Common Files/" "CodeBlocks/" "CMake/" "Bonjour/" "BlueJ/" "Autodesk/" "ATI Technologies/" "ATI/" "Application Verifier/" "Apple Software Update/" "AppInsights/" "AMD Quick Stream/" "AMD AVT/" "AMD/" "Adobe/" "../" "./")
+
+ ("c:/Users/Danniel/Code/c/K&R/" (22644 26019 0 0) "rpn.c" "C2.c" "C1.c" "a.exe" ".projectile" "../" "./")
+
+ ("c:/Users/Danniel/Code/rb/Airplane/" (22588 64741 0 0) "seat.rb" "program.rb" "plane.rb~" "plane.rb" "passenger.rb" ".vscode/" "../" "./")
+
+ ("c:/Users/Danniel/Documents/College Essays/out/" (22629 42857 0 0) "uc.txt" "../" "./")
+
+ ("c:/Users/Danniel/Pictures/Stuff/idk/Pixiv/Umi/" (22640 37695 0 0) "60049849_p0.jpg" "59699061_p0.png" "58599498_p0.jpg" "58272809_p0.jpg" "55818259_p0.png" "55578562_p0.png" "54600964_p0.png" "54366002_p0.jpg" "54185550_p0.jpg" "53760476_p0.jpg" "52557403_p0.jpg" "52161015_p0.png" "51525380_p0.png" "51422387_p0.png" "51399011_p0.jpg" "51261351_p0.png" "51222454_p0.jpg" "50492905_p0.jpg" "49515736_p0.png" "49293219_p0.png" "49284000_p0.jpg" "48758868_p0.jpg" "47974358_p0.png" "47580338_p0.jpg" "45690323_p0.jpg" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/python-mode/" (22640 36165 0 0) "__init__" "__eq__" "while" "try" "setter" "property-setter" "property" "main" "if-else" "if-elif-else" "if" "for" "elif" "class" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/scratch/" (22640 36319 0 0) "snippets_test.py" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/isort/" (22642 33789 0 0) "main.java" "main.class" "InsertionSortVisual.java" "InsertionSortVisual.class" "../" "./")
+
+ ("c:/Users/Danniel/Code/cs/" (22615 25259 0 0) "WinForms/" "scratch/" "Project Euler/" "FacebookSpam/" "exercises/" "EulerUtils/" "EssayXOR/" "DeckClass/" "Crazy8/" "BlackJack/" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/Exercises/BracketingSearch/BracketingSearch/" (22557 26067 0 0) "targetver.h" "stdafx.h" "stdafx.cpp" "ReadMe.txt" "Debug/" "BracketingSearch.vcxproj.filters" "BracketingSearch.vcxproj" "BracketingSearch.cpp" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/Exercises/BracketingSearch/" (22557 26098 0 0) "ipch/" "Debug/" "BracketingSearch.VC.db" "BracketingSearch.sln" "BracketingSearch/" ".vs/" "../" "./")
+
+ ("c:/Users/Danniel/Code/cpp/Exercises/" (22557 37904 0 0) "PancakeGlutton/" "ColaMachine/" "Bunnies/" "BracketingSearch/" "../" "./")
+
+ ("c:/Users/Danniel/AppData/Roaming/.emacs.d/snippets/" (22640 32199 0 0) "typescript-mode/" "python-mode/" "java-mode/" "csharp-mode/" "cc-mode/" "c-mode/" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/spaceinvaders/src/" (22608 14565 0 0) "UFO.java" "UFO.class" "SpriteLoader.java" "SpriteLoader.class" "res/" "PlayerMissile.java" "PlayerMissile.class" "Player.java" "Player.class" "Player$1.class" "Missile.java" "Missile.class" "Hitbox.class" "Game.java" "Game.class" "Game$1.class" "Entity.java" "Entity.class" "EnemyMissile.java" "EnemyMissile.class" "Enemy.java" "Enemy.class" "Direction.java" "Direction.class" "Direction$1.class" "Alien.java" "Alien.class" "../" "./")
+
+ ("c:/Users/Danniel/Pictures/Stuff/idk/Pixiv/more idk/" (22606 20167 0 0) "59220505_p0.jpg" "56606553_p1.png" "56479182_p0.jpg" "56028048_p0.png" "55667326_p0.jpg" "54618347_p0.png" "51559327_p0.jpg" "46093498_p4.png" "33285340_p0.jpg" "23371974_p0.jpg" "../" "./")
+
+ ("c:/Users/Danniel/Pictures/Stuff/" (22567 44430 0 0) "White Man Smiles.PNG" "Thuy Dancing.gif" "teletubbies.jpg" "stupidmathteacher.jpg" "OBL.jpg" "KJUFloppyDisc.jpg" "idk/" "hypeisnotreal.gif" "Coffee Can.jpg" "15032530_835358339940253_882764727_n.png" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/scratch/XorSwap/" (22628 28728 0 0) "xorswap.java" "xorswap.class" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/pip/" (22639 11297 0 0) "update_packages.py" "../" "./")
+
+ ("c:/Users/Danniel/Code/java/_APCS2/Notes/src/main/java/" (22639 10994 0 0) "MovingRectangle.java" "../" "./")
+
+ ("c:/Program Files/Vim/" (22640 21557 0 0) "_vimrc~" "_vimrc" "vimfiles/" "vim80/" "._vimrc.un~" "../" "./")
+
+ ("c:/Users/Danniel/Code/py/" (22640 34157 0 0) "scratch/" "python_koans/" "Project Euler/" "pip/" "LINQ/" "Beginning/" ".idea/" "../" "./")
+
+ ("c:/Users/Danniel/Code/php/" (22598 18611 0 0) "Ping Pong/" "Exercises/" "../" "./")
+
+ ("c:/Users/" (21770 22014 0 0) "Public/" "desktop.ini" "Default User/" "Default/" "Danniel/" "All Users/" "../" "./")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t

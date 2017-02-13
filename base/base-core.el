@@ -81,7 +81,7 @@ Stops when a non-whitespace char is encountered."
 (diminish 'abbrev-mode)
 (diminish 'auto-revert-mode)
 
-(load-theme 'spacemacs-dark t)
+(load-theme 'monokai t)
 
 (provide 'base-core)
 ;;; base-core.el ends here
