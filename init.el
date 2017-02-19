@@ -27,6 +27,7 @@
 (require 'lang-javascript)
 (require 'lang-org)
 (require 'lang-rust)
+(require 'lang-powershell)
 (require 'lang-python)
 (require 'lang-typescript)
 (require 'lang-web)

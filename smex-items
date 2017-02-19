@@ -1,19 +1,19 @@
 
 ;; ----- smex-history -----
 (
+ emacs-uptime
  emacs-init-time
- describe-variable
- load-file
- yas-reload-all
- eval-buffer
- customize-group
+ rainbow-delimiters-mode
  counsel-load-theme
+ load-file
+ package-delete
+ emacs-version
 )
 
 ;; ----- smex-data -----
 (
  (pacmacs-start . 3)
- (load-file . 246)
+ (load-file . 250)
  (customize-option . 17)
  (auto-save-mode . 2)
  (cider-jack-in . 1)
@@ -51,13 +51,13 @@
  (company-irony-c-headers-reload-compiler-output . 1)
  (irony-mode . 6)
  (xwidget-webkit-browse-url . 1)
- (emacs-version . 2)
- (emacs-init-time . 116)
- (emacs-uptime . 3)
+ (emacs-version . 3)
+ (emacs-init-time . 120)
+ (emacs-uptime . 4)
  (benchmark . 1)
  (dired . 4)
  (magit-status . 2)
- (package-delete . 57)
+ (package-delete . 58)
  (undo-tree-switch-branch . 1)
  (global-undo-tree-mode . 1)
  (kill-line . 1)
@@ -87,7 +87,7 @@
  (omnisharp-stop-server . 1)
  (omnisharp-mode . 3)
  (flycheck-mode . 1)
- (rainbow-delimiters-mode . 4)
+ (rainbow-delimiters-mode . 6)
  (describe-function . 21)
  (image-mode-fit-frame . 3)
  (describe-mode . 13)
@@ -127,7 +127,7 @@
  (ebuffers . 1)
  (counsel-yank-pop . 3)
  (describe-face . 1)
- (counsel-load-theme . 18)
+ (counsel-load-theme . 32)
  (comment-or-uncomment-region . 1)
  (counsel-git-grep . 2)
  (viper-mode . 2)
@@ -147,4 +147,5 @@
  (package-refresh-contents . 1)
  (company-tern . 5)
  (tern-mode . 2)
+ (debug-on-entry . 2)
 )

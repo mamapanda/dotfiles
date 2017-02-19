@@ -27,7 +27,7 @@
     (define-key irony-mode-map [remap complete-symbol]
       'irony-completion-at-point-async)
     (if (equal major-mode 'c++-mode)
-        (setq-local irony-additional-clang-options '("-std=c++14"))))
+        (setq-local irony-additional-clang-options '("-std=c++14" "-Wall"))))
   (add-hook 'irony-mode-hook 'my-irony-mode-hook)
   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
   (when (boundp 'w32-pipe-read-delay)
