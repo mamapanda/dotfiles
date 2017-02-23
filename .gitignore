@@ -1,0 +1,16 @@
+*
+
+!.gitignore
+
+!init.el
+!custom-file.el
+
+!base
+!base/*.el
+
+!lang
+!lang/*.el
+
+!snippets
+!snippets/*/
+!snippets/*/*
