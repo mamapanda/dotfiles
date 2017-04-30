@@ -6,16 +6,14 @@
 ;;; Code:
 
 (use-package haskell-mode
-  :defer t
-  :config
-  (add-hook 'haskell-mode-hook
-            (lambda ()
-              (setq flycheck-disabled-checkers '(haskell-stack-ghc)))))
+  :defer t)
 
-(use-package company-ghc
+(use-package intero
   :after haskell-mode
+  :init
+  (add-hook 'haskell-mode-hook 'intero-mode)
   :config
-  (add-to-list 'company-backends 'company-ghc))
+  (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
 
 (provide 'lang-haskell)
 ;;; lang-haskell.el ends here

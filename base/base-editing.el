@@ -12,11 +12,13 @@
 
 (use-package company
   :bind (:map company-active-map
-              ("<tab>" . nil) ;make company play nicer with yasnippet
+              ("<tab>" . company-complete-selection)
               ("C-w" . nil)) ;kill-line annoyance
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
+  (delete 'company-dabbrev company-backends)
+  (setq company-dabbrev-code-modes nil)
   (setq company-idle-delay 0.1
         company-minimum-prefix-length 1
         company-tooltip-align-annotations t))
@@ -82,6 +84,20 @@
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode t)
   (add-hook 'org-mode-hook (lambda () (yas-minor-mode -1)))
+  (eval-after-load 'company
+    (progn
+      (defun company-yasnippet ()
+        "Gives priority to yas completion over company completion."
+        (interactive)
+        (let ((yas-fallback-behavior nil))
+          (unless (yas-expand)
+            (call-interactively #'company-complete-selection))))
+      (defun company-yas-tab ()
+        "Substitutes company's key def to allow priority for yas completion."
+        (substitute-key-definition 'company-complete-selection
+                                   'company-yasnippet
+                                   company-active-map))
+      (add-hook 'company-mode-hook #'company-yas-tab)))
   (setq yas-triggers-in-field t
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t)

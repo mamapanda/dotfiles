@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: constructor
-# key: c
+# key: cons
 # --
 ${1:public} constructor (${2:args}) {
             $0

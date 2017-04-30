@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: switch case
-# key: ca
+# key: case
 # --
 case ${1:value}:
      $2

@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # name: Console.WriteLine();
-# key: writel
+# key: writeline
 # --
 Console.WriteLine(${1:text});

@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: setter
-# key: s
+# key: set
 # --
 @${1:var}.setter
 def $1(self, $1):

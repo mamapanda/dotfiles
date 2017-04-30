@@ -4,10 +4,8 @@
 # --
 if (${1:condition}) {
     $2
-}
-else if (${3:condition}) {
+} else if (${3:condition}) {
     $4
-}
-else {
+} else {
     $0
 }

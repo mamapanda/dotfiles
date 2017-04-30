@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # name: Console.ReadKey();
-# key: readk
+# key: readkey
 # --
 Console.ReadKey();

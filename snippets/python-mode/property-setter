@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: property-setter
-# key: gs
+# key: getset
 # --
 @property
 def ${1:var}(self):

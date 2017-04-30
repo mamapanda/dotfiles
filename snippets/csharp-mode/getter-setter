@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: getter-setter
-# key: gs
+# key: getset
 # --
 public ${1:Object} Get${2:O}()
 {

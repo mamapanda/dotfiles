@@ -14,12 +14,12 @@
 
 (require 'base-appearance)
 (require 'base-editing)
-;;(require 'base-ido)
 (require 'base-ivy)
 (require 'base-navigation)
 (require 'base-misc)
 
 (require 'lang-c)
+(require 'lang-common-lisp)
 (require 'lang-csharp)
 (require 'lang-go)
 (require 'lang-haskell)

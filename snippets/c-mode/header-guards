@@ -3,6 +3,7 @@
 # key: header
 # --
 #ifndef ${1:FILE}_H
+
 #define $1_H
 
 $0

@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: foreach
-# key: fore
+# key: foreach
 # --
 foreach (${1:Object o} in ${2:Enumerable})
 {

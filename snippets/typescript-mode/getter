@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: getter
-# key: g
+# key: get
 # --
 public get${1:O}(): ${2:Object} {
        return this.${3:o};
