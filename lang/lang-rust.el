@@ -16,7 +16,7 @@
 (use-package flycheck-rust
   :after rust-mode
   :config
-  (add-hook 'flycheck-mode-hook 'flycheck-rust-setup))
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 (provide 'lang-rust)
 ;;; lang-rust.el ends here

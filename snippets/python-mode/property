@@ -4,4 +4,4 @@
 # --
 @property
 def ${1:var}(self):
-    return self._$1
+    return self.__$1

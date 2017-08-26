@@ -25,6 +25,7 @@
 (require 'lang-haskell)
 (require 'lang-java)
 (require 'lang-javascript)
+(require 'lang-markdown)
 (require 'lang-org)
 (require 'lang-rust)
 (require 'lang-powershell)
@@ -32,7 +33,8 @@
 (require 'lang-typescript)
 (require 'lang-web)
 
-(w32-send-sys-command 61488) ;fullscreen / lol if not windows
+(when (string-equal system-type "windows-nt")
+  (w32-send-sys-command 61488))
 
 (provide 'init)
 ;;; init.el ends here

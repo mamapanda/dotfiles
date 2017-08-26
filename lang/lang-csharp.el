@@ -9,7 +9,6 @@
   :defer t)
 
 (use-package omnisharp
-  :disabled t
   :defer t
   :init
   (add-hook 'csharp-mode-hook 'omnisharp-mode)
