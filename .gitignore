@@ -14,3 +14,5 @@
 !snippets
 !snippets/*/
 !snippets/*/*
+
+!.mc-lists.el
