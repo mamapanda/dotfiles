@@ -9,7 +9,7 @@
   :bind (("C-c n" . nlinum-mode)))
 
 (use-package nyan-mode
-  :init
+  :config
   (nyan-mode t))
 
 (use-package rainbow-delimiters

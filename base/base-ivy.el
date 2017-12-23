@@ -27,22 +27,17 @@
                                 (t . ivy--regex-fuzzy))
         confirm-nonexistent-file-or-buffer t
         ivy-count-format "(%d/%d) ")
-  (defvar panda/ivy-match-colors '("#39FF14" "#67C8FF" "#FF9933")
-    "The colors to use for ivy's match highlighting.")
-  (defun panda/set-ivy-minibuffer-match-faces (match-colors)
-    "Changes ivy minibuffer match faces based on MATCH-COLORS."
-    (let* ((ivy-minibuffer-match-faces '(ivy-minibuffer-match-face-2
-                                         ivy-minibuffer-match-face-3
-                                         ivy-minibuffer-match-face-4))
-           (ivy-face-count (length ivy-minibuffer-match-faces))
-           (minibuffer-match-color-count (length match-colors)))
-      (dotimes (n ivy-face-count)
-        (set-face-attribute (nth n ivy-minibuffer-match-faces) nil
-                            :foreground (nth (mod n minibuffer-match-color-count) match-colors)
-                            :weight 'bold))))
-  (panda/set-ivy-minibuffer-match-faces panda/ivy-match-colors)
+  (set-face-attribute 'ivy-minibuffer-match-face-2 nil
+                      :foreground panda/neon-green
+                      :weight 'bold)
+  (set-face-attribute 'ivy-minibuffer-match-face-3 nil
+                      :foreground panda/light-blue
+                      :weight 'bold)
+  (set-face-attribute 'ivy-minibuffer-match-face-4 nil
+                      :foreground panda/deep-saffron
+                      :weight 'bold)
   (set-face-attribute 'ivy-confirm-face nil
-                      :foreground "#39FF14"))
+                      :foreground panda/neon-green))
 
 (provide 'base-ivy)
 ;;; base-ivy.el ends here

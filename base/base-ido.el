@@ -27,7 +27,7 @@
 
 (use-package smex ;slight lag if deferred
   :bind (("M-x" . smex))
-  :init
+  :config
   (smex-initialize))
 
 (provide 'base-ido)

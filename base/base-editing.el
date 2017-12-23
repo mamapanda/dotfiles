@@ -7,7 +7,7 @@
 
 (use-package anzu
   :bind (("C-c r" . anzu-query-replace))
-  :init
+  :config
   (global-anzu-mode t))
 
 (use-package company
@@ -15,17 +15,17 @@
               ("<tab>" . company-complete-selection)
               ("C-w" . nil)) ;kill-line annoyance
   :init
-  (add-hook 'after-init-hook 'global-company-mode)
+  (add-hook 'after-init-hook #'global-company-mode)
   :config
   (delete 'company-dabbrev company-backends)
-  (setq company-dabbrev-code-modes nil)
-  (setq company-idle-delay 0.1
+  (setq company-dabbrev-code-modes nil
+        company-idle-delay 0.1
         company-minimum-prefix-length 1
         company-tooltip-align-annotations t))
 
 (use-package corral
   :bind (("C-c c" . hydra-corral/body))
-  :init
+  :config
   (defhydra hydra-corral ()
     ("{" corral-braces-backward)
     ("}" corral-braces-forward)
@@ -52,7 +52,7 @@
 
 (use-package multiple-cursors
   :bind (("C-c m" . hydra-multiple-cursors/body))
-  :init
+  :config
   (defhydra hydra-multiple-cursors ()
     ("p" mc/mark-previous-like-this)
     ("n" mc/mark-next-like-this)
@@ -65,18 +65,18 @@
               ("C-c o o" . origami-toggle-node)
               ("C-c o a" . origami-toggle-all-nodes)
               ("C-c o p" . origami-show-only-node))
-  :init
+  :config
   (global-origami-mode))
 
 (use-package undo-tree
   :bind (:map undo-tree-map
               ("C-." . undo-tree-redo)
               ("C-?" . nil))
-  :init
+  :config
   (global-undo-tree-mode))
 
 (use-package winner
-  :init
+  :config
   (winner-mode t))
 
 (use-package yasnippet
@@ -103,8 +103,8 @@
         yas-also-auto-indent-first-line t)
   (add-hook 'python-mode-hook
             (lambda ()
-              (set (make-local-variable 'yas-indent-line) 'fixed)
-              (set (make-local-variable 'yas-also-auto-indent-first-line) 'nil))))
+              (setq-local yas-indent-line 'fixed)
+              (setq-local yas-also-auto-indent-first-line 'nil))))
 
 (provide 'base-editing)
 ;;; base-editing.el ends here

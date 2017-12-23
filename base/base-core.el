@@ -16,7 +16,7 @@
                 ("melpa" . 10)
                 ("melpa-stable" . 0)))
 
-(defvar panda/packages
+(defconst panda/packages
   '(clojure-mode
     ensime
     esup
@@ -50,8 +50,13 @@
 (setq custom-file "~/.emacs.d/custom-file.el") ;separate file for custom.el
 (load custom-file 'noerror)
 
-(global-auto-revert-mode t) ;reloads file if changed externally
+(defconst panda/neon-green "#39FF14")
+(defconst panda/light-blue "#67C8FF")
+(defconst panda/deep-saffron "#FF9933")
+
 (set-frame-font "Consolas-10") ;why emacs keep resetting my font
+
+(global-auto-revert-mode t) ;reloads file if changed externally
 (setq disabled-command-function nil)
 
 (defvar panda/delete-trailing-whitespace? t)
@@ -60,23 +65,23 @@
             (when panda/delete-trailing-whitespace?
               (delete-trailing-whitespace))))
 
-(defun panda/C-w ()
+(defun panda/kill-text ()
   "If a region is active, kill it; else, kill the current line."
   (interactive)
   (call-interactively (if (region-active-p)
                           'kill-region
                         'kill-whole-line)))
 
-(global-set-key (kbd "C-w") 'panda/C-w)
+(global-set-key (kbd "C-w") #'panda/kill-text)
 
-(defun panda/whitespace-killer ()
+(defun panda/kill-whitespace ()
   "Deletes all spaces, newlines, and tabs before cursor.
 Stops when a non-whitespace char is encountered."
   (interactive)
   (while (string-match (char-to-string (char-before)) " \r\n\t")
     (call-interactively 'delete-backward-char)))
 
-(global-set-key "\M-\d" 'panda/whitespace-killer)
+(global-set-key "\M-\d" #'panda/kill-whitespace)
 
 (require 'use-package)
 (setq use-package-always-ensure t)
