@@ -8,6 +8,7 @@
 (use-package ivy
   :ensure counsel
   :diminish ivy-mode
+  :demand t
   :bind (("C-x b" . ivy-switch-buffer)
          ("C-x C-f" . counsel-find-file)
          ("C-s" . swiper)

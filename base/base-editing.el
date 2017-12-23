@@ -61,6 +61,7 @@
     ("q" nil)))
 
 (use-package origami
+  :demand t
   :bind (:map origami-mode-map
               ("C-c o o" . origami-toggle-node)
               ("C-c o a" . origami-toggle-all-nodes)
