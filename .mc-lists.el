@@ -15,7 +15,9 @@
         markdown-cycle
         markdown-outdent-or-delete
         panda/C-w
+        powershell-indent-line
         repeat
+        typescript-insert-and-indent
         yas-expand
         ))
 
@@ -38,5 +40,6 @@
         nlinum-mode
         projectile-switch-project
         smex
+        suspend-frame
         toggle-input-method
         ))

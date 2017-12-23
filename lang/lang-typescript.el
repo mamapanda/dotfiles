@@ -17,7 +17,7 @@
     (tide-setup)
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1))
-  (add-hook 'before-save-hook 'tide-format-before-save)
+  ;(add-hook 'before-save-hook 'tide-format-before-save)
   (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
 (provide 'lang-typescript)
