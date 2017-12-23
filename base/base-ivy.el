@@ -17,11 +17,8 @@
          ("M-y" . counsel-yank-pop)
          :map ivy-minibuffer-map
          ("<return>" . ivy-alt-done))
-  :init
-  (ivy-mode 1)
   :config
-  (eval-after-load 'projectile
-    '(setq projectile-completion-system 'ivy))
+  (ivy-mode 1)
   (setq ivy-wrap t
         ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                 (t . ivy--regex-fuzzy))

@@ -53,7 +53,8 @@
 (use-package projectile
   :config
   (projectile-mode)
-  (setq projectile-indexing-method 'alien))
+  (setq projectile-indexing-method 'alien
+        projectile-completion-system 'ivy))
 
 (provide 'base-navigation)
 ;;; base-navigation.el ends here
