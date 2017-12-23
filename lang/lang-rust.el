@@ -14,9 +14,9 @@
   (add-hook 'rust-mode-hook #'racer-mode))
 
 (use-package flycheck-rust
-  :after rust-mode
-  :config
-  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+  :defer t
+  :init
+  (add-hook 'rust-mode-hook #'flycheck-rust-setup))
 
 (provide 'lang-rust)
 ;;; lang-rust.el ends here

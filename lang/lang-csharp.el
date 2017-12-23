@@ -11,10 +11,10 @@
 (use-package omnisharp
   :defer t
   :init
-  (add-hook 'csharp-mode-hook 'omnisharp-mode)
+  (add-hook 'csharp-mode-hook #'omnisharp-mode)
   :config
   (setq omnisharp-server-executable-path
-        "~/.emacs.d/omnisharp-roslyn/artifacts/publish/OmniSharp/default/net46/omnisharp.exe")
+        "~\\.emacs.d\\omnisharp\\OmniSharp.exe")
   (add-to-list 'company-backends 'company-omnisharp))
 
 (provide 'lang-csharp)

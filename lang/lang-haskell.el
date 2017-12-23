@@ -11,7 +11,7 @@
 (use-package intero
   :after haskell-mode
   :init
-  (add-hook 'haskell-mode-hook 'intero-mode)
+  (add-hook 'haskell-mode-hook #'intero-mode)
   :config
   (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
 

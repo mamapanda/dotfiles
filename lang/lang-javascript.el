@@ -12,7 +12,7 @@
 (use-package tern
   :defer t
   :init
-  (add-hook 'js2-mode-hook 'tern-mode))
+  (add-hook 'js2-mode-hook #'tern-mode))
 
 (use-package company-tern
   :after tern

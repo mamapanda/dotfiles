@@ -8,12 +8,12 @@
 (use-package ensime ;;installed through panda/packages bc pinned
   :defer t
   :init
-  (defun panda/maven-ensime()
+  (defun panda/ensime()
     "Activates ensime only if .ensime file is present."
     (when (locate-dominating-file default-directory ".ensime")
       (ensime)))
-  (add-hook 'java-mode-hook 'panda/maven-ensime)
-  (add-hook 'scala-mode-hook 'panda/maven-ensime)
+  (add-hook 'java-mode-hook #'panda/ensime)
+  (add-hook 'scala-mode-hook #'panda/ensime)
   :config
   (setq ensime-completion-style nil)
   (add-to-list 'company-backends 'ensime-company))

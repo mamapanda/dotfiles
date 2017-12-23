@@ -5,11 +5,10 @@
 
 ;;; Code:
 
-(setq inferior-lisp-program (executable-find "sbcl"))
-
 (use-package slime
   :defer t
   :config
+  (setq inferior-lisp-program (executable-find "sbcl"))
   (slime-setup '(slime-fancy)))
 
 (provide 'lang-common-lisp)
