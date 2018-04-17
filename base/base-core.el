@@ -18,6 +18,7 @@
 
 (defconst panda/packages
   '(clojure-mode
+    diminish
     ensime
     esup
     fireplace

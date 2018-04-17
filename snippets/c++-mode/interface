@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: interface
+# key: interface
+# --
+class ${1:Interface} {
+public:
+    virtual ~$1() = 0;$0
+};

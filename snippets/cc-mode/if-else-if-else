@@ -2,15 +2,10 @@
 # name: if-else if-else
 # key: ifee
 # --
-if (${1:condition})
-{
+if (${1:0}) {
     $2
-}
-else if (${3:condition})
-{
+} else if (${3:0}) {
     $4
-}
-else
-{
+} else {
     $0
 }

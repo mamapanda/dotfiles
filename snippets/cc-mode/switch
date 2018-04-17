@@ -2,9 +2,8 @@
 # name: switch(var) {...}
 # key: switch
 # --
-switch (${1:variable})
-{
-    case ${2:value}:
+switch (${1:0}) {
+    case ${2:0}:
          $3
          break;$4
     default:
