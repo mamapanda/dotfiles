@@ -51,6 +51,7 @@
         neo-window-position 'left))
 
 (use-package projectile
+  :bind-keymap (("C-c p" . projectile-command-map))
   :config
   (projectile-mode)
   (setq projectile-indexing-method 'alien

@@ -18,6 +18,7 @@
 (require 'base-navigation)
 (require 'base-misc)
 
+(require 'lang-assembly)
 (require 'lang-c)
 (require 'lang-common-lisp)
 (require 'lang-csharp)
