@@ -27,6 +27,7 @@
     hydra
     monokai-theme
     pacmacs
+    realgud
     spacemacs-theme
     use-package)
   "A list of packages to ensure are installed.")
