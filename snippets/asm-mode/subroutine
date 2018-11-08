@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: subroutine
+# key: sub
+# --
+    ## SUBROUTINE $1
+${1:subroutine}:
+    push %ebp
+    movl %esp, %ebp
+
+    $0
+
+    movl %ebp, %esp
+    pop %ebp
+    ret
+    ## END SUBROUTINE $1

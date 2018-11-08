@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: for
+# key: for
+# --
+    movl ${1:\$0}, ${2:%eax}
+for_${3:loop}:
+    cmpl ${4:\$0}, $2
+    ${5:jge} end_for_$3
+
+    $0
+
+    ${6:incl} $2
+    jmp for_$3
+end_for_$3:
