@@ -1,0 +1,174 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Daniel Phan
+
+
+* Package Initialization
+  #+begin_src emacs-lisp
+      (require 'package)
+
+      (setq-default package-archives
+                    '(("gnu"     . "https://elpa.gnu.org/packages/")
+                      ("melpa"        . "https://melpa.org/packages/")
+                      ("melpa-stable" . "https://stable.melpa.org/packages/"))
+                    package-archive-priorities
+                    '(("gnu" . 1)
+                      ("melpa" . 10)
+                      ("melpa-stable" . 0)))
+
+      (setq package-enable-at-startup nil) ; so it doesn't run twice
+      (package-initialize)
+  #+end_src
+* Customize File
+  #+begin_src emacs-lisp
+    (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
+    (load custom-file 'noerror)
+  #+end_src
+* Use-Package Setup
+  #+begin_src emacs-lisp
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+
+    (require 'use-package)
+    (setq use-package-always-ensure t)
+  #+end_src
+* Appearance
+*** Variables
+    #+begin_src emacs-lisp
+      (setq inhibit-startup-screen t
+            menu-bar-mode nil
+            ring-bell-function 'ignore
+            scroll-bar-mode nil
+            tool-bar-mode nil
+            truncate-lines t
+            visible-bell nil)
+    #+end_src
+*** Font
+    #+begin_src emacs-lisp
+      (set-frame-font "Consolas-10")
+    #+end_src
+*** Theme
+    #+begin_src emacs-lisp
+      (use-package monokai-theme
+        :defer t)
+
+      (use-package spacemacs-theme
+        :defer t)
+
+      (load-theme 'monokai t)
+    #+end_src
+*** Mode Line
+    #+begin_src emacs-lisp
+      (use-package spaceline-config
+        :ensure spaceline
+        :config
+        (spaceline-emacs-theme)
+        (spaceline-toggle-buffer-size-off)
+        (spaceline-toggle-buffer-modified-off)
+        (spaceline-toggle-hud-off))
+    #+end_src
+*** Diminish
+    #+begin_src emacs-lisp
+      (use-package diminish
+        :config
+        (diminish 'abbrev-mode)
+        (diminish 'auto-revert-mode))
+    #+end_src
+*** Line Numbers
+    #+begin_src emacs-lisp
+      (use-package nlinum
+        :bind (("C-c n" . nlinum-mode)))
+    #+end_src
+*** Nyan Cat Position Bar
+    #+begin_src emacs-lisp
+      (use-package nyan-mode
+        :config
+        (nyan-mode t))
+    #+end_src
+*** Rainbow Delimiters
+    #+begin_src emacs-lisp
+      (use-package rainbow-delimiters
+        :init
+        (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+    #+end_src
+* General Behavior
+*** Variables
+  #+begin_src emacs-lisp
+    (setq auto-save-default nil
+          c-basic-offset 4
+          c-default-style '((java-mode . "java")
+                            (awk-mode . "awk")
+                            (other . "linux"))
+          delete-selection-mode t
+          disabled-command-function nil
+          electric-pair-mode t
+          indent-tabs-mode nil
+          make-backup-files nil
+          show-paren-mode t
+          tab-width 4)
+  #+end_src
+*** Conditionally Delete Trailing Whitespace
+  #+begin_src emacs-lisp
+    (defvar panda/delete-trailing-whitespace? t)
+
+    (add-hook 'before-save-hook
+              (lambda ()
+                (when panda/delete-trailing-whitespace?
+                  (delete-trailing-whitespace))))
+  #+end_src
+*** Reload File if Changed Externally
+  #+begin_src emacs-lisp
+    (global-auto-revert-mode t)
+  #+end_src
+* General Key Definitions
+*** Cutting Text
+  #+begin_src emacs-lisp
+    (defun panda/kill-text ()
+      "If a region is active, kill it; else, kill the current line."
+      (interactive)
+      (call-interactively (if (region-active-p)
+                              'kill-region
+                            'kill-whole-line)))
+
+    (global-set-key (kbd "C-w") #'panda/kill-text)
+  #+end_src
+*** Deleting All Whitespace Before Cursor
+  #+begin_src emacs-lisp
+    (defun panda/kill-whitespace ()
+      "Deletes all spaces, newlines, and tabs before cursor.
+    Stops when a non-whitespace char is encountered."
+      (interactive)
+      (while (string-match (char-to-string (char-before)) " \r\n\t")
+        (call-interactively 'delete-backward-char)))
+
+    (global-set-key "\M-\d" #'panda/kill-whitespace)
+  #+end_src
+* General Constants
+*** Colors
+  #+begin_src emacs-lisp
+    (defconst panda/neon-green "#39FF14")
+    (defconst panda/light-blue "#67C8FF")
+    (defconst panda/deep-saffron "#FF9933")
+  #+end_src
+* Miscellaneous Packages
+  #+begin_src emacs-lisp
+    (use-package esup
+      :defer t)
+
+    (use-package fireplace
+      :defer t)
+
+    (use-package flx
+      :defer t)
+
+    (use-package hydra
+      :defer t)
+
+    (use-package pacmacs
+      :defer t)
+  #+end_src
+* Editing
+*** Find and Replace
+  #+begin_src emacs-lisp
+
+  #+end_src
