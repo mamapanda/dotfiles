@@ -1,41 +1,19 @@
-;;; init.el --- panda's emacs init.el file
+;;; init.el --- emacs init file
 
 ;;; Commentary:
-;;; bamboo
+;;; See config.org for the configuration.
 
 ;;; Code:
 
-;;(package-initialize) ;; pls go away
+(defconst org-config-path
+  (expand-file-name "config.org" user-emacs-directory))
 
-(add-to-list 'load-path (concat user-emacs-directory "base"))
-(add-to-list 'load-path (concat user-emacs-directory "lang"))
+(defconst el-config-path
+  (expand-file-name "config.el" user-emacs-directory))
 
-(require 'base-core)
-
-; (require 'base-appearance)
-; (require 'base-editing)
-; (require 'base-ivy)
-; (require 'base-navigation)
-; (require 'base-misc)
-
-(require 'lang-assembly)
-(require 'lang-c)
-(require 'lang-common-lisp)
-(require 'lang-csharp)
-(require 'lang-go)
-(require 'lang-haskell)
-(require 'lang-java)
-(require 'lang-javascript)
-(require 'lang-markdown)
-(require 'lang-org)
-(require 'lang-rust)
-(require 'lang-powershell)
-(require 'lang-python)
-(require 'lang-typescript)
-(require 'lang-web)
-
-(when (string-equal system-type "windows-nt")
-  (w32-send-sys-command 61488))
+(if (file-newer-than-file-p org-config-path el-config-path)
+    (org-babel-load-file org-config-path)
+  (load-file el-config-path))
 
 (provide 'init)
 ;;; init.el ends here

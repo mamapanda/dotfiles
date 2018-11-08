@@ -2,16 +2,10 @@
 
 !.gitignore
 
-!config.org
 
 !init.el
+!config.org
 !custom-file.el
-
-!base
-!base/*.el
-
-!lang
-!lang/*.el
 
 !snippets
 !snippets/*/

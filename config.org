@@ -1,7 +1,5 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Daniel Phan
-
-
 * Package Initialization
 #+BEGIN_SRC emacs-lisp
   (require 'package)
@@ -56,6 +54,10 @@
     :defer t)
 
   (load-theme 'monokai t)
+#+END_SRC
+*** Full Screen
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+END_SRC
 *** Mode Line
 #+BEGIN_SRC emacs-lisp
@@ -396,10 +398,229 @@
     :defer t)
 #+END_SRC
 * Debugging
-*** RealGUD
 #+BEGIN_SRC emacs-lisp
   (use-package realgud
     :defer t)
 #+END_SRC
 * Language Modes
 *** Assembly
+#+BEGIN_SRC emacs-lisp
+  (use-package asm-mode
+    :defer t
+    :config
+    (add-hook 'asm-mode-hook
+              (lambda ()
+                (setq-local tab-always-indent
+                            (default-value 'tab-always-indent))))
+    (setq asm-comment-char ?#))
+#+END_SRC
+*** C / C++
+#+BEGIN_SRC emacs-lisp
+  (defun panda/c-style-setup ()
+    "Set up c/c++ format style."
+    (c-set-style "linux")
+    (c-set-offset 'inline-open '0)
+    (setq c-basic-offset 4))
+
+  (add-hook 'c-mode-hook 'panda/c-style-setup)
+  (add-hook 'c++-mode-hook 'panda/c-style-setup)
+
+  (use-package irony
+    :defer t
+    :init
+    (add-hook 'c-mode-hook 'irony-mode)
+    (add-hook 'c++-mode-hook 'irony-mode)
+    :config
+    (defun my-irony-mode-hook ()
+      "Set up irony-mode."
+      (define-key irony-mode-map [remap completion-at-point]
+        'irony-completion-at-point-async)
+      (define-key irony-mode-map [remap complete-symbol]
+        'irony-completion-at-point-async))
+    (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+    (when (boundp 'w32-pipe-read-delay)
+      (setq w32-pipe-read-delay 0))
+    (when (boundp 'w32-pipe-buffer-size)
+      (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
+
+  (use-package company-irony
+    :after company-irony-c-headers
+    :config
+    (add-to-list 'company-backends 'company-irony))
+
+  (use-package company-irony-c-headers
+    :after irony
+    :config
+    (add-to-list 'company-backends 'company-irony-c-headers))
+
+  (use-package flycheck-irony
+    :after irony
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+#+END_SRC
+*** C#
+#+BEGIN_SRC emacs-lisp
+  (use-package csharp-mode
+    :defer t)
+
+  (use-package omnisharp
+    :defer t
+    :init
+    (defconst panda/omnisharp-exe-path
+      (expand-file-name "omnisharp/OmniSharp.exe" user-emacs-directory))
+    (defun panda/omnisharp-mode()
+      "Activates omnisharp-mode only if the server is present."
+      (when (file-exists-p panda/omnisharp-exe-path)
+        (omnisharp-mode)))
+    (add-hook 'csharp-mode-hook #'panda/omnisharp-mode)
+    :config
+    (setq omnisharp-server-executable-path panda/omnisharp-exe-path)
+    (add-to-list 'company-backends 'company-omnisharp))
+#+END_SRC
+*** Clojure
+#+BEGIN_SRC emacs-lisp
+  (use-package clojure-mode
+    :defer t)
+#+END_SRC
+*** Common Lisp
+#+BEGIN_SRC emacs-lisp
+  (use-package slime
+    :defer t
+    :config
+    (setq inferior-lisp-program (executable-find "sbcl"))
+    (slime-setup '(slime-fancy)))
+#+END_SRC
+*** Go
+#+BEGIN_SRC emacs-lisp
+  (use-package go-mode
+    :defer t)
+
+  (use-package go-eldoc
+    :after go-mode
+    :config
+    (add-hook 'go-mode-hook 'go-eldoc-setup))
+
+  (use-package company-go
+    :after go-mode
+    :config
+    (add-to-list 'company-backends 'company-go))
+#+END_SRC
+*** Haskell
+#+BEGIN_SRC emacs-lisp
+  (use-package haskell-mode
+    :defer t)
+
+  (use-package intero
+    :after haskell-mode
+    :init
+    (add-hook 'haskell-mode-hook #'intero-mode)
+    :config
+    (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
+#+END_SRC
+*** HTML / PHP / ASP.NET / Embedded Ruby
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :defer t
+    :mode (("\\.php\\'" . web-mode)
+           ("\\.as[cp]x\\'" . web-mode)
+           ("\\.erb\\'" . web-mode)
+           ("\\.html?\\'" . web-mode))
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-style-padding 4
+          web-mode-script-padding 4
+          web-mode-block-padding 4))
+#+END_SRC
+*** JavaScript
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-mode
+    :defer t
+    :mode (("\\.js\\'" . js2-mode)))
+
+  (use-package tern
+    :defer t
+    :init
+    (add-hook 'js2-mode-hook #'tern-mode))
+
+  (use-package company-tern
+    :after tern
+    :config
+    (add-to-list 'company-backends 'company-tern))
+#+END_SRC
+*** Markdown
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+    :defer t
+    :config
+    (add-hook 'markdown-mode-hook
+              (lambda ()
+                (setq-local panda/delete-trailing-whitespace? nil))))
+#+END_SRC
+*** Org
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :defer t
+    :config
+    (add-hook 'org-mode-hook (lambda () (yas-minor-mode -1)))
+    (setq org-src-fontify-natively t
+          org-src-tab-acts-natively t))
+#+END_SRC
+*** PowerShell
+#+BEGIN_SRC emacs-lisp
+  (use-package powershell
+    :defer t)
+#+END_SRC
+*** Python
+#+BEGIN_SRC emacs-lisp
+  (use-package python
+    :defer t
+    :config
+    (add-hook 'python-mode-hook
+              (lambda ()
+                (setq-local yas-indent-line 'fixed)
+                (setq-local yas-also-auto-indent-first-line 'nil)))
+    (setq python-indent-offset 4))
+
+  (use-package anaconda-mode
+    :defer t
+    :init
+    (add-hook 'python-mode-hook #'anaconda-mode)
+    (add-hook 'python-mode-hook #'anaconda-eldoc-mode))
+
+  (use-package company-anaconda
+    :after anaconda-mode
+    :config
+    (add-to-list 'company-backends 'company-anaconda))
+#+END_SRC
+*** Rust
+#+BEGIN_SRC emacs-lisp
+  (use-package rust-mode
+    :defer t)
+
+  (use-package racer
+    :defer t
+    :init
+    (add-hook 'rust-mode-hook #'racer-mode))
+
+  (use-package flycheck-rust
+    :defer t
+    :init
+    (add-hook 'rust-mode-hook #'flycheck-rust-setup))
+#+END_SRC
+*** TypeScript
+#+BEGIN_SRC emacs-lisp
+  (use-package typescript-mode
+    :defer t)
+
+  (use-package tide
+    :defer t
+    :init
+    (defun setup-tide-mode ()
+      "Sets up tide-mode."
+      (interactive)
+      (tide-setup)
+      (eldoc-mode +1)
+      (tide-hl-identifier-mode +1))
+    (add-hook 'typescript-mode-hook #'setup-tide-mode))
+#+END_SRC
