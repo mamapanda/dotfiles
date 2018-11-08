@@ -8,8 +8,7 @@
 
 (defconst panda/packages
   '(clojure-mode
-    git-timemachine
-    realgud)
+    )
   "A list of packages to ensure are installed.")
 
 

@@ -3,172 +3,403 @@
 
 
 * Package Initialization
-  #+begin_src emacs-lisp
-      (require 'package)
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
 
-      (setq-default package-archives
-                    '(("gnu"     . "https://elpa.gnu.org/packages/")
-                      ("melpa"        . "https://melpa.org/packages/")
-                      ("melpa-stable" . "https://stable.melpa.org/packages/"))
-                    package-archive-priorities
-                    '(("gnu" . 1)
-                      ("melpa" . 10)
-                      ("melpa-stable" . 0)))
+  (setq-default package-archives
+                '(("gnu"     . "https://elpa.gnu.org/packages/")
+                  ("melpa"        . "https://melpa.org/packages/")
+                  ("melpa-stable" . "https://stable.melpa.org/packages/"))
+                package-archive-priorities
+                '(("gnu" . 1)
+                  ("melpa" . 10)
+                  ("melpa-stable" . 0)))
 
-      (setq package-enable-at-startup nil) ; so it doesn't run twice
-      (package-initialize)
-  #+end_src
+  (setq package-enable-at-startup nil) ; so it doesn't run twice
+  (package-initialize)
+#+END_SRC
 * Customize File
-  #+begin_src emacs-lisp
-    (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
-    (load custom-file 'noerror)
-  #+end_src
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
+  (load custom-file 'noerror)
+#+END_SRC
 * Use-Package Setup
-  #+begin_src emacs-lisp
-    (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package))
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
 
-    (require 'use-package)
-    (setq use-package-always-ensure t)
-  #+end_src
+  (require 'use-package)
+  (setq use-package-always-ensure t)
+#+END_SRC
 * Appearance
 *** Variables
-    #+begin_src emacs-lisp
-      (setq inhibit-startup-screen t
-            menu-bar-mode nil
-            ring-bell-function 'ignore
-            scroll-bar-mode nil
-            tool-bar-mode nil
-            truncate-lines t
-            visible-bell nil)
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t
+        menu-bar-mode nil
+        ring-bell-function 'ignore
+        scroll-bar-mode nil
+        tool-bar-mode nil
+        truncate-lines t
+        visible-bell nil)
+#+END_SRC
 *** Font
-    #+begin_src emacs-lisp
-      (set-frame-font "Consolas-10")
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (set-frame-font "Consolas-10")
+#+END_SRC
 *** Theme
-    #+begin_src emacs-lisp
-      (use-package monokai-theme
-        :defer t)
+#+BEGIN_SRC emacs-lisp
+  (use-package monokai-theme
+    :defer t)
 
-      (use-package spacemacs-theme
-        :defer t)
+  (use-package spacemacs-theme
+    :defer t)
 
-      (load-theme 'monokai t)
-    #+end_src
+  (load-theme 'monokai t)
+#+END_SRC
 *** Mode Line
-    #+begin_src emacs-lisp
-      (use-package spaceline-config
-        :ensure spaceline
-        :config
-        (spaceline-emacs-theme)
-        (spaceline-toggle-buffer-size-off)
-        (spaceline-toggle-buffer-modified-off)
-        (spaceline-toggle-hud-off))
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (use-package spaceline-config
+    :ensure spaceline
+    :config
+    (spaceline-emacs-theme)
+    (spaceline-toggle-buffer-size-off)
+    (spaceline-toggle-buffer-modified-off)
+    (spaceline-toggle-hud-off))
+#+END_SRC
 *** Diminish
-    #+begin_src emacs-lisp
-      (use-package diminish
-        :config
-        (diminish 'abbrev-mode)
-        (diminish 'auto-revert-mode))
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish
+    :config
+    (diminish 'abbrev-mode)
+    (diminish 'auto-revert-mode))
+#+END_SRC
 *** Line Numbers
-    #+begin_src emacs-lisp
-      (use-package nlinum
-        :bind (("C-c n" . nlinum-mode)))
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (use-package nlinum
+    :bind (("C-c n" . nlinum-mode)))
+#+END_SRC
 *** Nyan Cat Position Bar
-    #+begin_src emacs-lisp
-      (use-package nyan-mode
-        :config
-        (nyan-mode t))
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (use-package nyan-mode
+    :config
+    (nyan-mode t))
+#+END_SRC
 *** Rainbow Delimiters
-    #+begin_src emacs-lisp
-      (use-package rainbow-delimiters
-        :init
-        (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-    #+end_src
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :init
+    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+#+END_SRC
 * General Behavior
 *** Variables
-  #+begin_src emacs-lisp
-    (setq auto-save-default nil
-          c-basic-offset 4
-          c-default-style '((java-mode . "java")
-                            (awk-mode . "awk")
-                            (other . "linux"))
-          delete-selection-mode t
-          disabled-command-function nil
-          electric-pair-mode t
-          indent-tabs-mode nil
-          make-backup-files nil
-          show-paren-mode t
-          tab-width 4)
-  #+end_src
+#+BEGIN_SRC emacs-lisp
+  (setq auto-save-default nil
+        c-basic-offset 4
+        c-default-style '((java-mode . "java")
+                          (awk-mode . "awk")
+                          (other . "linux"))
+        delete-selection-mode t
+        disabled-command-function nil
+        electric-pair-mode t
+        indent-tabs-mode nil
+        make-backup-files nil
+        show-paren-mode t
+        tab-width 4)
+#+END_SRC
 *** Conditionally Delete Trailing Whitespace
-  #+begin_src emacs-lisp
-    (defvar panda/delete-trailing-whitespace? t)
+#+BEGIN_SRC emacs-lisp
+  (defvar panda/delete-trailing-whitespace? t)
 
-    (add-hook 'before-save-hook
-              (lambda ()
-                (when panda/delete-trailing-whitespace?
-                  (delete-trailing-whitespace))))
-  #+end_src
+  (add-hook 'before-save-hook
+            (lambda ()
+              (when panda/delete-trailing-whitespace?
+                (delete-trailing-whitespace))))
+#+END_SRC
 *** Reload File if Changed Externally
-  #+begin_src emacs-lisp
-    (global-auto-revert-mode t)
-  #+end_src
+#+BEGIN_SRC emacs-lisp
+  (global-auto-revert-mode t)
+#+END_SRC
 * General Key Definitions
 *** Cutting Text
-  #+begin_src emacs-lisp
-    (defun panda/kill-text ()
-      "If a region is active, kill it; else, kill the current line."
-      (interactive)
-      (call-interactively (if (region-active-p)
-                              'kill-region
-                            'kill-whole-line)))
+#+BEGIN_SRC emacs-lisp
+  (defun panda/kill-text ()
+    "If a region is active, kill it; else, kill the current line."
+    (interactive)
+    (call-interactively (if (region-active-p)
+                            'kill-region
+                          'kill-whole-line)))
 
-    (global-set-key (kbd "C-w") #'panda/kill-text)
-  #+end_src
+  (global-set-key (kbd "C-w") #'panda/kill-text)
+#+END_SRC
 *** Deleting All Whitespace Before Cursor
-  #+begin_src emacs-lisp
-    (defun panda/kill-whitespace ()
-      "Deletes all spaces, newlines, and tabs before cursor.
-    Stops when a non-whitespace char is encountered."
-      (interactive)
-      (while (string-match (char-to-string (char-before)) " \r\n\t")
-        (call-interactively 'delete-backward-char)))
+#+BEGIN_SRC emacs-lisp
+  (defun panda/kill-whitespace ()
+    "Deletes all spaces, newlines, and tabs before cursor.
+  Stops when a non-whitespace char is encountered."
+    (interactive)
+    (while (string-match (char-to-string (char-before)) " \r\n\t")
+      (call-interactively 'delete-backward-char)))
 
-    (global-set-key "\M-\d" #'panda/kill-whitespace)
-  #+end_src
+  (global-set-key "\M-\d" #'panda/kill-whitespace)
+#+END_SRC
 * General Constants
 *** Colors
-  #+begin_src emacs-lisp
-    (defconst panda/neon-green "#39FF14")
-    (defconst panda/light-blue "#67C8FF")
-    (defconst panda/deep-saffron "#FF9933")
-  #+end_src
+#+BEGIN_SRC emacs-lisp
+  (defconst panda/neon-green "#39FF14")
+  (defconst panda/light-blue "#67C8FF")
+  (defconst panda/deep-saffron "#FF9933")
+#+END_SRC
 * Miscellaneous Packages
-  #+begin_src emacs-lisp
-    (use-package esup
-      :defer t)
+#+BEGIN_SRC emacs-lisp
+  (use-package esup
+    :defer t)
 
-    (use-package fireplace
-      :defer t)
+  (use-package fireplace
+    :defer t)
 
-    (use-package flx
-      :defer t)
+  (use-package flx
+    :defer t)
 
-    (use-package hydra
-      :defer t)
+  (use-package hydra
+    :defer t)
 
-    (use-package pacmacs
-      :defer t)
-  #+end_src
+  (use-package pacmacs
+    :defer t)
+#+END_SRC
 * Editing
 *** Find and Replace
-  #+begin_src emacs-lisp
-
-  #+end_src
+#+BEGIN_SRC emacs-lisp
+  (use-package anzu
+    :bind (("C-c r" . anzu-query-replace))
+    :config
+    (global-anzu-mode t))
+#+END_SRC
+*** Auto-Completion
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection)
+                ("C-w" . nil)) ; kill-line annoyance
+    :init
+    (add-hook 'after-init-hook #'global-company-mode)
+    :config
+    (delete 'company-dabbrev company-backends)
+    (setq company-dabbrev-code-modes nil
+          company-idle-delay 0.1
+          company-minimum-prefix-length 1
+          company-tooltip-align-annotations t))
+#+END_SRC
+*** Moving Delimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package corral
+    :bind (("C-c c" . hydra-corral/body))
+    :config
+    (defhydra hydra-corral ()
+      ("{" corral-braces-backward)
+      ("}" corral-braces-forward)
+      ("[" corral-brackets-backward)
+      ("]" corral-brackets-forward)
+      ("(" corral-parentheses-backward)
+      (")" corral-parentheses-forward)
+      ("q" nil)))
+#+END_SRC
+*** Expanding Selected Region
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :bind (("C-;" . er/expand-region)))
+#+END_SRC
+*** Error Checking
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :bind (("C-c f" . hydra-flycheck/body))
+    :init
+    (add-hook 'after-init-hook #'global-flycheck-mode)
+    :config
+    (defhydra hydra-flycheck ()
+      ("p" flycheck-previous-error)
+      ("n" flycheck-next-error)
+      ("q" nil))
+    (setq flycheck-check-syntax-automatically
+          '(mode-enabled save idle-change new-line)))
+#+END_SRC
+*** Multiple Cursors
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :bind (("C-c m" . hydra-multiple-cursors/body))
+    :config
+    (defhydra hydra-multiple-cursors ()
+      ("p" mc/mark-previous-like-this)
+      ("n" mc/mark-next-like-this)
+      ("l" mc/edit-lines :exit t)
+      ("a" mc/mark-all-like-this :exit t)
+      ("q" nil)))
+#+END_SRC
+*** Hiding/Showing Code Blocks
+#+BEGIN_SRC emacs-lisp
+  (use-package origami
+    :demand t
+    :bind (:map origami-mode-map
+                ("C-c o o" . origami-toggle-node)
+                ("C-c o a" . origami-toggle-all-nodes)
+                ("C-c o p" . origami-show-only-node))
+    :config
+    (global-origami-mode))
+#+END_SRC
+*** Undo/Redo
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree
+    :bind (:map undo-tree-map
+                ("C-." . undo-tree-redo)
+                ("C-?" . nil))
+    :config
+    (global-undo-tree-mode))
+#+END_SRC
+*** Undo/Redo Window Configuration
+#+BEGIN_SRC emacs-lisp
+  (use-package winner
+    :config
+    (winner-mode t))
+#+END_SRC
+*** Code Snippets
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+    :config
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    (yas-global-mode t)
+    (eval-after-load 'company
+      (progn
+        (defun company-yasnippet ()
+          "Gives priority to yas completion over company completion."
+          (interactive)
+          (let ((yas-fallback-behavior nil))
+            (unless (yas-expand)
+              (call-interactively #'company-complete-selection))))
+        (defun company-yas-tab ()
+          "Substitutes company's key def to allow priority for yas completion."
+          (substitute-key-definition 'company-complete-selection
+                                     'company-yasnippet
+                                     company-active-map))
+        (add-hook 'company-mode-hook #'company-yas-tab)))
+    (setq yas-triggers-in-field t
+          yas-indent-line 'auto
+          yas-also-auto-indent-first-line t))
+#+END_SRC
+* Ivy Completion
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy
+    :ensure counsel
+    :diminish ivy-mode
+    :demand t
+    :bind (("C-x b" . ivy-switch-buffer)
+           ("C-x C-f" . counsel-find-file)
+           ("C-s" . swiper)
+           ("C-c s" . counsel-rg)
+           ("C-r" . ivy-resume)
+           ("M-x" . counsel-M-x)
+           ("M-y" . counsel-yank-pop)
+           :map ivy-minibuffer-map
+           ("<return>" . ivy-alt-done))
+    :config
+    (ivy-mode 1)
+    (setq ivy-wrap t
+          ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                                  (t . ivy--regex-fuzzy))
+          confirm-nonexistent-file-or-buffer t
+          ivy-count-format "(%d/%d) ")
+    (set-face-attribute 'ivy-minibuffer-match-face-2 nil
+                        :foreground panda/neon-green
+                        :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-3 nil
+                        :foreground panda/light-blue
+                        :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-4 nil
+                        :foreground panda/deep-saffron
+                        :weight 'bold)
+    (set-face-attribute 'ivy-confirm-face nil
+                        :foreground panda/neon-green))
+#+END_SRC
+* Navigation
+*** Jumping Between Windows
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window
+    :bind (("C-x o" . ace-window))
+    :config
+    (set-face-attribute 'aw-leading-char-face nil
+                        :foreground panda/neon-green
+                        :weight 'bold))
+#+END_SRC
+*** Jumping to a Word
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :bind (("C-c SPC" . avy-goto-word-1))
+    :config
+    (set-face-attribute 'avy-lead-face nil
+                        :foreground panda/neon-green
+                        :background (face-attribute 'default :background)
+                        :weight 'bold)
+    (set-face-attribute 'avy-lead-face-0 nil
+                        :foreground panda/light-blue
+                        :background (face-attribute 'default :background)
+                        :weight 'bold)
+    (set-face-attribute 'avy-lead-face-2 nil
+                        :foreground panda/deep-saffron
+                        :background (face-attribute 'default :background)
+                        :weight 'bold)
+    (setq avy-background t))
+#+END_SRC
+*** Jumping with IMenu
+#+BEGIN_SRC emacs-lisp
+  (use-package imenu
+    :defer t
+    :bind (("C-c i" . imenu))
+    :config
+    (setq imenu-auto-rescan t))
+#+END_SRC
+*** Navigating a Directory
+#+BEGIN_SRC emacs-lisp
+  (use-package neotree
+    :after projectile
+    :bind (("C-c t" . panda/neotree-toggle))
+    :config
+    (defun panda/neotree-toggle ()
+      (interactive)
+      (if (get-buffer-window " *NeoTree*" 'visible)
+          (neotree-hide)
+        (if (projectile-project-p)
+            (neotree-dir (projectile-project-root))
+          (neotree-show))))
+    (setq neo-theme 'arrow
+          neo-window-width 30
+          neo-window-position 'left))
+#+END_SRC
+*** Project Navigation
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :bind-keymap (("C-c p" . projectile-command-map))
+    :config
+    (projectile-mode)
+    (setq projectile-indexing-method 'alien
+          projectile-completion-system 'ivy))
+#+END_SRC
+* Source Control
+*** Git Interface
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :bind (("C-c g" . magit-status))
+    :config
+    (setq magit-auto-revert-mode nil))
+#+END_SRC
+*** Git Timemachine
+#+BEGIN_SRC emacs-lisp
+  (use-package git-timemachine
+    :defer t)
+#+END_SRC
+* Debugging
+*** RealGUD
+#+BEGIN_SRC emacs-lisp
+  (use-package realgud
+    :defer t)
+#+END_SRC
+* Language Modes
+*** Assembly

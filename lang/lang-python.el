@@ -4,6 +4,10 @@
 ;;; bamboo
 
 ;;; Code:
+(add-hook 'python-mode-hook
+          (lambda ()
+            (setq-local yas-indent-line 'fixed)
+            (setq-local yas-also-auto-indent-first-line 'nil)))
 
 (use-package anaconda-mode
   :defer t

@@ -12,11 +12,11 @@
 
 (require 'base-core)
 
-(require 'base-appearance)
-(require 'base-editing)
-(require 'base-ivy)
-(require 'base-navigation)
-(require 'base-misc)
+; (require 'base-appearance)
+; (require 'base-editing)
+; (require 'base-ivy)
+; (require 'base-navigation)
+; (require 'base-misc)
 
 (require 'lang-assembly)
 (require 'lang-c)
