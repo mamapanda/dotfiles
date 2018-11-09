@@ -253,6 +253,7 @@
 *** Undo/Redo
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
+    :demand t
     :bind (:map undo-tree-map
                 ("C-." . undo-tree-redo)
                 ("C-?" . nil))
