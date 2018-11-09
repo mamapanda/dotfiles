@@ -1,0 +1,628 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Daniel Phan
+* Package Initialization
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+
+  (setq-default package-archives
+                '(("gnu"     . "https://elpa.gnu.org/packages/")
+                  ("melpa"        . "https://melpa.org/packages/")
+                  ("melpa-stable" . "https://stable.melpa.org/packages/"))
+                package-archive-priorities
+                '(("gnu" . 1)
+                  ("melpa" . 10)
+                  ("melpa-stable" . 0)))
+
+  (setq package-enable-at-startup nil) ; so it doesn't run twice
+  (package-initialize)
+#+END_SRC
+* Customize File
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
+  (load custom-file 'noerror)
+#+END_SRC
+* Use-Package Setup
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
+  (require 'use-package)
+  (setq use-package-always-ensure t)
+#+END_SRC
+* Appearance
+*** Defaults
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t
+        ring-bell-function 'ignore
+        truncate-lines t
+        visible-bell nil)
+
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1)
+
+  (set-frame-font "Consolas-10")
+#+END_SRC
+*** Full Screen on Start
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+END_SRC
+*** Theme
+#+BEGIN_SRC emacs-lisp
+  (use-package monokai-theme
+    :defer t)
+
+  (use-package spacemacs-theme
+    :defer t)
+
+  (load-theme 'monokai t)
+#+END_SRC
+*** Mode Line
+#+BEGIN_SRC emacs-lisp
+  (use-package spaceline-config
+    :ensure spaceline
+    :config
+    (spaceline-emacs-theme)
+    (spaceline-toggle-buffer-size-off)
+    (spaceline-toggle-buffer-modified-off)
+    (spaceline-toggle-hud-off))
+#+END_SRC
+*** Diminish
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish
+    :config
+    (diminish 'abbrev-mode)
+    (diminish 'auto-revert-mode))
+#+END_SRC
+*** Line Numbers
+#+BEGIN_SRC emacs-lisp
+  (use-package nlinum
+    :bind (("C-c n" . nlinum-mode)))
+#+END_SRC
+*** Nyan Cat Position Bar
+#+BEGIN_SRC emacs-lisp
+  (use-package nyan-mode
+    :config
+    (nyan-mode t))
+#+END_SRC
+*** Rainbow Delimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :init
+    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+#+END_SRC
+* General Behavior
+*** Defaults
+#+BEGIN_SRC emacs-lisp
+  (setq auto-save-default nil
+        c-basic-offset 4
+        c-default-style '((java-mode . "java")
+                          (awk-mode . "awk")
+                          (other . "linux"))
+        disabled-command-function nil
+        make-backup-files nil
+        show-paren-mode t
+        tab-width 4)
+
+  (setq-default indent-tabs-mode nil)
+
+  (delete-selection-mode 1)
+  (electric-pair-mode 1)
+  (show-paren-mode 1)
+#+END_SRC
+*** Conditionally Delete Trailing Whitespace
+#+BEGIN_SRC emacs-lisp
+  (defvar panda/delete-trailing-whitespace? t)
+
+  (add-hook 'before-save-hook
+            (lambda ()
+              (when panda/delete-trailing-whitespace?
+                (delete-trailing-whitespace))))
+#+END_SRC
+*** Reload File if Changed Externally
+#+BEGIN_SRC emacs-lisp
+  (global-auto-revert-mode t)
+#+END_SRC
+* General Key Definitions
+*** Cutting Text
+#+BEGIN_SRC emacs-lisp
+  (defun panda/kill-text ()
+    "If a region is active, kill it; else, kill the current line."
+    (interactive)
+    (call-interactively (if (region-active-p)
+                            'kill-region
+                          'kill-whole-line)))
+
+  (global-set-key (kbd "C-w") #'panda/kill-text)
+#+END_SRC
+*** Deleting All Whitespace Before Cursor
+#+BEGIN_SRC emacs-lisp
+  (defun panda/kill-whitespace ()
+    "Deletes all spaces, newlines, and tabs before cursor.
+  Stops when a non-whitespace char is encountered."
+    (interactive)
+    (while (string-match (char-to-string (char-before)) " \r\n\t")
+      (call-interactively 'delete-backward-char)))
+
+  (global-set-key "\M-\d" #'panda/kill-whitespace)
+#+END_SRC
+* General Constants
+*** Colors
+#+BEGIN_SRC emacs-lisp
+  (defconst panda/neon-green "#39FF14")
+  (defconst panda/light-blue "#67C8FF")
+  (defconst panda/deep-saffron "#FF9933")
+#+END_SRC
+* Miscellaneous Packages
+#+BEGIN_SRC emacs-lisp
+  (use-package esup
+    :defer t)
+
+  (use-package fireplace
+    :defer t)
+
+  (use-package flx
+    :defer t)
+
+  (use-package hydra
+    :defer t)
+
+  (use-package pacmacs
+    :defer t)
+#+END_SRC
+* Editing
+*** Find and Replace
+#+BEGIN_SRC emacs-lisp
+  (use-package anzu
+    :bind (("C-c r" . anzu-query-replace))
+    :config
+    (global-anzu-mode t))
+#+END_SRC
+*** Auto-Completion
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection)
+                ("C-w" . nil)) ; kill-line annoyance
+    :init
+    (add-hook 'after-init-hook #'global-company-mode)
+    :config
+    (delete 'company-dabbrev company-backends)
+    (setq company-dabbrev-code-modes nil
+          company-idle-delay 0.1
+          company-minimum-prefix-length 1
+          company-tooltip-align-annotations t))
+#+END_SRC
+*** Moving Delimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package corral
+    :bind (("C-c c" . hydra-corral/body))
+    :config
+    (defhydra hydra-corral ()
+      ("{" corral-braces-backward)
+      ("}" corral-braces-forward)
+      ("[" corral-brackets-backward)
+      ("]" corral-brackets-forward)
+      ("(" corral-parentheses-backward)
+      (")" corral-parentheses-forward)
+      ("q" nil)))
+#+END_SRC
+*** Expanding Selected Region
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :bind (("C-;" . er/expand-region)))
+#+END_SRC
+*** Error Checking
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :bind (("C-c f" . hydra-flycheck/body))
+    :init
+    (add-hook 'after-init-hook #'global-flycheck-mode)
+    :config
+    (defhydra hydra-flycheck ()
+      ("p" flycheck-previous-error)
+      ("n" flycheck-next-error)
+      ("q" nil))
+    (setq flycheck-check-syntax-automatically
+          '(mode-enabled save idle-change new-line)))
+#+END_SRC
+*** Multiple Cursors
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :bind (("C-c m" . hydra-multiple-cursors/body))
+    :config
+    (defhydra hydra-multiple-cursors ()
+      ("p" mc/mark-previous-like-this)
+      ("n" mc/mark-next-like-this)
+      ("l" mc/edit-lines :exit t)
+      ("a" mc/mark-all-like-this :exit t)
+      ("q" nil)))
+#+END_SRC
+*** Hiding/Showing Code Blocks
+#+BEGIN_SRC emacs-lisp
+  (use-package origami
+    :demand t
+    :bind (:map origami-mode-map
+                ("C-c o o" . origami-toggle-node)
+                ("C-c o a" . origami-toggle-all-nodes)
+                ("C-c o p" . origami-show-only-node))
+    :config
+    (global-origami-mode))
+#+END_SRC
+*** Undo/Redo
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree
+    :bind (:map undo-tree-map
+                ("C-." . undo-tree-redo)
+                ("C-?" . nil))
+    :config
+    (global-undo-tree-mode))
+#+END_SRC
+*** Undo/Redo Window Configuration
+#+BEGIN_SRC emacs-lisp
+  (use-package winner
+    :config
+    (winner-mode t))
+#+END_SRC
+*** Code Snippets
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+    :config
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    (yas-global-mode t)
+    (eval-after-load 'company
+      (progn
+        (defun company-yasnippet ()
+          "Gives priority to yas completion over company completion."
+          (interactive)
+          (let ((yas-fallback-behavior nil))
+            (unless (yas-expand)
+              (call-interactively #'company-complete-selection))))
+        (defun company-yas-tab ()
+          "Substitutes company's key def to allow priority for yas completion."
+          (substitute-key-definition 'company-complete-selection
+                                     'company-yasnippet
+                                     company-active-map))
+        (add-hook 'company-mode-hook #'company-yas-tab)))
+    (setq yas-triggers-in-field t
+          yas-indent-line 'auto
+          yas-also-auto-indent-first-line t))
+#+END_SRC
+* Ivy Completion
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy
+    :ensure counsel
+    :diminish ivy-mode
+    :demand t
+    :bind (("C-x b" . ivy-switch-buffer)
+           ("C-x C-f" . counsel-find-file)
+           ("C-s" . swiper)
+           ("C-c s" . counsel-rg)
+           ("C-r" . ivy-resume)
+           ("M-x" . counsel-M-x)
+           ("M-y" . counsel-yank-pop)
+           :map ivy-minibuffer-map
+           ("<return>" . ivy-alt-done))
+    :config
+    (ivy-mode 1)
+    (setq ivy-wrap t
+          ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                                  (t . ivy--regex-fuzzy))
+          confirm-nonexistent-file-or-buffer t
+          ivy-count-format "(%d/%d) ")
+    (set-face-attribute 'ivy-minibuffer-match-face-2 nil
+                        :foreground panda/neon-green
+                        :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-3 nil
+                        :foreground panda/light-blue
+                        :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-4 nil
+                        :foreground panda/deep-saffron
+                        :weight 'bold)
+    (set-face-attribute 'ivy-confirm-face nil
+                        :foreground panda/neon-green))
+#+END_SRC
+* Navigation
+*** Jumping Between Windows
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window
+    :bind (("C-x o" . ace-window))
+    :config
+    (set-face-attribute 'aw-leading-char-face nil
+                        :foreground panda/neon-green
+                        :weight 'bold))
+#+END_SRC
+*** Jumping to a Word
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :bind (("C-c SPC" . avy-goto-word-1))
+    :config
+    (set-face-attribute 'avy-lead-face nil
+                        :foreground panda/neon-green
+                        :background (face-attribute 'default :background)
+                        :weight 'bold)
+    (set-face-attribute 'avy-lead-face-0 nil
+                        :foreground panda/light-blue
+                        :background (face-attribute 'default :background)
+                        :weight 'bold)
+    (set-face-attribute 'avy-lead-face-2 nil
+                        :foreground panda/deep-saffron
+                        :background (face-attribute 'default :background)
+                        :weight 'bold)
+    (setq avy-background t))
+#+END_SRC
+*** Jumping with IMenu
+#+BEGIN_SRC emacs-lisp
+  (use-package imenu
+    :defer t
+    :bind (("C-c i" . imenu))
+    :config
+    (setq imenu-auto-rescan t))
+#+END_SRC
+*** Navigating a Directory
+#+BEGIN_SRC emacs-lisp
+  (use-package neotree
+    :after projectile
+    :bind (("C-c t" . panda/neotree-toggle))
+    :config
+    (defun panda/neotree-toggle ()
+      (interactive)
+      (if (get-buffer-window " *NeoTree*" 'visible)
+          (neotree-hide)
+        (if (projectile-project-p)
+            (neotree-dir (projectile-project-root))
+          (neotree-show))))
+    (setq neo-theme 'arrow
+          neo-window-width 30
+          neo-window-position 'left))
+#+END_SRC
+*** Project Navigation
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :bind-keymap (("C-c p" . projectile-command-map))
+    :config
+    (projectile-mode)
+    (setq projectile-indexing-method 'alien
+          projectile-completion-system 'ivy))
+#+END_SRC
+* Source Control
+*** Git Interface
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :bind (("C-c g" . magit-status))
+    :config
+    (setq magit-auto-revert-mode nil))
+#+END_SRC
+*** Git Timemachine
+#+BEGIN_SRC emacs-lisp
+  (use-package git-timemachine
+    :defer t)
+#+END_SRC
+* Debugging
+#+BEGIN_SRC emacs-lisp
+  (use-package realgud
+    :defer t)
+#+END_SRC
+* Language Modes
+*** Assembly
+#+BEGIN_SRC emacs-lisp
+  (use-package asm-mode
+    :defer t
+    :config
+    (add-hook 'asm-mode-hook
+              (lambda ()
+                (setq-local tab-always-indent
+                            (default-value 'tab-always-indent))))
+    (setq asm-comment-char ?#))
+#+END_SRC
+*** C / C++
+#+BEGIN_SRC emacs-lisp
+  (defun panda/c-style-setup ()
+    "Set up c/c++ format style."
+    (c-set-style "linux")
+    (c-set-offset 'inline-open '0)
+    (setq c-basic-offset 4))
+
+  (add-hook 'c-mode-hook 'panda/c-style-setup)
+  (add-hook 'c++-mode-hook 'panda/c-style-setup)
+
+  (use-package irony
+    :defer t
+    :init
+    (add-hook 'c-mode-hook 'irony-mode)
+    (add-hook 'c++-mode-hook 'irony-mode)
+    :config
+    (defun my-irony-mode-hook ()
+      "Set up irony-mode."
+      (define-key irony-mode-map [remap completion-at-point]
+        'irony-completion-at-point-async)
+      (define-key irony-mode-map [remap complete-symbol]
+        'irony-completion-at-point-async))
+    (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+    (when (boundp 'w32-pipe-read-delay)
+      (setq w32-pipe-read-delay 0))
+    (when (boundp 'w32-pipe-buffer-size)
+      (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
+
+  (use-package company-irony
+    :after company-irony-c-headers
+    :config
+    (add-to-list 'company-backends 'company-irony))
+
+  (use-package company-irony-c-headers
+    :after irony
+    :config
+    (add-to-list 'company-backends 'company-irony-c-headers))
+
+  (use-package flycheck-irony
+    :after irony
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+#+END_SRC
+*** C#
+#+BEGIN_SRC emacs-lisp
+  (use-package csharp-mode
+    :defer t)
+
+  (use-package omnisharp
+    :defer t
+    :init
+    (defconst panda/omnisharp-exe-path
+      (expand-file-name "omnisharp/OmniSharp.exe" user-emacs-directory))
+    (defun panda/omnisharp-mode()
+      "Activates omnisharp-mode only if the server is present."
+      (when (file-exists-p panda/omnisharp-exe-path)
+        (omnisharp-mode)))
+    (add-hook 'csharp-mode-hook #'panda/omnisharp-mode)
+    :config
+    (setq omnisharp-server-executable-path panda/omnisharp-exe-path)
+    (add-to-list 'company-backends 'company-omnisharp))
+#+END_SRC
+*** Clojure
+#+BEGIN_SRC emacs-lisp
+  (use-package clojure-mode
+    :defer t)
+#+END_SRC
+*** Common Lisp
+#+BEGIN_SRC emacs-lisp
+  (use-package slime
+    :defer t
+    :config
+    (setq inferior-lisp-program (executable-find "sbcl"))
+    (slime-setup '(slime-fancy)))
+#+END_SRC
+*** Go
+#+BEGIN_SRC emacs-lisp
+  (use-package go-mode
+    :defer t)
+
+  (use-package go-eldoc
+    :after go-mode
+    :config
+    (add-hook 'go-mode-hook 'go-eldoc-setup))
+
+  (use-package company-go
+    :after go-mode
+    :config
+    (add-to-list 'company-backends 'company-go))
+#+END_SRC
+*** Haskell
+#+BEGIN_SRC emacs-lisp
+  (use-package haskell-mode
+    :defer t)
+
+  (use-package intero
+    :after haskell-mode
+    :init
+    (add-hook 'haskell-mode-hook #'intero-mode)
+    :config
+    (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
+#+END_SRC
+*** HTML / PHP / ASP.NET / Embedded Ruby
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :defer t
+    :mode (("\\.php\\'" . web-mode)
+           ("\\.as[cp]x\\'" . web-mode)
+           ("\\.erb\\'" . web-mode)
+           ("\\.html?\\'" . web-mode))
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-style-padding 4
+          web-mode-script-padding 4
+          web-mode-block-padding 4))
+#+END_SRC
+*** JavaScript
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-mode
+    :defer t
+    :mode (("\\.js\\'" . js2-mode)))
+
+  (use-package tern
+    :defer t
+    :init
+    (add-hook 'js2-mode-hook #'tern-mode))
+
+  (use-package company-tern
+    :after tern
+    :config
+    (add-to-list 'company-backends 'company-tern))
+#+END_SRC
+*** Markdown
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+    :defer t
+    :config
+    (add-hook 'markdown-mode-hook
+              (lambda ()
+                (setq-local panda/delete-trailing-whitespace? nil))))
+#+END_SRC
+*** Org
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :defer t
+    :config
+    (add-hook 'org-mode-hook (lambda () (yas-minor-mode -1)))
+    (setq org-src-fontify-natively t
+          org-src-tab-acts-natively t))
+#+END_SRC
+*** PowerShell
+#+BEGIN_SRC emacs-lisp
+  (use-package powershell
+    :defer t)
+#+END_SRC
+*** Python
+#+BEGIN_SRC emacs-lisp
+  (use-package python
+    :defer t
+    :config
+    (add-hook 'python-mode-hook
+              (lambda ()
+                (setq-local yas-indent-line 'fixed)
+                (setq-local yas-also-auto-indent-first-line 'nil)))
+    (setq python-indent-offset 4))
+
+  (use-package anaconda-mode
+    :defer t
+    :init
+    (add-hook 'python-mode-hook #'anaconda-mode)
+    (add-hook 'python-mode-hook #'anaconda-eldoc-mode))
+
+  (use-package company-anaconda
+    :after anaconda-mode
+    :config
+    (add-to-list 'company-backends 'company-anaconda))
+#+END_SRC
+*** Rust
+#+BEGIN_SRC emacs-lisp
+  (use-package rust-mode
+    :defer t)
+
+  (use-package racer
+    :defer t
+    :init
+    (add-hook 'rust-mode-hook #'racer-mode))
+
+  (use-package flycheck-rust
+    :defer t
+    :init
+    (add-hook 'rust-mode-hook #'flycheck-rust-setup))
+#+END_SRC
+*** TypeScript
+#+BEGIN_SRC emacs-lisp
+  (use-package typescript-mode
+    :defer t)
+
+  (use-package tide
+    :defer t
+    :init
+    (defun setup-tide-mode ()
+      "Sets up tide-mode."
+      (interactive)
+      (tide-setup)
+      (eldoc-mode +1)
+      (tide-hl-identifier-mode +1))
+    (add-hook 'typescript-mode-hook #'setup-tide-mode))
+#+END_SRC
