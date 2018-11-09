@@ -31,19 +31,22 @@
   (setq use-package-always-ensure t)
 #+END_SRC
 * Appearance
-*** Variables
+*** Defaults
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-screen t
-        menu-bar-mode nil
         ring-bell-function 'ignore
-        scroll-bar-mode nil
-        tool-bar-mode nil
         truncate-lines t
         visible-bell nil)
-#+END_SRC
-*** Font
-#+BEGIN_SRC emacs-lisp
+
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1)
+
   (set-frame-font "Consolas-10")
+#+END_SRC
+*** Full Screen on Start
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+END_SRC
 *** Theme
 #+BEGIN_SRC emacs-lisp
@@ -54,10 +57,6 @@
     :defer t)
 
   (load-theme 'monokai t)
-#+END_SRC
-*** Full Screen
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+END_SRC
 *** Mode Line
 #+BEGIN_SRC emacs-lisp
@@ -94,20 +93,23 @@
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
 * General Behavior
-*** Variables
+*** Defaults
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
         c-basic-offset 4
         c-default-style '((java-mode . "java")
                           (awk-mode . "awk")
                           (other . "linux"))
-        delete-selection-mode t
         disabled-command-function nil
-        electric-pair-mode t
-        indent-tabs-mode nil
         make-backup-files nil
         show-paren-mode t
         tab-width 4)
+
+  (setq-default indent-tabs-mode nil)
+
+  (delete-selection-mode 1)
+  (electric-pair-mode 1)
+  (show-paren-mode 1)
 #+END_SRC
 *** Conditionally Delete Trailing Whitespace
 #+BEGIN_SRC emacs-lisp
