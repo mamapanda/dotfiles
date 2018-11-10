@@ -87,6 +87,7 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
 *** Cursor Beacon
 #+BEGIN_SRC emacs-lisp
   (use-package beacon
+    :diminish beacon-mode
     :config
     (setq beacon-blink-when-window-scrolls t
           beacon-blink-when-window-changes t
@@ -159,13 +160,13 @@ Delete trailing whitespace on save if ~panda/delete-trailing-whitespace?~ is not
 #+END_SRC
 *** Keybind Help
 #+BEGIN_SRC emacs-lisp
-    (use-package which-key
-      :diminish which-key-mode
-      :config
-      (setq which-key-popup-type 'minibuffer
-            which-key-idle-delay 2.0
-            which-key-show-remaining-keys t)
-      (which-key-mode))
+  (use-package which-key
+    :diminish which-key-mode
+    :config
+    (setq which-key-popup-type 'side-window
+          which-key-side-window-location 'bottom
+          which-key-idle-delay 2.0)
+    (which-key-mode 1))
 #+END_SRC
 * General Constants
 *** Colors
@@ -190,6 +191,26 @@ Colors that look nice with Monokai.
     :defer t)
 #+END_SRC
 * Editing
+*** Workspaces
+Swap between workspaces 0-9 with ~C-c e <workspace-number>~.
+#+BEGIN_SRC emacs-lisp
+  (use-package eyebrowse
+    :init
+    (setq eyebrowse-keymap-prefix "e")
+    :config
+    (eyebrowse-mode 1))
+#+END_SRC
+*** Crux
+Miscellaneous functions.
+#+BEGIN_SRC emacs-lisp
+  (use-package crux
+    :bind (("C-c x e" . crux-eval-and-replace)
+           ("C-c x t" . crux-transpose-windows)
+           ("C-c x d" . crux-delete-file-and-buffer)
+           ("C-c x c" . crux-copy-file-preserve-attributes)
+           ("C-c x r" . crux-rename-file-and-buffer)
+           ("C-c x i" . crux-find-user-init-file)))
+#+END_SRC
 *** Find and Replace
 #+BEGIN_SRC emacs-lisp
   (use-package anzu
@@ -212,6 +233,17 @@ Colors that look nice with Monokai.
           company-idle-delay 0.1
           company-minimum-prefix-length 1
           company-tooltip-align-annotations t))
+#+END_SRC
+*** Aggressive Indent
+Indent code on save if ~panda/indent-on-save?~ is not nil.
+#+BEGIN_SRC emacs-lisp
+  (use-package aggressive-indent
+    :defer t
+    :init
+    (defvar panda/indent-on-save? t)
+    (add-hook 'before-save-hook (lambda ()
+                                  (when panda/indent-on-save?
+                                    (aggressive-indent-indent-defun)))))
 #+END_SRC
 *** Moving Delimiters
 #+BEGIN_SRC emacs-lisp
@@ -475,8 +507,8 @@ Used for GNU Assembler.
     :config
     (add-hook 'asm-mode-hook
               (lambda ()
-                (setq-local tab-always-indent
-                            (default-value 'tab-always-indent))))
+                (setq-local tab-always-indent (default-value 'tab-always-indent))
+                (setq-local panda/indent-on-save? nil)))
     (setq asm-comment-char ?#))
 #+END_SRC
 *** C / C++
