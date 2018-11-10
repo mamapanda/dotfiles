@@ -235,15 +235,10 @@ Miscellaneous functions.
           company-tooltip-align-annotations t))
 #+END_SRC
 *** Aggressive Indent
-Indent code on save if ~panda/indent-on-save?~ is not nil.
 #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent
-    :defer t
-    :init
-    (defvar panda/indent-on-save? t)
-    (add-hook 'before-save-hook (lambda ()
-                                  (when panda/indent-on-save?
-                                    (aggressive-indent-indent-defun)))))
+    :config
+    (global-aggressive-indent-mode 1))
 #+END_SRC
 *** Moving Delimiters
 #+BEGIN_SRC emacs-lisp
@@ -507,9 +502,9 @@ Used for GNU Assembler.
     :config
     (add-hook 'asm-mode-hook
               (lambda ()
-                (setq-local tab-always-indent (default-value 'tab-always-indent))
-                (setq-local panda/indent-on-save? nil)))
-    (setq asm-comment-char ?#))
+                (setq-local tab-always-indent (default-value 'tab-always-indent))))
+    (setq asm-comment-char ?#)
+    (add-to-list 'aggressive-indent-excluded-modes 'asm-mode))
 #+END_SRC
 *** C / C++
 ~irony~ requires libclang to function properly.
