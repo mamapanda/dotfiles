@@ -84,6 +84,15 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
   (use-package nlinum
     :bind (("C-c n" . nlinum-mode)))
 #+END_SRC
+*** Cursor Beacon
+#+BEGIN_SRC emacs-lisp
+  (use-package beacon
+    :config
+    (setq beacon-blink-when-window-scrolls t
+          beacon-blink-when-window-changes t
+          beacon-blink-when-point-moves nil)
+    (beacon-mode 1))
+#+END_SRC
 *** Nyan Cat Position Bar
 #+BEGIN_SRC emacs-lisp
   (use-package nyan-mode
@@ -96,7 +105,7 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
     :init
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
-* General Behavior
+* General Defaults
 *** Settings
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
@@ -147,6 +156,16 @@ Delete trailing whitespace on save if ~panda/delete-trailing-whitespace?~ is not
       (call-interactively 'delete-backward-char)))
 
   (global-set-key "\M-\d" #'panda/kill-whitespace)
+#+END_SRC
+*** Keybind Help
+#+BEGIN_SRC emacs-lisp
+    (use-package which-key
+      :diminish which-key-mode
+      :config
+      (setq which-key-popup-type 'minibuffer
+            which-key-idle-delay 2.0
+            which-key-show-remaining-keys t)
+      (which-key-mode))
 #+END_SRC
 * General Constants
 *** Colors
