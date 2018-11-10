@@ -13,10 +13,11 @@
                   ("melpa" . 10)
                   ("melpa-stable" . 0)))
 
-  (setq package-enable-at-startup nil) ; so it doesn't run twice
+  (setq package-enable-at-startup nil)
   (package-initialize)
 #+END_SRC
 * Customize File
+Move Emacs's customize settings to a separate file.
 #+BEGIN_SRC emacs-lisp
   (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
   (load custom-file 'noerror)
@@ -70,6 +71,7 @@
     (spaceline-toggle-hud-off))
 #+END_SRC
 *** Diminish
+Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 #+BEGIN_SRC emacs-lisp
   (use-package diminish
     :config
@@ -77,6 +79,7 @@
     (diminish 'auto-revert-mode))
 #+END_SRC
 *** Line Numbers
+Use ~C-c n~ to toggle line numbers. They're off by default.
 #+BEGIN_SRC emacs-lisp
   (use-package nlinum
     :bind (("C-c n" . nlinum-mode)))
@@ -94,7 +97,6 @@
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
 * General Behavior
-*** Defaults
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
         c-default-style '((java-mode . "java")
@@ -110,25 +112,16 @@
   (delete-selection-mode 1)
   (electric-pair-mode 1)
   (show-paren-mode 1)
-#+END_SRC
-*** Conditionally Delete Trailing Whitespace
-#+BEGIN_SRC emacs-lisp
-  (defvar panda/delete-trailing-whitespace? t)
 
-  (add-hook 'before-save-hook
-            (lambda ()
-              (when panda/delete-trailing-whitespace?
-                (delete-trailing-whitespace))))
-#+END_SRC
-*** Reload File if Changed Externally
-#+BEGIN_SRC emacs-lisp
   (global-auto-revert-mode t)
+
+  (add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
 * General Key Definitions
 *** Cutting Text
+~C-w~ - If a region is selected, cut it; else, cut the current line.
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-text ()
-    "If a region is active, kill it; else, kill the current line."
     (interactive)
     (call-interactively (if (region-active-p)
                             'kill-region
@@ -137,10 +130,9 @@
   (global-set-key (kbd "C-w") #'panda/kill-text)
 #+END_SRC
 *** Deleting All Whitespace Before Cursor
+~M-backspace~ - Deletes whitespace until a non-whitespace character is encountered.
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-whitespace ()
-    "Deletes all spaces, newlines, and tabs before cursor.
-  Stops when a non-whitespace char is encountered."
     (interactive)
     (while (string-match (char-to-string (char-before)) " \r\n\t")
       (call-interactively 'delete-backward-char)))
@@ -149,6 +141,7 @@
 #+END_SRC
 * General Constants
 *** Colors
+Colors that look nice with Monokai.
 #+BEGIN_SRC emacs-lisp
   (defconst panda/neon-green "#39FF14")
   (defconst panda/light-blue "#67C8FF")
@@ -160,9 +153,6 @@
     :defer t)
 
   (use-package fireplace
-    :defer t)
-
-  (use-package flx
     :defer t)
 
   (use-package hydra
@@ -180,11 +170,12 @@
     (global-anzu-mode t))
 #+END_SRC
 *** Auto-Completion
+~C-w~ is unbound in ~company-active-map~ because it interferes with ~kill-line~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :bind (:map company-active-map
                 ("<tab>" . company-complete-selection)
-                ("C-w" . nil)) ; kill-line annoyance
+                ("C-w" . nil))
     :init
     (add-hook 'after-init-hook #'global-company-mode)
     :config
@@ -199,14 +190,19 @@
   (use-package corral
     :bind (("C-c c" . hydra-corral/body))
     :config
-    (defhydra hydra-corral ()
+    (defhydra hydra-corral (:hint nil :color pink)
+      "
+[_{_]: corral-braces-backward        [_}_]: corral-braces-forward
+[_[_]: corral-brackets-backward      [_]_]: corral-brackets-backward
+[_(_]: corral-parentheses-forward    [_)_]: corral-parentheses-backward
+[_/_]: cancel"
       ("{" corral-braces-backward)
       ("}" corral-braces-forward)
       ("[" corral-brackets-backward)
       ("]" corral-brackets-forward)
       ("(" corral-parentheses-backward)
       (")" corral-parentheses-forward)
-      ("q" nil)))
+      ("/" (message "Abort") :color blue)))
 #+END_SRC
 *** Expanding Selected Region
 #+BEGIN_SRC emacs-lisp
@@ -220,10 +216,13 @@
     :init
     (add-hook 'after-init-hook #'global-flycheck-mode)
     :config
-    (defhydra hydra-flycheck ()
+    (defhydra hydra-flycheck (:hint nil :color pink)
+      "
+[_p_]: flycheck-previous-error    [_n_]: flycheck-next-error
+[_/_]: cancel"
       ("p" flycheck-previous-error)
       ("n" flycheck-next-error)
-      ("q" nil))
+      ("/" (message "Abort") :color blue))
     (setq flycheck-check-syntax-automatically
           '(mode-enabled save idle-change new-line)))
 #+END_SRC
@@ -232,25 +231,30 @@
   (use-package multiple-cursors
     :bind (("C-c m" . hydra-multiple-cursors/body))
     :config
-    (defhydra hydra-multiple-cursors ()
+    (defhydra hydra-multiple-cursors (:hint nil :color pink)
+      "
+[_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
+[_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
+[_/_]: cancel"
       ("p" mc/mark-previous-like-this)
       ("n" mc/mark-next-like-this)
-      ("l" mc/edit-lines :exit t)
-      ("a" mc/mark-all-like-this :exit t)
-      ("q" nil)))
+      ("l" mc/edit-lines :color blue)
+      ("a" mc/mark-all-like-this :color blue)
+      ("/" (message "Abort") :color blue)))
 #+END_SRC
 *** Hiding/Showing Code Blocks
 #+BEGIN_SRC emacs-lisp
   (use-package origami
     :demand t
     :bind (:map origami-mode-map
-                ("C-c o o" . origami-toggle-node)
+                ("C-c o t" . origami-toggle-node)
                 ("C-c o a" . origami-toggle-all-nodes)
-                ("C-c o p" . origami-show-only-node))
+                ("C-c o o" . origami-show-only-node))
     :config
     (global-origami-mode))
 #+END_SRC
 *** Undo/Redo
+More natural undo/redo behavior. ~C-x u~ opens the undo tree.
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
     :demand t
@@ -261,12 +265,15 @@
     (global-undo-tree-mode))
 #+END_SRC
 *** Undo/Redo Window Configuration
+~C-<left>~ to undo; ~C-<right>~ to redo.
 #+BEGIN_SRC emacs-lisp
   (use-package winner
     :config
     (winner-mode t))
 #+END_SRC
 *** Code Snippets
+The function ~company-yasnippet~ gives tab priority
+to yasnippet instead of company.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :config
@@ -275,13 +282,11 @@
     (eval-after-load 'company
       (progn
         (defun company-yasnippet ()
-          "Gives priority to yas completion over company completion."
           (interactive)
           (let ((yas-fallback-behavior nil))
             (unless (yas-expand)
               (call-interactively #'company-complete-selection))))
         (defun company-yas-tab ()
-          "Substitutes company's key def to allow priority for yas completion."
           (substitute-key-definition 'company-complete-selection
                                      'company-yasnippet
                                      company-active-map))
@@ -291,7 +296,14 @@
           yas-also-auto-indent-first-line t))
 #+END_SRC
 * Ivy Completion
+~flx~ and ~smex~ give better regex sorting and completion sorting, respectively.
 #+BEGIN_SRC emacs-lisp
+  (use-package flx
+    :defer t)
+
+  (use-package smex
+    :defer t)
+
   (use-package ivy
     :ensure counsel
     :diminish ivy-mode
@@ -401,12 +413,15 @@
     :defer t)
 #+END_SRC
 * Debugging
+Call ~M-x load-library~ on ~realgud~ to load the package.
+Use ~realgud:<debugger-name>~ to run the debugger.
 #+BEGIN_SRC emacs-lisp
   (use-package realgud
     :defer t)
 #+END_SRC
 * Language Modes
 *** Assembly
+Used for GNU Assembler.
 #+BEGIN_SRC emacs-lisp
   (use-package asm-mode
     :defer t
@@ -418,6 +433,7 @@
     (setq asm-comment-char ?#))
 #+END_SRC
 *** C / C++
+~irony~ requires libclang to function properly.
 #+BEGIN_SRC emacs-lisp
   (defun panda/c-style-setup ()
     "Set up c/c++ format style."
@@ -463,6 +479,8 @@
     (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
 #+END_SRC
 *** C#
+~omnisharp~ requires the [[https://github.com/OmniSharp/omnisharp-roslyn][OmniSharp server]]
+to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
 #+BEGIN_SRC emacs-lisp
   (use-package csharp-mode
     :defer t)
@@ -487,6 +505,7 @@
     :defer t)
 #+END_SRC
 *** Common Lisp
+~slime~ requires the [[http://www.sbcl.org/platform-table.html][sbcl]] executable (Steel Bank Common Lisp).
 #+BEGIN_SRC emacs-lisp
   (use-package slime
     :defer t
@@ -495,6 +514,7 @@
     (slime-setup '(slime-fancy)))
 #+END_SRC
 *** Go
+~go-eldoc~ and ~company-go~ need [[https://github.com/nsf/gocode][gocode]].
 #+BEGIN_SRC emacs-lisp
   (use-package go-mode
     :defer t)
@@ -510,6 +530,7 @@
     (add-to-list 'company-backends 'company-go))
 #+END_SRC
 *** Haskell
+~intero~ depends on [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][stack]].
 #+BEGIN_SRC emacs-lisp
   (use-package haskell-mode
     :defer t)
@@ -536,6 +557,7 @@
           web-mode-block-padding 4))
 #+END_SRC
 *** JavaScript
+~tern~ depends on [[https://www.npmjs.com/package/tern][tern]].
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
     :defer t
@@ -558,7 +580,7 @@
     :config
     (add-hook 'markdown-mode-hook
               (lambda ()
-                (setq-local panda/delete-trailing-whitespace? nil))))
+                (remove-hook 'before-save-hook #'delete-trailing-whitespace t))))
 #+END_SRC
 *** Org
 #+BEGIN_SRC emacs-lisp
@@ -597,6 +619,7 @@
     (add-to-list 'company-backends 'company-anaconda))
 #+END_SRC
 *** Rust
+~racer~ needs [[https://github.com/racer-rust/racer][racer]] to be installed.
 #+BEGIN_SRC emacs-lisp
   (use-package rust-mode
     :defer t)

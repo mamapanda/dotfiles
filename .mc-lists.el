@@ -18,6 +18,7 @@
         indent-for-tab-command
         markdown-cycle
         markdown-outdent-or-delete
+        org-beginning-of-line
         panda/C-w
         powershell-indent-line
         repeat
@@ -42,6 +43,7 @@
         ivy-alt-done
         mouse-set-region
         nlinum-mode
+        org-self-insert-command
         projectile-switch-project
         smex
         suspend-frame
