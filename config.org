@@ -97,6 +97,7 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
 * General Behavior
+*** Settings
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
         c-default-style '((java-mode . "java")
@@ -114,8 +115,16 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
   (show-paren-mode 1)
 
   (global-auto-revert-mode t)
+#+END_SRC
+*** Delete Trailing Whitespace on Save
+Delete trailing whitespace on save if ~panda/delete-trailing-whitespace?~ is not nil.
+#+BEGIN_SRC emacs-lisp
+  (defvar panda/delete-trailing-whitespace? t)
 
-  (add-hook 'before-save-hook #'delete-trailing-whitespace)
+  (add-hook 'before-save-hook
+            (lambda ()
+              (when panda/delete-trailing-whitespace?
+                (delete-trailing-whitespace))))
 #+END_SRC
 * General Key Definitions
 *** Cutting Text
@@ -580,7 +589,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     :config
     (add-hook 'markdown-mode-hook
               (lambda ()
-                (remove-hook 'before-save-hook #'delete-trailing-whitespace t))))
+                (setq-local panda/delete-trailing-whitespace? nil))))
 #+END_SRC
 *** Org
 #+BEGIN_SRC emacs-lisp
