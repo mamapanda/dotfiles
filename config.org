@@ -201,9 +201,10 @@ Colors that look nice with Monokai.
     :config
     (defhydra hydra-corral (:hint nil :color pink)
       "
-[_{_]: corral-braces-backward        [_}_]: corral-braces-forward
-[_[_]: corral-brackets-backward      [_]_]: corral-brackets-backward
-[_(_]: corral-parentheses-forward    [_)_]: corral-parentheses-backward
+corral
+[_{_]: braces backward         [_}_]: braces forward
+[_[_]: brackets backward       [_]_]: brackets forward
+[_(_]: parentheses backward    [_)_]: parentheses forward
 [_/_]: cancel"
       ("{" corral-braces-backward)
       ("}" corral-braces-forward)
@@ -227,7 +228,8 @@ Colors that look nice with Monokai.
     :config
     (defhydra hydra-flycheck (:hint nil :color pink)
       "
-[_p_]: flycheck-previous-error    [_n_]: flycheck-next-error
+flycheck
+[_p_]: previous error    [_n_]: next error
 [_/_]: cancel"
       ("p" flycheck-previous-error)
       ("n" flycheck-next-error)
@@ -242,6 +244,7 @@ Colors that look nice with Monokai.
     :config
     (defhydra hydra-multiple-cursors (:hint nil :color pink)
       "
+multiple-cursors
 [_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
 [_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
 [_/_]: cancel"
@@ -253,14 +256,30 @@ Colors that look nice with Monokai.
 #+END_SRC
 *** Hiding/Showing Code Blocks
 #+BEGIN_SRC emacs-lisp
-  (use-package origami
-    :demand t
-    :bind (:map origami-mode-map
-                ("C-c o t" . origami-toggle-node)
-                ("C-c o a" . origami-toggle-all-nodes)
-                ("C-c o o" . origami-show-only-node))
-    :config
-    (global-origami-mode))
+    (use-package origami
+      :demand t
+      :bind (:map origami-mode-map
+                  ("C-c o" . hydra-origami/body))
+      :config
+      (defhydra hydra-origami (:hint nil :color pink)
+        "
+  origami
+  [_p_]: previous fold     [_n_]: next fold
+  [_o_]: open fold         [_c_]: close fold         [_t_]: toggle fold         [_s_]: show only fold
+  [_O_]: open all folds    [_C_]: close all folds    [_T_]: toggle all folds
+  [_r_]: reset             [_/_]: cancel"
+        ("p" origami-previous-fold)
+        ("n" origami-forward-fold)
+        ("o" origami-open-node)
+        ("c" origami-close-node)
+        ("t" origami-toggle-node)
+        ("s" origami-show-only-node)
+        ("O" origami-open-all-nodes :color blue)
+        ("C" origami-close-all-nodes :color blue)
+        ("T" origami-toggle-all-nodes :color blue)
+        ("r" origami-reset :color blue)
+        ("/" (message "Abort") :color blue))
+      (global-origami-mode))
 #+END_SRC
 *** Undo/Redo
 More natural undo/redo behavior. ~C-x u~ opens the undo tree.
