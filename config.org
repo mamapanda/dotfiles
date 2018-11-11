@@ -471,25 +471,18 @@ Activate with ~flycheck-mode~.
 #+END_SRC
 *** Code Snippets
 Activate with ~yas-minor-mode~.
-The function ~company-yasnippet~ gives tab priority
-to yasnippet instead of company.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :config
-    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    (setq yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
     (yas-reload-all)
     (eval-after-load 'company
-      (progn
-        (defun company-yasnippet ()
-          (interactive)
-          (let ((yas-fallback-behavior nil))
-            (unless (yas-expand)
-              (call-interactively #'company-complete-selection))))
-        (defun company-yas-tab (&optional ignored-arg)
-          (substitute-key-definition 'company-complete-selection
-                                     'company-yasnippet
-                                     company-active-map))
-        (add-hook 'company-mode-hook #'company-yas-tab)))
+      (define-advice company-complete-selection (:around (old-func))
+        (if (bound-and-true-p yas-minor-mode)
+            (let ((yas-fallback-behavior nil))
+              (unless (call-interactively #'yas-expand)
+                (call-interactively old-func)))
+          (call-interactively old-func))))
     (setq yas-triggers-in-field t
           yas-indent-line 'auto
           yas-also-auto-indent-first-line t))
