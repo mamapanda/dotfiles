@@ -466,8 +466,7 @@ Activate with ~flycheck-mode~.
         ("p" flycheck-previous-error)
         ("n" flycheck-next-error)
         ("/" (message "Abort") :color blue))
-      (setq flycheck-check-syntax-automatically
-            '(mode-enabled save idle-change new-line)))
+      (setq flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
 *** Code Snippets
 Activate with ~yas-minor-mode~.
@@ -787,7 +786,8 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-rust-mode ()
     (aggressive-indent-mode 1)
     (company-mode 1)
-    (flycheck-mode 1)
+    (if (locate-dominating-file default-directory "cargo.toml")
+        (flycheck-mode 1))
     (yas-minor-mode 1)
     (setq panda/delete-trailing-whitespace? t))
 
