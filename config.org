@@ -786,7 +786,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-rust-mode ()
     (aggressive-indent-mode 1)
     (company-mode 1)
-    (if (locate-dominating-file default-directory "cargo.toml")
+    (if (locate-dominating-file default-directory "Cargo.toml")
         (flycheck-mode 1))
     (yas-minor-mode 1)
     (setq panda/delete-trailing-whitespace? t))
