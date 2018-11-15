@@ -107,7 +107,6 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
 * General Defaults
-*** Settings
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
         c-default-style '((java-mode . "java")
@@ -125,16 +124,6 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
   (show-paren-mode 1)
 
   (global-auto-revert-mode t)
-#+END_SRC
-*** Delete Trailing Whitespace on Save
-Delete trailing whitespace on save if ~panda/delete-trailing-whitespace?~ is not nil.
-#+BEGIN_SRC emacs-lisp
-  (defvar-local panda/delete-trailing-whitespace? nil)
-
-  (add-hook 'before-save-hook
-            (lambda ()
-              (when panda/delete-trailing-whitespace?
-                (delete-trailing-whitespace))))
 #+END_SRC
 * General Key Definitions
 *** Cutting Text
@@ -492,7 +481,7 @@ Used for GNU Assembler.
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-asm-mode ()
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
     (setq-local tab-always-indent (default-value 'tab-always-indent)))
 
   (use-package asm-mode
@@ -511,8 +500,8 @@ Used for GNU Assembler.
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
-    (setq panda/delete-trailing-whitespace? t
-          c-basic-offset 4))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+    (setq c-basic-offset 4))
 
   (add-hook 'c-mode-hook #'panda/setup-c-mode)
   (add-hook 'c++-mode-hook #'panda/setup-c-mode)
@@ -560,7 +549,10 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+  (defconst panda/omnisharp-exe-path
+    (expand-file-name "omnisharp/OmniSharp.exe" user-emacs-directory))
 
   (use-package csharp-mode
     :defer t
@@ -568,15 +560,10 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (add-hook 'csharp-mode-hook #'panda/setup-csharp-mode))
 
   (use-package omnisharp
+    :if (file-exists-p panda/omnisharp-exe-path)
     :defer t
     :init
-    (defconst panda/omnisharp-exe-path
-      (expand-file-name "omnisharp/OmniSharp.exe" user-emacs-directory))
-    (defun panda/omnisharp-mode()
-      "Activates omnisharp-mode only if the server is present."
-      (when (file-exists-p panda/omnisharp-exe-path)
-        (omnisharp-mode)))
-    (add-hook 'csharp-mode-hook #'panda/omnisharp-mode)
+    (add-hook 'csharp-mode-hook #'omnisharp-mode)
     :config
     (setq omnisharp-server-executable-path panda/omnisharp-exe-path)
     (add-to-list 'company-backends 'company-omnisharp))
@@ -586,7 +573,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-clojure-mode ()
     (aggressive-indent-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package clojure-mode
     :defer t
@@ -599,7 +586,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-slime-mode ()
     (aggressive-indent-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package slime
     :defer t
@@ -614,7 +601,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (aggressive-indent-mode 1)
     (company-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (add-hook 'emacs-lisp-mode-hook #'panda/setup-emacs-lisp-mode)
 #+END_SRC
@@ -626,7 +613,9 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+    (setq indent-tabs-mode t
+          tab-width 4))
 
   (use-package go-mode
     :defer t
@@ -650,7 +639,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package haskell-mode
     :defer t
@@ -669,7 +658,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-web-mode ()
     (aggressive-indent-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package web-mode
     :defer t
@@ -689,7 +678,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-java-mode ()
     (aggressive-indent-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (add-hook 'java-mode-hook #'panda/setup-java-mode)
 #+END_SRC
@@ -701,7 +690,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package js2-mode
     :defer t
@@ -732,7 +721,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
 *** Org
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-org-mode ()
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package org
     :defer t
@@ -746,7 +735,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (defun panda/setup-powershell-mode ()
     (aggressive-indent-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package powershell
     :defer t
@@ -759,7 +748,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
     (setq-local yas-indent-line 'fixed)
     (setq-local yas-also-auto-indent-first-line 'nil))
 
@@ -789,7 +778,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (if (locate-dominating-file default-directory "Cargo.toml")
         (flycheck-mode 1))
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package rust-mode
     :defer t
@@ -813,7 +802,7 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
-    (setq panda/delete-trailing-whitespace? t))
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package typescript-mode
     :defer t
