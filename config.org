@@ -605,6 +605,17 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
 
   (add-hook 'emacs-lisp-mode-hook #'panda/setup-emacs-lisp-mode)
 #+END_SRC
+*** Git Files
+#+BEGIN_SRC emacs-lisp
+  (use-package gitattributes-mode
+    :defer t)
+
+  (use-package gitconfig-mode
+    :defer t)
+
+  (use-package gitignore-mode
+    :defer t)
+#+END_SRC
 *** Go
 ~go-eldoc~ and ~company-go~ need [[https://github.com/nsf/gocode][gocode]].
 #+BEGIN_SRC emacs-lisp

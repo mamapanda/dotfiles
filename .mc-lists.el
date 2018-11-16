@@ -33,6 +33,7 @@
         hydra--negative-argument
         hydra-evil-multiple-cursors/mc/mark-previous-like-this
         hydra-multiple-cursors/body
+        hydra-multiple-cursors/lambda-/-and-exit
         hydra-multiple-cursors/mc/edit-lines
         hydra-multiple-cursors/mc/edit-lines-and-exit
         hydra-multiple-cursors/mc/mark-all-like-this
