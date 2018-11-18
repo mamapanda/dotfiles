@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: foreach
-# key: foreach
-# --
-for (${1:Object o} : ${2:new Object[1]}) {
-    $0
-}

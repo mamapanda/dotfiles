@@ -474,6 +474,9 @@ Activate with ~yas-minor-mode~.
     (setq yas-triggers-in-field t
           yas-indent-line 'auto
           yas-also-auto-indent-first-line t))
+
+  (use-package yasnippet-snippets
+    :after yasnippet)
 #+END_SRC
 * Language Modes
 *** Assembly
@@ -539,6 +542,17 @@ Used for GNU Assembler.
     :after irony
     :config
     (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+
+  (use-package clang-format
+    :if (executable-find "clang-format")
+    :defer t
+    :init
+    (defun panda/enable-clang-format ()
+      (add-hook 'before-save-hook #'clang-format-buffer nil t))
+    (add-hook 'c-mode-hook #'panda/enable-clang-format)
+    (add-hook 'c++-mode-hook #'panda/enable-clang-format)
+    :config
+    (setq-default clang-format-style "{BasedOnStyle: Google, IndentWidth: 4}"))
 #+END_SRC
 *** C#
 ~omnisharp~ requires the [[https://github.com/OmniSharp/omnisharp-roslyn][OmniSharp server]]

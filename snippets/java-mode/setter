@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: setter
-# key: set
-# --
-${1:public} void set${2:O}(${3:Object o}) {
-       ${4:o}_ = $4;
-}

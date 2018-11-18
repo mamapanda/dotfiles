@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: setter
-# key: set
-# --
-${1:public} void Set${2:O}(${3:Object o}) {
-       this.${4:o} = $4;
-}

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: StreamReader
-# key: streamreader
-# --
-StreamReader sr = new StreamReader(${1:source});

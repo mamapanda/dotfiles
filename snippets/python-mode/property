@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: property
-# key: get
-# --
-@property
-def ${1:var}(self):
-    return self.__$1

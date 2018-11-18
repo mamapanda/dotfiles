@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: getter
-# key: get
-# --
-get ${1:x}(): ${2:Object} {
-       return this.${3:x}_;
-}

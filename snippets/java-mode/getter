@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: getter
-# key: get
-# --
-public ${1:Object} get${2:O}() {
-       return ${3:o};
-}

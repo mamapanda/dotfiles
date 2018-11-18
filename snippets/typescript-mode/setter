@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: setter
-# key: set
-# --
-$1set ${2:x}(new$2: ${3:Object}): void {
-       this.$2_ = new$2;
-}
