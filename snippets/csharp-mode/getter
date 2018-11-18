@@ -2,7 +2,6 @@
 # name: getter
 # key: get
 # --
-public ${1:Object} Get${2:O}()
-{
-       return ${3:o};
+public ${1:Object} Get${2:O}() {
+    return ${3:o};
 }

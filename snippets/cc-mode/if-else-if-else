@@ -1,10 +1,10 @@
 # -*- mode: snippet -*-
-# name: if-else if-else
+# name: if-else-if-else
 # key: ifee
 # --
-if (${1:0}) {
+if (${1:false}) {
     $2
-} else if (${3:0}) {
+} else if (${3:false}) {
     $4
 } else {
     $0

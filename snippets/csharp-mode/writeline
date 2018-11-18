@@ -2,4 +2,4 @@
 # name: Console.WriteLine();
 # key: writeline
 # --
-Console.WriteLine(${1:text});
+Console.WriteLine(${1:""});

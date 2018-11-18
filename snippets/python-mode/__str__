@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: __str__
-# key: tos
+# key: tostr
 # --
 def __str__(self):
     $0

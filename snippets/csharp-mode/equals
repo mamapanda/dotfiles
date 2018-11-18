@@ -2,7 +2,6 @@
 # name: equals
 # key: eq
 # --
-public override boolean Equals(${1:Object o})
-{
-       return ${2:condition};
+public override boolean Equals(${1:Object o}) {
+       $0
 }

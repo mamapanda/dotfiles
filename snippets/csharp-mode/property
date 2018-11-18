@@ -2,14 +2,11 @@
 # name: property
 # key: prop
 # --
-${1:public} ${2:Object} ${3:O}
-{
-    get
-    {
+${1:public} ${2:Object} ${3:O} {
+    get {
         return this.${4:o};
     }
-    set
-    {
+    set {
         this.$4 = value;
     }
 }

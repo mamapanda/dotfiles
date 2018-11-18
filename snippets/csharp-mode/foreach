@@ -2,7 +2,6 @@
 # name: foreach
 # key: foreach
 # --
-foreach (${1:Object o} in ${2:Enumerable})
-{
+foreach (${1:Object o} in ${2:new List<Object>()}) {
     $0
 }

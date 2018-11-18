@@ -1,8 +1,7 @@
 # -*- mode: snippet -*-
 # name: constructor
-# key: cons
+# key: init
 # --
-${1:public} ${2:Class} (${3:args})
-{
-            $0
+${1:public} ${2:Class}($3) {
+    $0
 }

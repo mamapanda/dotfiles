@@ -2,4 +2,4 @@
 # name: Console.Write();
 # key: write
 # --
-Console.Write(${1:text});
+Console.Write(${1:""});

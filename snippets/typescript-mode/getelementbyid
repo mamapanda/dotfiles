@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # name: document.getElementById
-# key: getid
+# key: getbyid
 # --
 document.getElementById($1);

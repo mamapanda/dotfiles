@@ -1,8 +1,8 @@
 # -*- mode: snippet -*-
 # name: toString
-# key: tos
+# key: tostr
 # --
 @Override
 public String toString() {
-       return ${1:string};
+       return ${0:""};
 }

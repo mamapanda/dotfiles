@@ -2,6 +2,6 @@
 # name: switch
 # key: switch
 # --
-switch (${1:variable}) {
+switch (${1:true}) {
     $0
 }

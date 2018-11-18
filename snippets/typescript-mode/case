@@ -2,6 +2,6 @@
 # name: switch case
 # key: case
 # --
-case ${1:value}:
-     $2
+case ${1:true}:
+     $0
      break;

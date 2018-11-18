@@ -2,9 +2,9 @@
 # name: if-elif-else
 # key: ifee
 # --
-if ${1:condition}:
+if ${1:False}:
     $2
-elif ${3:condition}:
+elif ${3:False}:
     $4
 else:
     $0

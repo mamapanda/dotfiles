@@ -2,6 +2,6 @@
 # name: setter
 # key: set
 # --
-${1:public} set${2:O}(${3:o: Object}): void {
-       this.${4:o} = $4;
+$1set ${2:x}(new$2: ${3:Object}): void {
+       this.$2_ = new$2;
 }

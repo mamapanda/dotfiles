@@ -4,5 +4,5 @@
 # --
 @Override
 public boolean equals(${1:Object o}) {
-       return ${2:condition};
+       return ${2:false};
 }

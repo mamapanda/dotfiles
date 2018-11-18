@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: switch case
-# key: case
-# --
-case ${1:value}:
-     $2
-     break;

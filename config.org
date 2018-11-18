@@ -288,7 +288,7 @@ More natural undo/redo behavior. ~C-x u~ opens the undo tree.
     (global-undo-tree-mode))
 #+END_SRC
 *** Undo/Redo Window Configuration
-~C-<left>~ to undo; ~C-<right>~ to redo.
+~C-c <left>~ to undo; ~C-c <right>~ to redo.
 #+BEGIN_SRC emacs-lisp
   (use-package winner
     :config

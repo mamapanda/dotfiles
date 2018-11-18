@@ -3,8 +3,7 @@
 # key: try
 # --
 try {
-    $1
-}
-catch (${2:e}) {
-    ${3:alert(e.stack);}
+    $0
+} catch (${1:e}) {
+    ${2:alert(e.stack);}
 }

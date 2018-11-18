@@ -2,5 +2,5 @@
 # name: elif
 # key: elif
 # --
-elif ${1:condition}:
+elif ${1:False}:
     $0

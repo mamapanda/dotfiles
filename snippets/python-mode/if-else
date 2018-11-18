@@ -2,7 +2,7 @@
 # name: if-else
 # key: ife
 # --
-if ${1:cond}:
+if ${1:False}:
     $2
 else:
     $0

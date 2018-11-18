@@ -2,5 +2,5 @@
 # name: if
 # key: if
 # --
-if ${1:condition}:
+if ${1:False}:
     $0

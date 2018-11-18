@@ -2,6 +2,6 @@
 # name: getter
 # key: get
 # --
-public get${1:O}(): ${2:Object} {
-       return this.${3:o};
+get ${1:x}(): ${2:Object} {
+       return this.${3:x}_;
 }

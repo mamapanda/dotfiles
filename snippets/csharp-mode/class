@@ -2,7 +2,6 @@
 # name: class
 # key: class
 # --
-${1:public} class ${2:Class}
-{
+${1:public} class ${2:Class} {
     $0
 }

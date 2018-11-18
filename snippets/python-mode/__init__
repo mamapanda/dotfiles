@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: __init__
-# key: cons
+# key: init
 # --
 def __init__(self$1):
     $0

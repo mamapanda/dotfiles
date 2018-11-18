@@ -3,4 +3,4 @@
 # key: hash
 # --
 def __hash__(self):
-    return hash(${1:hash})
+    return hash(${0:hash})

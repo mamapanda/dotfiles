@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # name: lambda
-# key: \
+# key: lam
 # --
-lambda ${1:args}: ${2:expression}
+lambda ${1:x}: ${0:x}
