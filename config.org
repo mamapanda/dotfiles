@@ -462,7 +462,7 @@ Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :config
-    (setq yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
+    (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
     (yas-reload-all)
     (eval-after-load 'company
       (define-advice company-complete-selection (:around (old-func))
@@ -808,7 +808,13 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (use-package rust-mode
     :defer t
     :config
-    (add-hook 'rust-mode-hook #'panda/setup-rust-mode))
+    (add-hook 'rust-mode-hook #'panda/setup-rust-mode)
+    (setq rust-format-on-save t))
+
+  (use-package cargo
+    :defer t
+    :init
+    (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
   (use-package racer
     :defer t
