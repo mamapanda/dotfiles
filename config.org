@@ -461,11 +461,13 @@ Activate with ~flycheck-mode~.
 Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
+    :demand t
+    :bind (:map yas-minor-mode-map
+                ("<tab>" . nil)
+                ("TAB" . nil)
+                ("<backtab>" . yas-expand))
     :config
-    (define-key yas-minor-mode-map (kbd "<tab>") nil)
-    (define-key yas-minor-mode-map (kbd "TAB") nil)
-    (define-key yas-minor-mode-map (kbd "<backtab>") #'yas-expand)
-    (setq yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
+    (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
     (yas-reload-all)
     (setq yas-triggers-in-field t
           yas-indent-line 'auto
@@ -811,7 +813,13 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (use-package rust-mode
     :defer t
     :config
-    (add-hook 'rust-mode-hook #'panda/setup-rust-mode))
+    (add-hook 'rust-mode-hook #'panda/setup-rust-mode)
+    (setq rust-format-on-save t))
+
+  (use-package cargo
+    :defer t
+    :init
+    (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
   (use-package racer
     :defer t
