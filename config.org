@@ -465,8 +465,20 @@ Activate with ~yas-minor-mode~.
     :bind (:map yas-minor-mode-map
                 ("<tab>" . nil)
                 ("TAB" . nil)
-                ("<backtab>" . yas-expand))
+                ("S-<tab>" . yas-expand)
+                ("<backtab>" . yas-expand)
+                :map yas-keymap
+                ("S-<tab>" . nil)
+                ("<backtab>" . nil)
+                ("<tab>" . panda/company-or-yas-next-field)
+                ("TAB" . panda/company-or-yas-next-field))
     :config
+    (defun panda/company-or-yas-next-field()
+      (interactive)
+      (if (and (bound-and-true-p company-mode)
+               company-candidates)
+          (call-interactively #'company-complete-selection)
+        (yas-next-field)))
     (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
     (yas-reload-all)
     (setq yas-triggers-in-field t
