@@ -462,15 +462,11 @@ Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :config
+    (define-key yas-minor-mode-map (kbd "<tab>") nil)
+    (define-key yas-minor-mode-map (kbd "TAB") nil)
+    (define-key yas-minor-mode-map (kbd "<backtab>") #'yas-expand)
     (setq yas-snippet-dirs `(,(expand-file-name "snippets" user-emacs-directory)))
     (yas-reload-all)
-    (eval-after-load 'company
-      (define-advice company-complete-selection (:around (old-func))
-        (if (bound-and-true-p yas-minor-mode)
-            (let ((yas-fallback-behavior nil))
-              (unless (call-interactively #'yas-expand)
-                (call-interactively old-func)))
-          (call-interactively old-func))))
     (setq yas-triggers-in-field t
           yas-indent-line 'auto
           yas-also-auto-indent-first-line t))
@@ -732,6 +728,13 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     :after tern
     :config
     (add-to-list 'company-backends 'company-tern))
+#+END_SRC
+*** Makefile
+#+BEGIN_SRC emacs-lisp
+  (defun panda/setup-makefile-mode ()
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+  (add-hook 'makefile-mode-hook #'panda/setup-makefile-mode)
 #+END_SRC
 *** Markdown
 #+BEGIN_SRC emacs-lisp
