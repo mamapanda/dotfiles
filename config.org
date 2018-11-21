@@ -296,6 +296,9 @@ More natural undo/redo behavior. ~C-x u~ opens the undo tree.
 #+END_SRC
 * Ivy Completion
 ~flx~ and ~smex~ give better regex sorting and completion sorting, respectively.
+
+Dependencies:
+- [[https://github.com/BurntSushi/ripgrep][ripgrep]]
 #+BEGIN_SRC emacs-lisp
   (use-package flx
     :defer t)
@@ -399,6 +402,8 @@ More natural undo/redo behavior. ~C-x u~ opens the undo tree.
           projectile-completion-system 'ivy))
 #+END_SRC
 * Source Control
+Dependencies:
+- [[https://git-scm.com/downloads][git]]
 *** Git Interface
 #+BEGIN_SRC emacs-lisp
   (use-package magit
@@ -504,7 +509,10 @@ Used for GNU Assembler.
     (setq asm-comment-char ?#))
 #+END_SRC
 *** C / C++
-~irony~ requires libclang to function properly.
+Dependencies:
+- [[https://releases.llvm.org/download.html][clang]]
+- [[https://releases.llvm.org/download.html][libclang]]
+- [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-c-mode ()
     (aggressive-indent-mode 1)
@@ -554,7 +562,6 @@ Used for GNU Assembler.
     (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
 
   (use-package clang-format
-    :if (executable-find "clang-format")
     :defer t
     :init
     (defun panda/enable-clang-format ()
@@ -565,8 +572,9 @@ Used for GNU Assembler.
     (setq-default clang-format-style "{BasedOnStyle: Google, IndentWidth: 4}"))
 #+END_SRC
 *** C#
-~omnisharp~ requires the [[https://github.com/OmniSharp/omnisharp-roslyn][OmniSharp server]]
-to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
+Dependencies:
+- [[https://github.com/OmniSharp/omnisharp-roslyn][omnisharp-roslyn server]]
+  - can be installed with ~M-x omnisharp-install-server~
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-csharp-mode ()
     (aggressive-indent-mode 1)
@@ -575,21 +583,16 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
-  (defconst panda/omnisharp-exe-path
-    (expand-file-name "omnisharp/OmniSharp.exe" user-emacs-directory))
-
   (use-package csharp-mode
     :defer t
     :config
     (add-hook 'csharp-mode-hook #'panda/setup-csharp-mode))
 
   (use-package omnisharp
-    :if (file-exists-p panda/omnisharp-exe-path)
     :defer t
     :init
     (add-hook 'csharp-mode-hook #'omnisharp-mode)
     :config
-    (setq omnisharp-server-executable-path panda/omnisharp-exe-path)
     (add-to-list 'company-backends 'company-omnisharp))
 #+END_SRC
 *** Clojure
@@ -605,7 +608,8 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
 #+END_SRC
 *** Common Lisp
-~slime~ requires the [[http://www.sbcl.org/platform-table.html][sbcl]] executable (Steel Bank Common Lisp).
+Dependencies:
+- [[http://www.sbcl.org/platform-table.html][sbcl]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-slime-mode ()
     (aggressive-indent-mode 1)
@@ -631,17 +635,28 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
 #+END_SRC
 *** Git Files
 #+BEGIN_SRC emacs-lisp
+  (defun panda/setup-gitfiles-mode ()
+    (yas-minor-mode 1)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
   (use-package gitattributes-mode
-    :defer t)
+    :defer t
+    :config
+    (add-hook 'gitattributes-mode-hook #'panda/setup-gitfiles-mode))
 
   (use-package gitconfig-mode
-    :defer t)
+    :defer t
+    :config
+    (add-hook 'gitconfig-mode-hook #'panda/setup-gitfiles-mode))
 
   (use-package gitignore-mode
-    :defer t)
+    :defer t
+    :config
+    (add-hook 'gitignore-mode-hook #'panda/setup-gitfiles-mode))
 #+END_SRC
 *** Go
-~go-eldoc~ and ~company-go~ need [[https://github.com/nsf/gocode][gocode]].
+Dependencies:
+- [[https://github.com/nsf/gocode][gocode]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-go-mode ()
     (aggressive-indent-mode 1)
@@ -668,7 +683,8 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (add-to-list 'company-backends 'company-go))
 #+END_SRC
 *** Haskell
-~intero~ depends on [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][stack]].
+Dependencies:
+- [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][stack]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-haskell-mode ()
     (company-mode 1)
@@ -718,7 +734,8 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
   (add-hook 'java-mode-hook #'panda/setup-java-mode)
 #+END_SRC
 *** JavaScript
-~tern~ depends on [[https://www.npmjs.com/package/tern][tern]].
+Dependencies:
+- [[https://www.npmjs.com/package/tern][tern]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-javascript-mode ()
     (aggressive-indent-mode 1)
@@ -785,6 +802,10 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (add-hook 'powershell-mode-hook #'panda/setup-powershell-mode))
 #+END_SRC
 *** Python
+Dependencies:
+- [[https://www.python.org/downloads/][python]]
+- [[https://pypi.org/project/setuptools/][setuptools]]
+- [[https://flake8.readthedocs.io/en/latest/][flake8]] or [[https://pylint.org/#install][pylint]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-python-mode ()
     (company-mode 1)
@@ -812,7 +833,10 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (add-to-list 'company-backends 'company-anaconda))
 #+END_SRC
 *** Rust
-~racer~ needs [[https://github.com/racer-rust/racer][racer]] to be installed.
+Dependencies:
+- [[https://www.rust-lang.org/en-US/install.html][cargo]]
+- [[https://github.com/racer-rust/racer][racer]]
+- [[https://github.com/rust-lang-nursery/rustfmt][rustfmt]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-rust-mode ()
     (aggressive-indent-mode 1)
@@ -844,6 +868,9 @@ to be at ~<emacs-directory>/omnisharp/OmniSharp.exe~.
     (add-hook 'rust-mode-hook #'flycheck-rust-setup))
 #+END_SRC
 *** TypeScript
+Dependencies:
+- [[https://www.typescriptlang.org/#download-links][tsc]]
+- [[https://nodejs.org/en/][node.js]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-typescript-mode ()
     (aggressive-indent-mode 1)
