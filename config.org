@@ -426,6 +426,7 @@ Use ~realgud:<debugger-name>~ to run the debugger.
 * Per-Language Modes
 *** Auto-Completion
 Activate with ~company-mode~.
+
 ~C-w~ is unbound in ~company-active-map~ because it interferes with ~kill-line~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
@@ -439,6 +440,13 @@ Activate with ~company-mode~.
           company-idle-delay 0.1
           company-minimum-prefix-length 1
           company-tooltip-align-annotations t))
+#+END_SRC
+*** Auto-Formatting
+Activate with ~format-all-mode~.
+
+Auto-formats source files on save.
+#+BEGIN_SRC emacs-lisp
+  (use-package format-all)
 #+END_SRC
 *** Aggressive Indent
 Activate with ~aggressive-indent-mode~.
@@ -496,10 +504,14 @@ Activate with ~yas-minor-mode~.
 * Language Modes
 *** Assembly
 Used for GNU Assembler.
+
+Dependencies:
+- [[https://github.com/klauspost/asmfmt][asmfmt]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-asm-mode ()
+    (format-all-mode 1)
     (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+    (setq indent-tabs-mode t)
     (setq-local tab-always-indent (default-value 'tab-always-indent)))
 
   (use-package asm-mode
@@ -521,7 +533,6 @@ Dependencies:
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
     (setq c-basic-offset 4))
 
   (add-hook 'c-mode-hook #'panda/setup-c-mode)
@@ -628,8 +639,8 @@ Dependencies:
   (defun panda/setup-emacs-lisp-mode ()
     (aggressive-indent-mode 1)
     (company-mode 1)
-    (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+    (format-all-mode 1)
+    (yas-minor-mode 1))
 
   (add-hook 'emacs-lisp-mode-hook #'panda/setup-emacs-lisp-mode)
 #+END_SRC
@@ -657,15 +668,15 @@ Dependencies:
 *** Go
 Dependencies:
 - [[https://github.com/nsf/gocode][gocode]]
+- [[https://golang.org/cmd/gofmt/][gofmt]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-go-mode ()
     (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
+    (format-all-mode 1)
     (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
-    (setq indent-tabs-mode t
-          tab-width 4))
+    (setq indent-tabs-mode t))
 
   (use-package go-mode
     :defer t
@@ -685,12 +696,13 @@ Dependencies:
 *** Haskell
 Dependencies:
 - [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][stack]]
+- [[https://github.com/lspitzner/brittany][brittany]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-haskell-mode ()
     (company-mode 1)
     (flycheck-mode 1)
-    (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+    (format-all-mode 1)
+    (yas-minor-mode 1))
 
   (use-package haskell-mode
     :defer t
@@ -725,22 +737,28 @@ Dependencies:
           web-mode-block-padding 4))
 #+END_SRC
 *** Java
+~panda/enable-clang-format~ is defined under the C/C++ section.
+
+Dependencies
+- [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-java-mode ()
     (aggressive-indent-mode 1)
     (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+    (panda/enable-clang-format))
 
   (add-hook 'java-mode-hook #'panda/setup-java-mode)
 #+END_SRC
 *** JavaScript
 Dependencies:
 - [[https://www.npmjs.com/package/tern][tern]]
+- [[https://prettier.io/docs/en/install.html][prettier]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-javascript-mode ()
     (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
+    (format-all-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -768,8 +786,11 @@ Dependencies:
   (add-hook 'makefile-mode-hook #'panda/setup-makefile-mode)
 #+END_SRC
 *** Markdown
+Dependencies:
+- [[https://prettier.io/docs/en/install.html][prettier]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-markdown-mode ()
+    (format-all-mode 1)
     (yas-minor-mode 1))
 
   (use-package markdown-mode
@@ -806,12 +827,13 @@ Dependencies:
 - [[https://www.python.org/downloads/][python]]
 - [[https://pypi.org/project/setuptools/][setuptools]]
 - [[https://flake8.readthedocs.io/en/latest/][flake8]] or [[https://pylint.org/#install][pylint]]
+- [[https://github.com/ambv/black][black]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-python-mode ()
     (company-mode 1)
     (flycheck-mode 1)
+    (format-all-mode 1)
     (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
     (setq-local yas-indent-line 'fixed)
     (setq-local yas-also-auto-indent-first-line 'nil))
 
@@ -876,8 +898,7 @@ Dependencies:
     (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
-    (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+    (yas-minor-mode 1))
 
   (use-package typescript-mode
     :defer t
@@ -890,6 +911,7 @@ Dependencies:
     (defun setup-tide-mode ()
       (interactive)
       (tide-setup)
-      (tide-hl-identifier-mode +1))
+      (tide-hl-identifier-mode +1)
+      (add-hook 'before-save-hook #'tide-format-before-save nil t))
     (add-hook 'typescript-mode-hook #'setup-tide-mode))
 #+END_SRC
