@@ -62,13 +62,23 @@ Move Emacs's customize settings to a separate file.
 #+END_SRC
 *** Mode Line
 #+BEGIN_SRC emacs-lisp
+  (defvar panda/modeline 'doom)
+
   (use-package spaceline-config
+    :if (eq panda/modeline 'spaceline)
     :ensure spaceline
     :config
     (spaceline-emacs-theme)
     (spaceline-toggle-buffer-size-off)
     (spaceline-toggle-buffer-modified-off)
     (spaceline-toggle-hud-off))
+
+  (use-package doom-modeline
+    :if (eq panda/modeline 'doom)
+    :config
+    (doom-modeline-init)
+    (setq doom-modeline-icon nil
+          doom-modeline-buffer-file-name-style 'relative-from-project))
 #+END_SRC
 *** Diminish
 Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
@@ -94,12 +104,6 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
           beacon-blink-when-point-moves nil)
     (beacon-mode 1))
 #+END_SRC
-*** Nyan Cat Position Bar
-#+BEGIN_SRC emacs-lisp
-  (use-package nyan-mode
-    :config
-    (nyan-mode t))
-#+END_SRC
 *** Rainbow Delimiters
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
@@ -113,6 +117,7 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
                           (awk-mode . "awk")
                           (other . "linux"))
         disabled-command-function nil
+        inhibit-compacting-font-caches t
         make-backup-files nil)
 
   (setq-default c-basic-offset 4
@@ -500,6 +505,11 @@ Activate with ~yas-minor-mode~.
 
   (use-package yasnippet-snippets
     :after yasnippet)
+
+  (use-package ivy-yasnippet
+    :after yasnippet
+    :bind (:map yas-minor-mode-map
+                ("C-c y" . ivy-yasnippet)))
 #+END_SRC
 * Language Modes
 *** Assembly
@@ -750,17 +760,18 @@ Dependencies
   (add-hook 'java-mode-hook #'panda/setup-java-mode)
 #+END_SRC
 *** JavaScript
+~panda/enable-clang-format~ is defined under the C/C++ section.
+
 Dependencies:
 - [[https://www.npmjs.com/package/tern][tern]]
-- [[https://prettier.io/docs/en/install.html][prettier]]
+- [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-javascript-mode ()
     (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
-    (format-all-mode 1)
     (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+    (panda/enable-clang-format))
 
   (use-package js2-mode
     :defer t
