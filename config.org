@@ -543,6 +543,7 @@ Dependencies:
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
+    (c-set-offset 'innamespace 0)
     (setq c-basic-offset 4))
 
   (add-hook 'c-mode-hook #'panda/setup-c-mode)
