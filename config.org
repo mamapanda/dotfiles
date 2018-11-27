@@ -110,6 +110,74 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
     :init
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
+* User Keymap
+#+BEGIN_SRC emacs-lisp
+  (defvar panda/leader-map (make-sparse-keymap)
+    "Leader key map")
+
+  (use-package general
+    :config
+    (general-override-mode)
+    (general-define-key
+     :states '(emacs insert)
+     :keymaps 'override
+     :prefix "M-p"
+     :prefix-map 'panda/leader-map)
+    (general-create-definer panda/general-leader
+      :keymaps 'panda/leader-map)
+
+    (general-create-definer panda/general-file
+      :wrapping panda/general-leader
+      :prefix "f")
+    (general-create-definer panda/general-navigation
+      :wrapping panda/general-leader
+      :prefix "n")
+    (general-create-definer panda/general-workspace
+      :wrapping panda/general-leader
+      :prefix "q")
+    (general-create-definer panda/text
+      :wrapping panda/general-leader
+      :prefix "t")
+    (general-create-definer panda/general-window
+      :wrapping panda/general-leader
+      :prefix "w"))
+#+END_SRC
+* Evil
+#+BEGIN_SRC emacs-lisp
+  (use-package goto-chg
+    :defer t)
+
+  (use-package evil
+    :init
+    (setq evil-want-C-u-scroll t
+          evil-want-keybinding nil
+          evil-disable-insert-state-bindings t)
+    :config
+    (evil-mode 1)
+    (general-evil-setup)
+    (general-define-key
+     :states '(normal visual)
+     :keymaps 'override
+     :prefix "SPC"
+     :prefix-map 'panda/leader-map))
+
+  (use-package evil-tutor
+    :defer t)
+
+  (use-package evil-collection
+    :after evil
+    :init
+    (setq evil-collection-setup-minibuffer t)
+    :config
+    (evil-collection-init))
+
+  (use-package evil-escape
+    :after evil
+    :config
+    (evil-escape-mode 1)
+    (setq-default evil-escape-key-sequence "fd")
+    (setq-default evil-escape-delay 0.1))
+#+END_SRC
 * General Defaults
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
@@ -130,9 +198,8 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
 
   (global-auto-revert-mode t)
 #+END_SRC
-* General Key Definitions
+* General Emacs Key Definitions
 *** Cutting Text
-~C-w~ - If a region is selected, cut it; else, cut the current line.
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-text ()
     (interactive)
@@ -140,17 +207,16 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
                             'kill-region
                           'kill-whole-line)))
 
-  (global-set-key (kbd "C-w") #'panda/kill-text)
+  (general-iemap "C-w" #'panda/kill-text)
 #+END_SRC
 *** Deleting All Whitespace Before Cursor
-~M-backspace~ - Deletes whitespace until a non-whitespace character is encountered.
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-whitespace ()
     (interactive)
     (while (string-match (char-to-string (char-before)) " \r\n\t")
       (call-interactively 'delete-backward-char)))
 
-  (global-set-key "\M-\d" #'panda/kill-whitespace)
+  (general-iemap "M-DEL" #'panda/kill-whitespace)
 #+END_SRC
 *** Keybind Help
 #+BEGIN_SRC emacs-lisp
@@ -186,11 +252,21 @@ Colors that look nice with Monokai.
 #+END_SRC
 * Editing
 *** Workspaces
-Swap between workspaces 0-9 with ~C-c e <workspace-number>~.
 #+BEGIN_SRC emacs-lisp
   (use-package eyebrowse
-    :init
-    (setq eyebrowse-keymap-prefix "e")
+    :general
+    (panda/general-workspace
+      "." 'eyebrowse-switch-to-window-config
+      "0" 'eyebrowse-switch-to-window-config-0
+      "1" 'eyebrowse-switch-to-window-config-1
+      "2" 'eyebrowse-switch-to-window-config-2
+      "3" 'eyebrowse-switch-to-window-config-3
+      "4" 'eyebrowse-switch-to-window-config-4
+      "5" 'eyebrowse-switch-to-window-config-5
+      "6" 'eyebrowse-switch-to-window-config-6
+      "7" 'eyebrowse-switch-to-window-config-7
+      "8" 'eyebrowse-switch-to-window-config-8
+      "9" 'eyebrowse-switch-to-window-config-9)
     :config
     (eyebrowse-mode 1))
 #+END_SRC
