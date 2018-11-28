@@ -62,7 +62,7 @@ Move Emacs's customize settings to a separate file.
     (setq-default evil-escape-delay 0.1))
 #+END_SRC
 * Appearance
-*** Defaults
+** Defaults
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-screen t
         ring-bell-function 'ignore
@@ -76,11 +76,11 @@ Move Emacs's customize settings to a separate file.
 
   (set-frame-font "Consolas-10")
 #+END_SRC
-*** Full Screen on Start
+** Full Screen on Start
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+END_SRC
-*** Theme
+** Theme
 #+BEGIN_SRC emacs-lisp
   (use-package monokai-theme
     :defer t)
@@ -90,7 +90,7 @@ Move Emacs's customize settings to a separate file.
 
   (load-theme 'monokai t)
 #+END_SRC
-*** Mode Line
+** Mode Line
 #+BEGIN_SRC emacs-lisp
   (defvar panda/modeline 'doom)
 
@@ -110,7 +110,7 @@ Move Emacs's customize settings to a separate file.
     (setq doom-modeline-icon nil
           doom-modeline-buffer-file-name-style 'relative-from-project))
 #+END_SRC
-*** Diminish
+** Diminish
 Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 #+BEGIN_SRC emacs-lisp
   (use-package diminish
@@ -118,14 +118,14 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
     (diminish 'abbrev-mode)
     (diminish 'auto-revert-mode))
 #+END_SRC
-*** Line Numbers
+** Line Numbers
 #+BEGIN_SRC emacs-lisp
   (use-package linum-relative
     :config
     (linum-relative-global-mode 1)
     (setq linum-relative-backend 'display-line-numbers-mode))
 #+END_SRC
-*** Cursor Beacon
+** Cursor Beacon
 #+BEGIN_SRC emacs-lisp
   (use-package beacon
     :diminish beacon-mode
@@ -135,7 +135,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
           beacon-blink-when-point-moves nil)
     (beacon-mode 1))
 #+END_SRC
-*** Rainbow Delimiters
+** Rainbow Delimiters
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
     :init
@@ -194,7 +194,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
       :prefix-command 'window-prefix))
 #+END_SRC
 * Basic Configuration
-*** Defaults
+** Defaults
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
         c-default-style '((java-mode . "java")
@@ -214,8 +214,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 
   (global-auto-revert-mode t)
 #+END_SRC
-*** Key Definitions
-***** Cutting Text
+** Key Definitions
+*** Cutting Text
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-text ()
     (interactive)
@@ -225,7 +225,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 
   (general-iemap "C-w" #'panda/kill-text)
 #+END_SRC
-***** Deleting All Whitespace Before Cursor
+*** Deleting All Whitespace Before Cursor
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-whitespace ()
     (interactive)
@@ -234,7 +234,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 
   (general-iemap "M-DEL" #'panda/kill-whitespace)
 #+END_SRC
-***** Keybind Help
+*** Keybind Help
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
     :diminish which-key-mode
@@ -244,8 +244,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
           which-key-idle-delay 1.0)
     (which-key-mode 1))
 #+END_SRC
-*** Constants
-***** Colors
+** Constants
+*** Colors
 Colors that look nice with Monokai.
 #+BEGIN_SRC emacs-lisp
   (defconst panda/neon-green "#39FF14")
@@ -267,8 +267,8 @@ Colors that look nice with Monokai.
     :defer t)
 #+END_SRC
 * Global Packages
-*** Multi-Purpose
-***** Ivy
+** Multi-Purpose
+*** Ivy
 ~flx~ and ~smex~ give better regex sorting and completion sorting, respectively.
 
 Dependencies:
@@ -321,7 +321,7 @@ Dependencies:
     (set-face-attribute 'ivy-confirm-face nil
                         :foreground panda/neon-green))
 #+END_SRC
-***** Crux
+*** Crux
 Miscellaneous functions.
 #+BEGIN_SRC emacs-lisp
   (use-package crux
@@ -336,17 +336,17 @@ Miscellaneous functions.
     (panda/general-window
       "t" 'crux-transpose-windows))
 #+END_SRC
-*** Buffer
+** Buffer
 Empty for now.
-*** Debugging
+** Debugging
 Call ~M-x load-library~ on ~realgud~ to load the package.
 Use ~realgud:<debugger-name>~ to run the debugger.
 #+BEGIN_SRC emacs-lisp
   (use-package realgud
     :defer t)
 #+END_SRC
-*** Editing
-***** Anzu
+** Editing
+*** Anzu
 Better find-and-replace.
 #+BEGIN_SRC emacs-lisp
   (use-package anzu
@@ -355,7 +355,7 @@ Better find-and-replace.
     :config
     (global-anzu-mode t))
 #+END_SRC
-***** Corral
+*** Corral
 Move braces, brackets, and parentheses.
 #+BEGIN_SRC emacs-lisp
   (use-package corral
@@ -377,7 +377,7 @@ Move braces, brackets, and parentheses.
         (")" corral-parentheses-forward)
         ("/" (message "Abort") :color blue)))
 #+END_SRC
-***** Expand Region
+*** Expand Region
 Expand selected region.
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
@@ -385,7 +385,7 @@ Expand selected region.
     (general-iemap "C-;" 'er/expand-region)
     (general-vmap ";" 'er/expand-region))
 #+END_SRC
-***** Multiple Cursors
+*** Multiple Cursors
 #+BEGIN_SRC emacs-lisp
   (use-package multiple-cursors
     :general
@@ -403,7 +403,7 @@ Expand selected region.
         ("a" mc/mark-all-like-this :color blue)
         ("/" (message "Abort") :color blue)))
 #+END_SRC
-***** Undo Tree
+*** Undo Tree
 Linear undo and redo.
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
@@ -418,10 +418,10 @@ Linear undo and redo.
     :config
     (global-undo-tree-mode))
 #+END_SRC
-*** File
+** File
 Empty for now.
-*** Git
-***** Magit
+** Git
+*** Magit
 Git interface.
 
 Dependencies:
@@ -443,8 +443,8 @@ Dependencies:
     :general
     (panda/general-git "t" 'git-timemachine))
 #+END_SRC
-*** Navigation
-***** Avy
+** Navigation
+*** Avy
 Jump to a word on the screen.
 #+BEGIN_SRC emacs-lisp
   (use-package avy
@@ -466,7 +466,7 @@ Jump to a word on the screen.
                         :weight 'bold)
     (setq avy-background t))
 #+END_SRC
-***** IMenu
+*** IMenu
 Jump between definitions.
 #+BEGIN_SRC emacs-lisp
   (use-package imenu
@@ -476,7 +476,7 @@ Jump between definitions.
     :config
     (setq imenu-auto-rescan t))
 #+END_SRC
-***** Neotree
+*** Neotree
 Navigate a directory.
 #+BEGIN_SRC emacs-lisp
   (use-package neotree
@@ -495,7 +495,7 @@ Navigate a directory.
           neo-window-width 30
           neo-window-position 'left))
 #+END_SRC
-***** Origami
+*** Origami
 Show, hide, and navigate code blocks.
 #+BEGIN_SRC emacs-lisp
   (use-package origami
@@ -523,8 +523,7 @@ Show, hide, and navigate code blocks.
         ("/" (message "Abort") :color blue))
       (global-origami-mode))
 #+END_SRC
-*** Project
-***** Projectile
+** Project
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
     :general
@@ -536,8 +535,8 @@ Show, hide, and navigate code blocks.
     (setq projectile-indexing-method 'alien
           projectile-completion-system 'ivy))
 #+END_SRC
-*** Window
-***** Ace Window
+** Window
+*** Ace Window
 Jump quickly between multiple windows.
 #+BEGIN_SRC emacs-lisp
   (use-package ace-window
@@ -549,7 +548,7 @@ Jump quickly between multiple windows.
                         :foreground panda/neon-green
                         :weight 'bold))
 #+END_SRC
-***** Eyebrowse
+*** Eyebrowse
 Workspaces.
 #+BEGIN_SRC emacs-lisp
   (use-package eyebrowse
@@ -568,7 +567,7 @@ Workspaces.
     :config
     (eyebrowse-mode 1))
 #+END_SRC
-***** Winner
+*** Winner
 Undo/redo changes in window configuration.
 #+BEGIN_SRC emacs-lisp
   (use-package winner
@@ -580,12 +579,12 @@ Undo/redo changes in window configuration.
     (winner-mode t))
 #+END_SRC
 * Per-Language Packages
-*** Aggressive Indent
+** Aggressive Indent
 Indents code with every change. Activate with ~aggressive-indent-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent)
 #+END_SRC
-*** Company
+** Company
 Activate auto-completion with ~company-mode~.
 
 ~C-w~ is unbound in ~company-active-map~ because it interferes with ~kill-line~.
@@ -604,12 +603,12 @@ Activate auto-completion with ~company-mode~.
           company-minimum-prefix-length 1
           company-tooltip-align-annotations t))
 #+END_SRC
-*** Format All
+** Format All
 Auto-formats source files on save. Activate with ~format-all-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package format-all)
 #+END_SRC
-*** Flycheck
+** Flycheck
 Linting. Activate with ~flycheck-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
@@ -627,7 +626,7 @@ Linting. Activate with ~flycheck-mode~.
       ("/" (message "Abort") :color blue))
     (setq flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
-*** Yasnippet
+** Yasnippet
 Code snippets. Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
@@ -659,7 +658,7 @@ Code snippets. Activate with ~yas-minor-mode~.
     (panda/general-editing "s" 'ivy-yasnippet))
 #+END_SRC
 * Language Modes
-*** Assembly
+** Assembly
 Used for GNU Assembler.
 
 Dependencies:
@@ -677,7 +676,7 @@ Dependencies:
     (add-hook 'asm-mode-hook #'panda/setup-asm-mode)
     (setq asm-comment-char ?#))
 #+END_SRC
-*** C / C++
+** C / C++
 Dependencies:
 - [[https://releases.llvm.org/download.html][clang]]
 - [[https://releases.llvm.org/download.html][libclang]]
@@ -747,7 +746,7 @@ Dependencies:
   IndentWidth: 4 \
   }"))
 #+END_SRC
-*** C#
+** C#
 Dependencies:
 - [[https://github.com/OmniSharp/omnisharp-roslyn][omnisharp-roslyn server]]
   - can be installed with ~M-x omnisharp-install-server~
@@ -771,7 +770,7 @@ Dependencies:
     :config
     (add-to-list 'company-backends 'company-omnisharp))
 #+END_SRC
-*** Clojure
+** Clojure
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-clojure-mode ()
     (aggressive-indent-mode 1)
@@ -783,7 +782,7 @@ Dependencies:
     :config
     (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
 #+END_SRC
-*** Common Lisp
+** Common Lisp
 Dependencies:
 - [[http://www.sbcl.org/platform-table.html][sbcl]]
 #+BEGIN_SRC emacs-lisp
@@ -799,7 +798,7 @@ Dependencies:
     (setq inferior-lisp-program (executable-find "sbcl"))
     (slime-setup '(slime-fancy)))
 #+END_SRC
-*** Emacs Lisp
+** Emacs Lisp
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-emacs-lisp-mode ()
     (aggressive-indent-mode 1)
@@ -809,7 +808,7 @@ Dependencies:
 
   (add-hook 'emacs-lisp-mode-hook #'panda/setup-emacs-lisp-mode)
 #+END_SRC
-*** Git Files
+** Git Files
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-gitfiles-mode ()
     (yas-minor-mode 1)
@@ -830,7 +829,7 @@ Dependencies:
     :config
     (add-hook 'gitignore-mode-hook #'panda/setup-gitfiles-mode))
 #+END_SRC
-*** Go
+** Go
 Dependencies:
 - [[https://github.com/nsf/gocode][gocode]]
 - [[https://golang.org/cmd/gofmt/][gofmt]]
@@ -858,7 +857,7 @@ Dependencies:
     :config
     (add-to-list 'company-backends 'company-go))
 #+END_SRC
-*** Haskell
+** Haskell
 Dependencies:
 - [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][stack]]
 - [[https://github.com/lspitzner/brittany][brittany]]
@@ -881,7 +880,7 @@ Dependencies:
     :config
     (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
 #+END_SRC
-*** HTML / PHP / ASP.NET / Embedded Ruby
+** HTML / PHP / ASP.NET / Embedded Ruby
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-web-mode ()
     (aggressive-indent-mode 1)
@@ -901,7 +900,7 @@ Dependencies:
           web-mode-script-padding 4
           web-mode-block-padding 4))
 #+END_SRC
-*** Java
+** Java
 ~panda/enable-clang-format~ is defined under the C/C++ section.
 
 Dependencies
@@ -914,7 +913,7 @@ Dependencies
 
   (add-hook 'java-mode-hook #'panda/setup-java-mode)
 #+END_SRC
-*** JavaScript
+** JavaScript
 ~panda/enable-clang-format~ is defined under the C/C++ section.
 
 Dependencies:
@@ -944,14 +943,14 @@ Dependencies:
     :config
     (add-to-list 'company-backends 'company-tern))
 #+END_SRC
-*** Makefile
+** Makefile
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-makefile-mode ()
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (add-hook 'makefile-mode-hook #'panda/setup-makefile-mode)
 #+END_SRC
-*** Markdown
+** Markdown
 Dependencies:
 - [[https://prettier.io/docs/en/install.html][prettier]]
 #+BEGIN_SRC emacs-lisp
@@ -964,7 +963,7 @@ Dependencies:
     :config
     (add-hook 'markdown-mode-hook #'panda/setup-markdown-mode))
 #+END_SRC
-*** Org
+** Org
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-org-mode ()
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
@@ -976,7 +975,7 @@ Dependencies:
     (setq org-src-fontify-natively t
           org-src-tab-acts-natively t))
 #+END_SRC
-*** PowerShell
+** PowerShell
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-powershell-mode ()
     (aggressive-indent-mode 1)
@@ -988,7 +987,7 @@ Dependencies:
     :config
     (add-hook 'powershell-mode-hook #'panda/setup-powershell-mode))
 #+END_SRC
-*** Python
+** Python
 Dependencies:
 - [[https://www.python.org/downloads/][python]]
 - [[https://pypi.org/project/setuptools/][setuptools]]
@@ -1020,7 +1019,7 @@ Dependencies:
     :config
     (add-to-list 'company-backends 'company-anaconda))
 #+END_SRC
-*** Rust
+** Rust
 Dependencies:
 - [[https://www.rust-lang.org/en-US/install.html][cargo]]
 - [[https://github.com/racer-rust/racer][racer]]
@@ -1055,7 +1054,7 @@ Dependencies:
     :init
     (add-hook 'rust-mode-hook #'flycheck-rust-setup))
 #+END_SRC
-*** TypeScript
+** TypeScript
 Dependencies:
 - [[https://www.typescriptlang.org/#download-links][tsc]]
 - [[https://nodejs.org/en/][node.js]]
