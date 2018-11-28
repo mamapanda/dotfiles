@@ -13,7 +13,11 @@
         c-electric-slash
         c-electric-star
         c-indent-line-or-region
+        evil-delete-char
+        evil-emacs-state
+        evil-next-line
         evil-previous-line
+        evil-scroll-line-down
         hs-hide-block
         indent-for-tab-command
         markdown-cycle

@@ -39,7 +39,8 @@ Move Emacs's customize settings to a separate file.
   (use-package evil
     :init
     (setq evil-want-C-u-scroll t
-          evil-want-keybinding nil)
+          evil-want-keybinding nil
+          evil-disable-insert-state-bindings t)
     :config
     (evil-mode 1))
 
@@ -118,10 +119,11 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
     (diminish 'auto-revert-mode))
 #+END_SRC
 *** Line Numbers
-Line numbers are off by default. Enable them with ~M-x nlinum-mode~.
 #+BEGIN_SRC emacs-lisp
-  (use-package nlinum
-    :defer t)
+  (use-package linum-relative
+    :config
+    (linum-relative-global-mode 1)
+    (setq linum-relative-backend 'display-line-numbers-mode))
 #+END_SRC
 *** Cursor Beacon
 #+BEGIN_SRC emacs-lisp
@@ -419,25 +421,23 @@ Dependencies:
     :diminish ivy-mode
     :demand t
     :general
-    (general-define-key
-     :states '(emacs insert normal visual)
-     "C-s" 'swiper)
+    (panda/general-leader "s" 'swiper)
     (general-iemap
+      "C-s" 'swiper
       "C-x b" 'ivy-switch-buffer
       "C-r" 'ivy-resume)
     (panda/general-buffer
-      "b" 'ivy-switch-buffer)
+      "b" 'ivy-switch-buffer
+      "k" 'kill-buffer)
     (panda/general-file
       "f" 'counsel-find-file)
     (panda/general-navigation
       "r" 'counsel-rg)
     (panda/general-editing
-      "p" 'counsel-yank-pop-after-point
-      "P" 'counsel-yank-pop)
-    (general-define-key
-     :states '(emacs insert)
-     :keymaps 'ivy-minibuffer-map
-     "<return>" 'ivy-alt-done)
+      "p" 'counsel-yank-pop)
+    (general-iemap
+      :keymaps 'ivy-minibuffer-map
+      "<return>" 'ivy-alt-done)
     :config
     (ivy-mode 1)
     (counsel-mode 1)
@@ -475,7 +475,7 @@ Dependencies:
   (use-package avy
     :general
     (panda/general-leader
-      "SPC" 'avy-goto-char)
+      "SPC" 'avy-goto-word-1)
     :config
     (set-face-attribute 'avy-lead-face nil
                         :foreground panda/neon-green
@@ -562,9 +562,11 @@ Activate with ~company-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :demand t
-    :bind (:map company-active-map
-                ("<tab>" . company-complete-selection)
-                ("C-w" . nil))
+    :general
+    (general-iemap
+      :keymaps 'company-active-map
+      "<tab>" 'company-complete-selection
+      "C-w" nil)
     :config
     (delete 'company-dabbrev company-backends)
     (setq company-dabbrev-code-modes nil
@@ -589,40 +591,36 @@ Activate with ~flycheck-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
     :demand t
-    :bind (("C-c f" . hydra-flycheck/body))
+    :general
+    (panda/general-navigation "e" 'hydra-flycheck/body)
     :config
     (defhydra hydra-flycheck (:hint nil :color pink)
       "
   flycheck
   [_p_]: previous error    [_n_]: next error
   [_/_]: cancel"
-        ("p" flycheck-previous-error)
-        ("n" flycheck-next-error)
-        ("/" (message "Abort") :color blue))
-      (setq flycheck-check-syntax-automatically '(mode-enabled save)))
+      ("p" flycheck-previous-error)
+      ("n" flycheck-next-error)
+      ("/" (message "Abort") :color blue))
+    (setq flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
 *** Code Snippets
 Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :demand t
-    :bind (:map yas-minor-mode-map
-                ("<tab>" . nil)
-                ("TAB" . nil)
-                ("S-<tab>" . yas-expand)
-                ("<backtab>" . yas-expand)
-                :map yas-keymap
-                ("S-<tab>" . nil)
-                ("<backtab>" . nil)
-                ("<tab>" . panda/company-or-yas-next-field)
-                ("TAB" . panda/company-or-yas-next-field))
+    :general
+    (general-iemap
+      :keymaps 'yas-minor-mode-map
+      "<tab>" 'nil
+      "TAB" 'nil
+      "S-<tab>" 'yas-expand
+      "<backtab>" 'yas-expand)
+    (general-iemap
+      :keymaps 'yas-keymap
+      "S-<tab>" 'nil
+      "<backtab>" 'nil)
     :config
-    (defun panda/company-or-yas-next-field()
-      (interactive)
-      (if (and (bound-and-true-p company-mode)
-               company-candidates)
-          (call-interactively #'company-complete-selection)
-        (yas-next-field)))
     (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
     (yas-reload-all)
     (setq yas-triggers-in-field t
@@ -634,8 +632,8 @@ Activate with ~yas-minor-mode~.
 
   (use-package ivy-yasnippet
     :after yasnippet
-    :bind (:map yas-minor-mode-map
-                ("C-c y" . ivy-yasnippet)))
+    :general
+    (panda/general-editing "s" 'ivy-yasnippet))
 #+END_SRC
 * Language Modes
 *** Assembly
