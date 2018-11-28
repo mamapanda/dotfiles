@@ -31,6 +31,35 @@ Move Emacs's customize settings to a separate file.
   (require 'use-package)
   (setq use-package-always-ensure t)
 #+END_SRC
+* Evil
+#+BEGIN_SRC emacs-lisp
+  (use-package goto-chg
+    :defer t)
+
+  (use-package evil
+    :init
+    (setq evil-want-C-u-scroll t
+          evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+
+  (use-package evil-tutor
+    :defer t)
+
+  (use-package evil-collection
+    :after evil
+    :init
+    (setq evil-collection-setup-minibuffer t)
+    :config
+    (evil-collection-init))
+
+  (use-package evil-escape
+    :after evil
+    :config
+    (evil-escape-mode 1)
+    (setq-default evil-escape-key-sequence "fd")
+    (setq-default evil-escape-delay 0.1))
+#+END_SRC
 * Appearance
 *** Defaults
 #+BEGIN_SRC emacs-lisp
@@ -89,10 +118,10 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
     (diminish 'auto-revert-mode))
 #+END_SRC
 *** Line Numbers
-Use ~C-c n~ to toggle line numbers. They're off by default.
+Line numbers are off by default. Enable them with ~M-x nlinum-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package nlinum
-    :bind (("C-c n" . nlinum-mode)))
+    :defer t)
 #+END_SRC
 *** Cursor Beacon
 #+BEGIN_SRC emacs-lisp
@@ -110,73 +139,57 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
     :init
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 #+END_SRC
-* User Keymap
+* Leader Keymap
 #+BEGIN_SRC emacs-lisp
-  (defvar panda/leader-map (make-sparse-keymap)
-    "Leader key map")
-
   (use-package general
     :config
     (general-override-mode)
+    (general-evil-setup)
+
     (general-define-key
-     :states '(emacs insert)
+     :states '(emacs insert normal visual)
      :keymaps 'override
-     :prefix "M-p"
+     :prefix "SPC"
+     :non-normal-prefix "M-p"
      :prefix-map 'panda/leader-map)
+
     (general-create-definer panda/general-leader
       :keymaps 'panda/leader-map)
 
+    (general-create-definer panda/general-buffer
+      :wrapping panda/general-leader
+      :prefix "b"
+      :prefix-command 'buffer-prefix)
+
     (general-create-definer panda/general-file
       :wrapping panda/general-leader
-      :prefix "f")
+      :prefix "f"
+      :prefix-command 'file-prefix)
+
+    (general-create-definer panda/general-git
+      :wrapping panda/general-leader
+      :prefix "g"
+      :prefix-command 'git-prefix)
+
     (general-create-definer panda/general-navigation
       :wrapping panda/general-leader
-      :prefix "n")
+      :prefix "n"
+      :prefix-command 'navigation-prefix)
+
     (general-create-definer panda/general-workspace
       :wrapping panda/general-leader
-      :prefix "q")
-    (general-create-definer panda/text
+      :prefix "q"
+      :prefix-command 'workspace-prefix)
+
+    (general-create-definer panda/general-editing
       :wrapping panda/general-leader
-      :prefix "t")
+      :prefix "e"
+      :prefix-command 'editing-prefix)
+
     (general-create-definer panda/general-window
       :wrapping panda/general-leader
-      :prefix "w"))
-#+END_SRC
-* Evil
-#+BEGIN_SRC emacs-lisp
-  (use-package goto-chg
-    :defer t)
-
-  (use-package evil
-    :init
-    (setq evil-want-C-u-scroll t
-          evil-want-keybinding nil
-          evil-disable-insert-state-bindings t)
-    :config
-    (evil-mode 1)
-    (general-evil-setup)
-    (general-define-key
-     :states '(normal visual)
-     :keymaps 'override
-     :prefix "SPC"
-     :prefix-map 'panda/leader-map))
-
-  (use-package evil-tutor
-    :defer t)
-
-  (use-package evil-collection
-    :after evil
-    :init
-    (setq evil-collection-setup-minibuffer t)
-    :config
-    (evil-collection-init))
-
-  (use-package evil-escape
-    :after evil
-    :config
-    (evil-escape-mode 1)
-    (setq-default evil-escape-key-sequence "fd")
-    (setq-default evil-escape-delay 0.1))
+      :prefix "w"
+      :prefix-command 'window-prefix))
 #+END_SRC
 * General Defaults
 #+BEGIN_SRC emacs-lisp
@@ -198,7 +211,7 @@ Use ~C-c n~ to toggle line numbers. They're off by default.
 
   (global-auto-revert-mode t)
 #+END_SRC
-* General Emacs Key Definitions
+* General Key Definitions
 *** Cutting Text
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-text ()
@@ -255,8 +268,7 @@ Colors that look nice with Monokai.
 #+BEGIN_SRC emacs-lisp
   (use-package eyebrowse
     :general
-    (panda/general-workspace
-      "." 'eyebrowse-switch-to-window-config
+    (panda/general-window
       "0" 'eyebrowse-switch-to-window-config-0
       "1" 'eyebrowse-switch-to-window-config-1
       "2" 'eyebrowse-switch-to-window-config-2
@@ -274,71 +286,80 @@ Colors that look nice with Monokai.
 Miscellaneous functions.
 #+BEGIN_SRC emacs-lisp
   (use-package crux
-    :bind (("C-c x e" . crux-eval-and-replace)
-           ("C-c x t" . crux-transpose-windows)
-           ("C-c x d" . crux-delete-file-and-buffer)
-           ("C-c x c" . crux-copy-file-preserve-attributes)
-           ("C-c x r" . crux-rename-file-and-buffer)
-           ("C-c x i" . crux-find-user-init-file)))
+    :general
+    (panda/general-file
+      "c" 'crux-copy-file-preserve-attributes
+      "d" 'crux-delete-file-and-buffer
+      "i" 'crux-find-user-init-file
+      "r" 'crux-rename-file-and-buffer)
+    (panda/general-editing
+      "e" 'crux-eval-and-replace)
+    (panda/general-window
+      "t" 'crux-transpose-windows))
 #+END_SRC
 *** Find and Replace
 #+BEGIN_SRC emacs-lisp
   (use-package anzu
-    :bind (("C-c r" . anzu-query-replace))
+    :general
+    (panda/general-editing "r" 'anzu-query-replace)
     :config
     (global-anzu-mode t))
 #+END_SRC
 *** Moving Delimiters
 #+BEGIN_SRC emacs-lisp
   (use-package corral
-    :bind (("C-c c" . hydra-corral/body))
+    :general
+    (panda/general-editing "b" 'hydra-corral/body)
     :config
     (defhydra hydra-corral (:hint nil :color pink)
       "
-corral
-[_{_]: braces backward         [_}_]: braces forward
-[_[_]: brackets backward       [_]_]: brackets forward
-[_(_]: parentheses backward    [_)_]: parentheses forward
-[_/_]: cancel"
-      ("{" corral-braces-backward)
-      ("}" corral-braces-forward)
-      ("[" corral-brackets-backward)
-      ("]" corral-brackets-forward)
-      ("(" corral-parentheses-backward)
-      (")" corral-parentheses-forward)
-      ("/" (message "Abort") :color blue)))
+  corral
+  [_{_]: braces backward         [_}_]: braces forward
+  [_[_]: brackets backward       [_]_]: brackets forward
+  [_(_]: parentheses backward    [_)_]: parentheses forward
+  [_/_]: cancel"
+        ("{" corral-braces-backward)
+        ("}" corral-braces-forward)
+        ("[" corral-brackets-backward)
+        ("]" corral-brackets-forward)
+        ("(" corral-parentheses-backward)
+        (")" corral-parentheses-forward)
+        ("/" (message "Abort") :color blue)))
 #+END_SRC
 *** Expanding Selected Region
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
-    :bind (("C-;" . er/expand-region)))
+    :general
+    (general-iemap "C-;" 'er/expand-region)
+    (general-vmap ";" 'er/expand-region))
 #+END_SRC
 *** Multiple Cursors
 #+BEGIN_SRC emacs-lisp
   (use-package multiple-cursors
-    :bind (("C-c m" . hydra-multiple-cursors/body))
+    :general
+    (panda/general-editing "m" 'hydra-multiple-cursors/body)
     :config
     (defhydra hydra-multiple-cursors (:hint nil :color pink)
       "
-multiple-cursors
-[_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
-[_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
-[_/_]: cancel"
-      ("p" mc/mark-previous-like-this)
-      ("n" mc/mark-next-like-this)
-      ("l" mc/edit-lines :color blue)
-      ("a" mc/mark-all-like-this :color blue)
-      ("/" (message "Abort") :color blue)))
+  multiple-cursors
+  [_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
+  [_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
+  [_/_]: cancel"
+        ("p" mc/mark-previous-like-this)
+        ("n" mc/mark-next-like-this)
+        ("l" mc/edit-lines :color blue)
+        ("a" mc/mark-all-like-this :color blue)
+        ("/" (message "Abort") :color blue)))
 #+END_SRC
 *** Hiding/Showing Code Blocks
 #+BEGIN_SRC emacs-lisp
-    (use-package origami
-      :demand t
-      :bind (:map origami-mode-map
-                  ("C-c o" . hydra-origami/body))
-      :config
-      (defhydra hydra-origami (:hint nil :color pink)
-        "
+  (use-package origami
+    :demand t
+    :general
+    (panda/general-navigation "f" 'hydra-origami/body)
+    :config
+    (defhydra hydra-origami (:hint nil :color pink)
+      "
   origami
   [_p_]: previous fold     [_n_]: next fold
   [_o_]: open fold         [_c_]: close fold         [_t_]: toggle fold         [_s_]: show only fold
@@ -358,20 +379,26 @@ multiple-cursors
       (global-origami-mode))
 #+END_SRC
 *** Undo/Redo
-More natural undo/redo behavior. ~C-x u~ opens the undo tree.
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
     :demand t
-    :bind (:map undo-tree-map
-                ("C-." . undo-tree-redo)
-                ("C-?" . nil))
+    :general
+    (general-iemap
+      :keymaps 'origami-mode-map
+      "C-." 'undo-tree-redo
+      "C-?" nil)
+    (panda/general-editing
+     "u" 'undo-tree-visualize)
     :config
     (global-undo-tree-mode))
 #+END_SRC
 *** Undo/Redo Window Configuration
-~C-c <left>~ to undo; ~C-c <right>~ to redo.
 #+BEGIN_SRC emacs-lisp
   (use-package winner
+    :general
+    (panda/general-window
+      "u" 'winner-undo
+      "r" 'winner-redo)
     :config
     (winner-mode t))
 #+END_SRC
@@ -391,17 +418,29 @@ Dependencies:
     :ensure counsel
     :diminish ivy-mode
     :demand t
-    :bind (("C-x b" . ivy-switch-buffer)
-           ("C-x C-f" . counsel-find-file)
-           ("C-s" . swiper)
-           ("C-c s" . counsel-rg)
-           ("C-r" . ivy-resume)
-           ("M-x" . counsel-M-x)
-           ("M-y" . counsel-yank-pop)
-           :map ivy-minibuffer-map
-           ("<return>" . ivy-alt-done))
+    :general
+    (general-define-key
+     :states '(emacs insert normal visual)
+     "C-s" 'swiper)
+    (general-iemap
+      "C-x b" 'ivy-switch-buffer
+      "C-r" 'ivy-resume)
+    (panda/general-buffer
+      "b" 'ivy-switch-buffer)
+    (panda/general-file
+      "f" 'counsel-find-file)
+    (panda/general-navigation
+      "r" 'counsel-rg)
+    (panda/general-editing
+      "p" 'counsel-yank-pop-after-point
+      "P" 'counsel-yank-pop)
+    (general-define-key
+     :states '(emacs insert)
+     :keymaps 'ivy-minibuffer-map
+     "<return>" 'ivy-alt-done)
     :config
     (ivy-mode 1)
+    (counsel-mode 1)
     (setq ivy-wrap t
           ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                   (t . ivy--regex-fuzzy))
@@ -423,7 +462,9 @@ Dependencies:
 *** Jumping Between Windows
 #+BEGIN_SRC emacs-lisp
   (use-package ace-window
-    :bind (("C-x o" . ace-window))
+    :general
+    (general-iemap "C-x o" 'ace-window)
+    (panda/general-window "w" 'ace-window)
     :config
     (set-face-attribute 'aw-leading-char-face nil
                         :foreground panda/neon-green
@@ -432,7 +473,9 @@ Dependencies:
 *** Jumping to a Word
 #+BEGIN_SRC emacs-lisp
   (use-package avy
-    :bind (("C-c SPC" . avy-goto-word-1))
+    :general
+    (panda/general-leader
+      "SPC" 'avy-goto-char)
     :config
     (set-face-attribute 'avy-lead-face nil
                         :foreground panda/neon-green
@@ -452,7 +495,8 @@ Dependencies:
 #+BEGIN_SRC emacs-lisp
   (use-package imenu
     :defer t
-    :bind (("C-c i" . imenu))
+    :general
+    (panda/general-navigation "i" 'imenu)
     :config
     (setq imenu-auto-rescan t))
 #+END_SRC
@@ -460,7 +504,8 @@ Dependencies:
 #+BEGIN_SRC emacs-lisp
   (use-package neotree
     :after projectile
-    :bind (("C-c t" . panda/neotree-toggle))
+    :general
+    (panda/general-file "t" 'panda/neotree-toggle)
     :config
     (defun panda/neotree-toggle ()
       (interactive)
@@ -476,7 +521,10 @@ Dependencies:
 *** Project Navigation
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :bind-keymap (("C-c p" . projectile-command-map))
+    :general
+    (panda/general-leader
+      :prefix "p"
+      :prefix-command 'projectile-command-map)
     :config
     (projectile-mode)
     (setq projectile-indexing-method 'alien
@@ -488,14 +536,16 @@ Dependencies:
 *** Git Interface
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :bind (("C-c g" . magit-status))
+    :general
+    (panda/general-git "g" 'magit-status)
     :config
     (setq magit-auto-revert-mode nil))
 #+END_SRC
 *** Git Timemachine
 #+BEGIN_SRC emacs-lisp
   (use-package git-timemachine
-    :defer t)
+    :general
+    (panda/general-git "t" 'git-timemachine))
 #+END_SRC
 * Debugging
 Call ~M-x load-library~ on ~realgud~ to load the package.
