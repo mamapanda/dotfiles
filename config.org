@@ -193,7 +193,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
       :prefix "w"
       :prefix-command 'window-prefix))
 #+END_SRC
-* General Defaults
+* Basic Configuration
+*** Defaults
 #+BEGIN_SRC emacs-lisp
   (setq auto-save-default nil
         c-default-style '((java-mode . "java")
@@ -213,8 +214,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 
   (global-auto-revert-mode t)
 #+END_SRC
-* General Key Definitions
-*** Cutting Text
+*** Key Definitions
+***** Cutting Text
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-text ()
     (interactive)
@@ -224,7 +225,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 
   (general-iemap "C-w" #'panda/kill-text)
 #+END_SRC
-*** Deleting All Whitespace Before Cursor
+***** Deleting All Whitespace Before Cursor
 #+BEGIN_SRC emacs-lisp
   (defun panda/kill-whitespace ()
     (interactive)
@@ -233,7 +234,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 
   (general-iemap "M-DEL" #'panda/kill-whitespace)
 #+END_SRC
-*** Keybind Help
+***** Keybind Help
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
     :diminish which-key-mode
@@ -243,8 +244,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
           which-key-idle-delay 1.0)
     (which-key-mode 1))
 #+END_SRC
-* General Constants
-*** Colors
+*** Constants
+***** Colors
 Colors that look nice with Monokai.
 #+BEGIN_SRC emacs-lisp
   (defconst panda/neon-green "#39FF14")
@@ -265,146 +266,9 @@ Colors that look nice with Monokai.
   (use-package pacmacs
     :defer t)
 #+END_SRC
-* Editing
-*** Workspaces
-#+BEGIN_SRC emacs-lisp
-  (use-package eyebrowse
-    :general
-    (panda/general-window
-      "0" 'eyebrowse-switch-to-window-config-0
-      "1" 'eyebrowse-switch-to-window-config-1
-      "2" 'eyebrowse-switch-to-window-config-2
-      "3" 'eyebrowse-switch-to-window-config-3
-      "4" 'eyebrowse-switch-to-window-config-4
-      "5" 'eyebrowse-switch-to-window-config-5
-      "6" 'eyebrowse-switch-to-window-config-6
-      "7" 'eyebrowse-switch-to-window-config-7
-      "8" 'eyebrowse-switch-to-window-config-8
-      "9" 'eyebrowse-switch-to-window-config-9)
-    :config
-    (eyebrowse-mode 1))
-#+END_SRC
-*** Crux
-Miscellaneous functions.
-#+BEGIN_SRC emacs-lisp
-  (use-package crux
-    :general
-    (panda/general-file
-      "c" 'crux-copy-file-preserve-attributes
-      "d" 'crux-delete-file-and-buffer
-      "i" 'crux-find-user-init-file
-      "r" 'crux-rename-file-and-buffer)
-    (panda/general-editing
-      "e" 'crux-eval-and-replace)
-    (panda/general-window
-      "t" 'crux-transpose-windows))
-#+END_SRC
-*** Find and Replace
-#+BEGIN_SRC emacs-lisp
-  (use-package anzu
-    :general
-    (panda/general-editing "r" 'anzu-query-replace)
-    :config
-    (global-anzu-mode t))
-#+END_SRC
-*** Moving Delimiters
-#+BEGIN_SRC emacs-lisp
-  (use-package corral
-    :general
-    (panda/general-editing "b" 'hydra-corral/body)
-    :config
-    (defhydra hydra-corral (:hint nil :color pink)
-      "
-  corral
-  [_{_]: braces backward         [_}_]: braces forward
-  [_[_]: brackets backward       [_]_]: brackets forward
-  [_(_]: parentheses backward    [_)_]: parentheses forward
-  [_/_]: cancel"
-        ("{" corral-braces-backward)
-        ("}" corral-braces-forward)
-        ("[" corral-brackets-backward)
-        ("]" corral-brackets-forward)
-        ("(" corral-parentheses-backward)
-        (")" corral-parentheses-forward)
-        ("/" (message "Abort") :color blue)))
-#+END_SRC
-*** Expanding Selected Region
-#+BEGIN_SRC emacs-lisp
-  (use-package expand-region
-    :general
-    (general-iemap "C-;" 'er/expand-region)
-    (general-vmap ";" 'er/expand-region))
-#+END_SRC
-*** Multiple Cursors
-#+BEGIN_SRC emacs-lisp
-  (use-package multiple-cursors
-    :general
-    (panda/general-editing "m" 'hydra-multiple-cursors/body)
-    :config
-    (defhydra hydra-multiple-cursors (:hint nil :color pink)
-      "
-  multiple-cursors
-  [_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
-  [_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
-  [_/_]: cancel"
-        ("p" mc/mark-previous-like-this)
-        ("n" mc/mark-next-like-this)
-        ("l" mc/edit-lines :color blue)
-        ("a" mc/mark-all-like-this :color blue)
-        ("/" (message "Abort") :color blue)))
-#+END_SRC
-*** Hiding/Showing Code Blocks
-#+BEGIN_SRC emacs-lisp
-  (use-package origami
-    :demand t
-    :general
-    (panda/general-navigation "f" 'hydra-origami/body)
-    :config
-    (defhydra hydra-origami (:hint nil :color pink)
-      "
-  origami
-  [_p_]: previous fold     [_n_]: next fold
-  [_o_]: open fold         [_c_]: close fold         [_t_]: toggle fold         [_s_]: show only fold
-  [_O_]: open all folds    [_C_]: close all folds    [_T_]: toggle all folds
-  [_r_]: reset             [_/_]: cancel"
-        ("p" origami-previous-fold)
-        ("n" origami-forward-fold)
-        ("o" origami-open-node)
-        ("c" origami-close-node)
-        ("t" origami-toggle-node)
-        ("s" origami-show-only-node)
-        ("O" origami-open-all-nodes :color blue)
-        ("C" origami-close-all-nodes :color blue)
-        ("T" origami-toggle-all-nodes :color blue)
-        ("r" origami-reset :color blue)
-        ("/" (message "Abort") :color blue))
-      (global-origami-mode))
-#+END_SRC
-*** Undo/Redo
-#+BEGIN_SRC emacs-lisp
-  (use-package undo-tree
-    :demand t
-    :general
-    (general-iemap
-      :keymaps 'origami-mode-map
-      "C-." 'undo-tree-redo
-      "C-?" nil)
-    (panda/general-editing
-     "u" 'undo-tree-visualize)
-    :config
-    (global-undo-tree-mode))
-#+END_SRC
-*** Undo/Redo Window Configuration
-#+BEGIN_SRC emacs-lisp
-  (use-package winner
-    :general
-    (panda/general-window
-      "u" 'winner-undo
-      "r" 'winner-redo)
-    :config
-    (winner-mode t))
-#+END_SRC
-* Ivy Completion
+* Global Packages
+*** Multi-Purpose
+***** Ivy
 ~flx~ and ~smex~ give better regex sorting and completion sorting, respectively.
 
 Dependencies:
@@ -424,7 +288,6 @@ Dependencies:
     (panda/general-leader "s" 'swiper)
     (general-iemap
       "C-s" 'swiper
-      "C-x b" 'ivy-switch-buffer
       "C-r" 'ivy-resume)
     (panda/general-buffer
       "b" 'ivy-switch-buffer
@@ -458,19 +321,131 @@ Dependencies:
     (set-face-attribute 'ivy-confirm-face nil
                         :foreground panda/neon-green))
 #+END_SRC
-* Navigation
-*** Jumping Between Windows
+***** Crux
+Miscellaneous functions.
 #+BEGIN_SRC emacs-lisp
-  (use-package ace-window
+  (use-package crux
     :general
-    (general-iemap "C-x o" 'ace-window)
-    (panda/general-window "w" 'ace-window)
-    :config
-    (set-face-attribute 'aw-leading-char-face nil
-                        :foreground panda/neon-green
-                        :weight 'bold))
+    (panda/general-file
+      "c" 'crux-copy-file-preserve-attributes
+      "d" 'crux-delete-file-and-buffer
+      "i" 'crux-find-user-init-file
+      "r" 'crux-rename-file-and-buffer)
+    (panda/general-editing
+      "e" 'crux-eval-and-replace)
+    (panda/general-window
+      "t" 'crux-transpose-windows))
 #+END_SRC
-*** Jumping to a Word
+*** Buffer
+Empty for now.
+*** Debugging
+Call ~M-x load-library~ on ~realgud~ to load the package.
+Use ~realgud:<debugger-name>~ to run the debugger.
+#+BEGIN_SRC emacs-lisp
+  (use-package realgud
+    :defer t)
+#+END_SRC
+*** Editing
+***** Anzu
+Better find-and-replace.
+#+BEGIN_SRC emacs-lisp
+  (use-package anzu
+    :general
+    (panda/general-editing "r" 'anzu-query-replace)
+    :config
+    (global-anzu-mode t))
+#+END_SRC
+***** Corral
+Move braces, brackets, and parentheses.
+#+BEGIN_SRC emacs-lisp
+  (use-package corral
+    :general
+    (panda/general-editing "b" 'hydra-corral/body)
+    :config
+    (defhydra hydra-corral (:hint nil :color pink)
+      "
+  corral
+  [_{_]: braces backward         [_}_]: braces forward
+  [_[_]: brackets backward       [_]_]: brackets forward
+  [_(_]: parentheses backward    [_)_]: parentheses forward
+  [_/_]: cancel"
+        ("{" corral-braces-backward)
+        ("}" corral-braces-forward)
+        ("[" corral-brackets-backward)
+        ("]" corral-brackets-forward)
+        ("(" corral-parentheses-backward)
+        (")" corral-parentheses-forward)
+        ("/" (message "Abort") :color blue)))
+#+END_SRC
+***** Expand Region
+Expand selected region.
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :general
+    (general-iemap "C-;" 'er/expand-region)
+    (general-vmap ";" 'er/expand-region))
+#+END_SRC
+***** Multiple Cursors
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :general
+    (panda/general-editing "m" 'hydra-multiple-cursors/body)
+    :config
+    (defhydra hydra-multiple-cursors (:hint nil :color pink)
+      "
+  multiple-cursors
+  [_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
+  [_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
+  [_/_]: cancel"
+        ("p" mc/mark-previous-like-this)
+        ("n" mc/mark-next-like-this)
+        ("l" mc/edit-lines :color blue)
+        ("a" mc/mark-all-like-this :color blue)
+        ("/" (message "Abort") :color blue)))
+#+END_SRC
+***** Undo Tree
+Linear undo and redo.
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree
+    :demand t
+    :general
+    (general-iemap
+      :keymaps 'origami-mode-map
+      "C-." 'undo-tree-redo
+      "C-?" nil)
+    (panda/general-editing
+     "u" 'undo-tree-visualize)
+    :config
+    (global-undo-tree-mode))
+#+END_SRC
+*** File
+Empty for now.
+*** Git
+***** Magit
+Git interface.
+
+Dependencies:
+- [[https://git-scm.com/downloads][git]]
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :general
+    (panda/general-git "g" 'magit-status)
+    :config
+    (setq magit-auto-revert-mode nil))
+#+END_SRC
+*** Git Timemachine
+Walk through git history.
+
+Dependencies:
+- [[https://git-scm.com/downloads][git]]
+#+BEGIN_SRC emacs-lisp
+  (use-package git-timemachine
+    :general
+    (panda/general-git "t" 'git-timemachine))
+#+END_SRC
+*** Navigation
+***** Avy
+Jump to a word on the screen.
 #+BEGIN_SRC emacs-lisp
   (use-package avy
     :general
@@ -491,7 +466,8 @@ Dependencies:
                         :weight 'bold)
     (setq avy-background t))
 #+END_SRC
-*** Jumping with IMenu
+***** IMenu
+Jump between definitions.
 #+BEGIN_SRC emacs-lisp
   (use-package imenu
     :defer t
@@ -500,7 +476,8 @@ Dependencies:
     :config
     (setq imenu-auto-rescan t))
 #+END_SRC
-*** Navigating a Directory
+***** Neotree
+Navigate a directory.
 #+BEGIN_SRC emacs-lisp
   (use-package neotree
     :after projectile
@@ -518,7 +495,36 @@ Dependencies:
           neo-window-width 30
           neo-window-position 'left))
 #+END_SRC
-*** Project Navigation
+***** Origami
+Show, hide, and navigate code blocks.
+#+BEGIN_SRC emacs-lisp
+  (use-package origami
+    :demand t
+    :general
+    (panda/general-navigation "f" 'hydra-origami/body)
+    :config
+    (defhydra hydra-origami (:hint nil :color pink)
+      "
+  origami
+  [_p_]: previous fold     [_n_]: next fold
+  [_o_]: open fold         [_c_]: close fold         [_t_]: toggle fold         [_s_]: show only fold
+  [_O_]: open all folds    [_C_]: close all folds    [_T_]: toggle all folds
+  [_r_]: reset             [_/_]: cancel"
+        ("p" origami-previous-fold)
+        ("n" origami-forward-fold)
+        ("o" origami-open-node)
+        ("c" origami-close-node)
+        ("t" origami-toggle-node)
+        ("s" origami-show-only-node)
+        ("O" origami-open-all-nodes :color blue)
+        ("C" origami-close-all-nodes :color blue)
+        ("T" origami-toggle-all-nodes :color blue)
+        ("r" origami-reset :color blue)
+        ("/" (message "Abort") :color blue))
+      (global-origami-mode))
+#+END_SRC
+*** Project
+***** Projectile
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
     :general
@@ -530,33 +536,57 @@ Dependencies:
     (setq projectile-indexing-method 'alien
           projectile-completion-system 'ivy))
 #+END_SRC
-* Source Control
-Dependencies:
-- [[https://git-scm.com/downloads][git]]
-*** Git Interface
+*** Window
+***** Ace Window
+Jump quickly between multiple windows.
 #+BEGIN_SRC emacs-lisp
-  (use-package magit
+  (use-package ace-window
     :general
-    (panda/general-git "g" 'magit-status)
+    (general-iemap "C-x o" 'ace-window)
+    (panda/general-window "w" 'ace-window)
     :config
-    (setq magit-auto-revert-mode nil))
+    (set-face-attribute 'aw-leading-char-face nil
+                        :foreground panda/neon-green
+                        :weight 'bold))
 #+END_SRC
-*** Git Timemachine
+***** Eyebrowse
+Workspaces.
 #+BEGIN_SRC emacs-lisp
-  (use-package git-timemachine
+  (use-package eyebrowse
     :general
-    (panda/general-git "t" 'git-timemachine))
+    (panda/general-window
+      "0" 'eyebrowse-switch-to-window-config-0
+      "1" 'eyebrowse-switch-to-window-config-1
+      "2" 'eyebrowse-switch-to-window-config-2
+      "3" 'eyebrowse-switch-to-window-config-3
+      "4" 'eyebrowse-switch-to-window-config-4
+      "5" 'eyebrowse-switch-to-window-config-5
+      "6" 'eyebrowse-switch-to-window-config-6
+      "7" 'eyebrowse-switch-to-window-config-7
+      "8" 'eyebrowse-switch-to-window-config-8
+      "9" 'eyebrowse-switch-to-window-config-9)
+    :config
+    (eyebrowse-mode 1))
 #+END_SRC
-* Debugging
-Call ~M-x load-library~ on ~realgud~ to load the package.
-Use ~realgud:<debugger-name>~ to run the debugger.
+***** Winner
+Undo/redo changes in window configuration.
 #+BEGIN_SRC emacs-lisp
-  (use-package realgud
-    :defer t)
+  (use-package winner
+    :general
+    (panda/general-window
+      "u" 'winner-undo
+      "r" 'winner-redo)
+    :config
+    (winner-mode t))
 #+END_SRC
-* Per-Language Modes
-*** Auto-Completion
-Activate with ~company-mode~.
+* Per-Language Packages
+*** Aggressive Indent
+Indents code with every change. Activate with ~aggressive-indent-mode~.
+#+BEGIN_SRC emacs-lisp
+  (use-package aggressive-indent)
+#+END_SRC
+*** Company
+Activate auto-completion with ~company-mode~.
 
 ~C-w~ is unbound in ~company-active-map~ because it interferes with ~kill-line~.
 #+BEGIN_SRC emacs-lisp
@@ -574,20 +604,13 @@ Activate with ~company-mode~.
           company-minimum-prefix-length 1
           company-tooltip-align-annotations t))
 #+END_SRC
-*** Auto-Formatting
-Activate with ~format-all-mode~.
-
-Auto-formats source files on save.
+*** Format All
+Auto-formats source files on save. Activate with ~format-all-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package format-all)
 #+END_SRC
-*** Aggressive Indent
-Activate with ~aggressive-indent-mode~.
-#+BEGIN_SRC emacs-lisp
-  (use-package aggressive-indent)
-#+END_SRC
-*** Error Checking
-Activate with ~flycheck-mode~.
+*** Flycheck
+Linting. Activate with ~flycheck-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
     :demand t
@@ -604,8 +627,8 @@ Activate with ~flycheck-mode~.
       ("/" (message "Abort") :color blue))
     (setq flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
-*** Code Snippets
-Activate with ~yas-minor-mode~.
+*** Yasnippet
+Code snippets. Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :demand t
