@@ -715,7 +715,14 @@ Dependencies:
     (add-hook 'c-mode-hook #'panda/enable-clang-format)
     (add-hook 'c++-mode-hook #'panda/enable-clang-format)
     :config
-    (setq-default clang-format-style "{BasedOnStyle: Google, IndentWidth: 4}"))
+    (setq-default clang-format-style "{ \
+  BasedOnStyle: Google, \
+  AccessModifierOffset: -4, \
+  AlignConsecutiveAssignments: true, \
+  AlignConsecutiveDeclarations: true, \
+  AlignTrailingComments: true, \
+  IndentWidth: 4 \
+  }"))
 #+END_SRC
 *** C#
 Dependencies:
