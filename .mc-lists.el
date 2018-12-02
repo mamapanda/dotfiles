@@ -6,6 +6,7 @@
         anzu-query-replace
         c-electric-brace
         c-electric-colon
+        c-electric-delete-forward
         c-electric-lt-gt
         c-electric-paren
         c-electric-pound
@@ -13,10 +14,13 @@
         c-electric-slash
         c-electric-star
         c-indent-line-or-region
+        evil-backward-char
         evil-delete-char
         evil-emacs-state
+        evil-insert
         evil-next-line
         evil-previous-line
+        evil-replace
         evil-scroll-line-down
         hs-hide-block
         indent-for-tab-command

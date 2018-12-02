@@ -1,6 +1,6 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Daniel Phan
-* Package Initialization
+* Package Management
 #+BEGIN_SRC emacs-lisp
   (require 'package)
 
@@ -15,21 +15,19 @@
 
   (setq package-enable-at-startup nil)
   (package-initialize)
-#+END_SRC
-* Customize File
-Move Emacs's customize settings to a separate file.
-#+BEGIN_SRC emacs-lisp
-  (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
-  (load custom-file 'noerror)
-#+END_SRC
-* Use-Package Setup
-#+BEGIN_SRC emacs-lisp
+
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package))
 
   (require 'use-package)
   (setq use-package-always-ensure t)
+#+END_SRC
+* Customize File
+Move Emacs's customize settings to a separate file.
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
+  (load custom-file 'noerror)
 #+END_SRC
 * Evil
 #+BEGIN_SRC emacs-lisp
@@ -92,19 +90,7 @@ Move Emacs's customize settings to a separate file.
 #+END_SRC
 ** Mode Line
 #+BEGIN_SRC emacs-lisp
-  (defvar panda/modeline 'doom)
-
-  (use-package spaceline-config
-    :if (eq panda/modeline 'spaceline)
-    :ensure spaceline
-    :config
-    (spaceline-emacs-theme)
-    (spaceline-toggle-buffer-size-off)
-    (spaceline-toggle-buffer-modified-off)
-    (spaceline-toggle-hud-off))
-
   (use-package doom-modeline
-    :if (eq panda/modeline 'doom)
     :config
     (doom-modeline-init)
     (setq doom-modeline-icon nil
@@ -268,7 +254,7 @@ Colors that look nice with Monokai.
 #+END_SRC
 * Global Packages
 ** Multi-Purpose
-*** Ivy
+*** Ivy / Counsel / Swiper
 ~flx~ and ~smex~ give better regex sorting and completion sorting, respectively.
 
 Dependencies:
@@ -281,7 +267,6 @@ Dependencies:
     :defer t)
 
   (use-package ivy
-    :ensure counsel
     :diminish ivy-mode
     :demand t
     :general
@@ -292,18 +277,11 @@ Dependencies:
     (panda/general-buffer
       "b" 'ivy-switch-buffer
       "k" 'kill-buffer)
-    (panda/general-file
-      "f" 'counsel-find-file)
-    (panda/general-navigation
-      "r" 'counsel-rg)
-    (panda/general-editing
-      "p" 'counsel-yank-pop)
     (general-iemap
       :keymaps 'ivy-minibuffer-map
       "<return>" 'ivy-alt-done)
     :config
     (ivy-mode 1)
-    (counsel-mode 1)
     (setq ivy-wrap t
           ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                   (t . ivy--regex-fuzzy))
@@ -320,6 +298,18 @@ Dependencies:
                         :weight 'bold)
     (set-face-attribute 'ivy-confirm-face nil
                         :foreground panda/neon-green))
+
+  (use-package counsel
+    :demand t
+    :general
+    (panda/general-file
+      "f" 'counsel-find-file)
+    (panda/general-navigation
+      "r" 'counsel-rg)
+    (panda/general-editing
+      "p" 'counsel-yank-pop)
+    :config
+    (counsel-mode 1))
 #+END_SRC
 *** Crux
 Miscellaneous functions.
@@ -781,6 +771,18 @@ Dependencies:
     :defer t
     :config
     (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
+#+END_SRC
+** CMake
+#+BEGIN_SRC emacs-lisp
+  (defun panda/setup-cmake-mode ()
+    (aggressive-indent-mode 1)
+    (yas-minor-mode 1)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace))
+
+  (use-package cmake-mode
+    :defer t
+    :config
+    (add-hook 'cmake-mode-hook #'panda/setup-cmake-mode))
 #+END_SRC
 ** Common Lisp
 Dependencies:
