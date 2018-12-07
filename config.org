@@ -711,19 +711,21 @@ Dependencies:
   (use-package clang-format
     :defer t
     :init
+    (defvar panda/default-clang-format-file
+      (expand-file-name "default-files/.clang-format" user-emacs-directory))
+    (defun panda/default-clang-format-style ()
+      (with-temp-buffer
+        (insert-file-contents panda/default-clang-format-file)
+        (let ((lines (split-string (buffer-string) "\n" t)))
+          (format "{%s}" (string-join lines ", ")))))
     (defun panda/enable-clang-format ()
+      (setq-local clang-format-style
+                  (if (locate-dominating-file "." ".clang-format")
+                      "file"
+                    (panda/default-clang-format-style)))
       (add-hook 'before-save-hook #'clang-format-buffer nil t))
     (add-hook 'c-mode-hook #'panda/enable-clang-format)
-    (add-hook 'c++-mode-hook #'panda/enable-clang-format)
-    :config
-    (setq-default clang-format-style "{ \
-  BasedOnStyle: Google, \
-  AccessModifierOffset: -4, \
-  AlignConsecutiveAssignments: true, \
-  AlignConsecutiveDeclarations: true, \
-  AlignTrailingComments: true, \
-  IndentWidth: 4 \
-  }"))
+    (add-hook 'c++-mode-hook #'panda/enable-clang-format))
 #+END_SRC
 ** C#
 Dependencies:

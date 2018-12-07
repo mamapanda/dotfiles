@@ -36,7 +36,6 @@
 
 (setq mc/cmds-to-run-once
       '(
-        evil-forward-char
         evil-goto-mark-line
         hydra--digit-argument
         hydra--negative-argument

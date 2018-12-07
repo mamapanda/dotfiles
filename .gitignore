@@ -7,8 +7,11 @@
 !config.org
 !custom-file.el
 
-!snippets
+!snippets/
 !snippets/*/
 !snippets/*/*
+
+!default-files/
+!default-files/*
 
 !.mc-lists.el
