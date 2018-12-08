@@ -37,8 +37,7 @@ Move Emacs's customize settings to a separate file.
   (use-package evil
     :init
     (setq evil-want-C-u-scroll t
-          evil-want-keybinding nil
-          evil-disable-insert-state-bindings t)
+          evil-want-keybinding nil)
     :config
     (evil-mode 1))
 
@@ -133,47 +132,38 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
     :config
     (general-override-mode)
     (general-evil-setup)
-
     (general-define-key
-     :states '(emacs insert normal operator motion replace visual)
+     :states '(insert normal operator motion replace visual)
      :keymaps 'override
      :prefix "SPC"
      :non-normal-prefix "M-p"
      :prefix-map 'panda/leader-map)
-
     (general-create-definer panda/general-leader
       :keymaps 'panda/leader-map)
-
     (general-create-definer panda/general-buffer
       :wrapping panda/general-leader
       :prefix "b"
       :prefix-command 'buffer-prefix)
-
     (general-create-definer panda/general-file
       :wrapping panda/general-leader
       :prefix "f"
       :prefix-command 'file-prefix)
-
     (general-create-definer panda/general-git
       :wrapping panda/general-leader
       :prefix "g"
       :prefix-command 'git-prefix)
-
     (general-create-definer panda/general-navigation
       :wrapping panda/general-leader
       :prefix "n"
       :prefix-command 'navigation-prefix)
-
     (general-create-definer panda/general-workspace
       :wrapping panda/general-leader
       :prefix "q"
       :prefix-command 'workspace-prefix)
-
     (general-create-definer panda/general-editing
       :wrapping panda/general-leader
       :prefix "e"
       :prefix-command 'editing-prefix)
-
     (general-create-definer panda/general-window
       :wrapping panda/general-leader
       :prefix "w"
@@ -201,25 +191,6 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
   (global-auto-revert-mode t)
 #+END_SRC
 ** Key Definitions
-*** Cutting Text
-#+BEGIN_SRC emacs-lisp
-  (defun panda/kill-text ()
-    (interactive)
-    (call-interactively (if (region-active-p)
-                            'kill-region
-                          'kill-whole-line)))
-
-  (general-iemap "C-w" #'panda/kill-text)
-#+END_SRC
-*** Deleting All Whitespace Before Cursor
-#+BEGIN_SRC emacs-lisp
-  (defun panda/kill-whitespace ()
-    (interactive)
-    (while (string-match (char-to-string (char-before)) " \r\n\t")
-      (call-interactively 'delete-backward-char)))
-
-  (general-iemap "M-DEL" #'panda/kill-whitespace)
-#+END_SRC
 *** Keybind Help
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
@@ -271,13 +242,10 @@ Dependencies:
     :demand t
     :general
     (panda/general-leader "s" 'swiper)
-    (general-iemap
-      "C-s" 'swiper
-      "C-r" 'ivy-resume)
     (panda/general-buffer
       "b" 'ivy-switch-buffer
       "k" 'kill-buffer)
-    (general-iemap
+    (general-imap
       :keymaps 'ivy-minibuffer-map
       "<return>" 'ivy-alt-done)
     :config
@@ -374,7 +342,7 @@ Expand selected region.
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
     :general
-    (general-iemap "C-;" 'er/expand-region)
+    (general-imap "C-;" 'er/expand-region)
     (general-vmap ";" 'er/expand-region))
 #+END_SRC
 *** Multiple Cursors
@@ -401,10 +369,6 @@ Linear undo and redo.
   (use-package undo-tree
     :demand t
     :general
-    (general-iemap
-      :keymaps 'origami-mode-map
-      "C-." 'undo-tree-redo
-      "C-?" nil)
     (panda/general-editing
      "u" 'undo-tree-visualize)
     :config
@@ -536,7 +500,6 @@ Jump quickly between multiple windows.
 #+BEGIN_SRC emacs-lisp
   (use-package ace-window
     :general
-    (general-iemap "C-x o" 'ace-window)
     (panda/general-window "w" 'ace-window)
     :config
     (set-face-attribute 'aw-leading-char-face nil
@@ -590,7 +553,7 @@ Activate auto-completion with ~company-mode~.
     (delete 'company-dabbrev company-backends)
     (setq company-dabbrev-code-modes nil
           company-idle-delay 0.1
-          company-minimum-prefix-length 1
+          company-minimum-prefix-length 2
           company-tooltip-align-annotations t))
 #+END_SRC
 ** Format All
