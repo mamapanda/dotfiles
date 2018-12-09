@@ -579,6 +579,20 @@ Linting. Activate with ~flycheck-mode~.
       ("/" (message "Abort") :color blue))
     (setq flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
+** Lsp
+Activate with ~lsp~.
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :demand t
+    :config
+    (require 'lsp-clients))
+
+  (use-package company-lsp
+    :defer t)
+
+  (use-package lsp-ui
+    :defer t)
+#+END_SRC
 ** Yasnippet
 Code snippets. Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
@@ -621,13 +635,12 @@ Dependencies:
 ** C / C++
 Dependencies:
 - [[https://releases.llvm.org/download.html][clang]]
-- [[https://releases.llvm.org/download.html][libclang]]
+- [[https://releases.llvm.org/download.html][clangd]]
 - [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-c-mode ()
     (aggressive-indent-mode 1)
-    (company-mode 1)
-    (flycheck-mode 1)
+    (lsp)
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
@@ -637,32 +650,9 @@ Dependencies:
   (add-hook 'c-mode-hook #'panda/setup-c-mode)
   (add-hook 'c++-mode-hook #'panda/setup-c-mode)
 
-  (use-package irony
-    :defer t
-    :init
-    (add-hook 'c-mode-hook 'irony-mode)
-    (add-hook 'c++-mode-hook 'irony-mode)
-    :config
-    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-    (when (boundp 'w32-pipe-read-delay)
-      (setq w32-pipe-read-delay 0))
-    (when (boundp 'w32-pipe-buffer-size)
-      (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
-
-  (use-package company-irony
-    :after company-irony-c-headers
-    :config
-    (add-to-list 'company-backends 'company-irony))
-
-  (use-package company-irony-c-headers
-    :after irony
-    :config
-    (add-to-list 'company-backends 'company-irony-c-headers))
-
-  (use-package flycheck-irony
-    :after irony
-    :config
-    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+  (use-package lsp-clangd
+    :hook ((c-mode-hook . lsp-clangd-c-enable)
+           (c++-mode-hook . lsp-clangd-c++-enable)))
 
   (use-package clang-format
     :defer t
