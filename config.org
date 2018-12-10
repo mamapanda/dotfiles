@@ -538,11 +538,6 @@ Undo/redo changes in window configuration.
     (winner-mode t))
 #+END_SRC
 * Per-Language Packages
-** Aggressive Indent
-Indents code with every change. Activate with ~aggressive-indent-mode~.
-#+BEGIN_SRC emacs-lisp
-  (use-package aggressive-indent)
-#+END_SRC
 ** Company
 Activate auto-completion with ~company-mode~.
 
@@ -640,7 +635,6 @@ Dependencies:
 - [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-c-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
@@ -656,7 +650,8 @@ Dependencies:
                                  (require 'ccls)
                                  (lsp)))
     :custom
-    (ccls-executable (expand-file-name "ccls/build/ccls" user-emacs-directory)))
+    (ccls-executable
+     (expand-file-name "lsp-servers/ccls/ccls" user-emacs-directory)))
 
   (use-package clang-format
     :defer t
@@ -683,7 +678,6 @@ Dependencies:
   - can be installed with ~M-x omnisharp-install-server~
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-csharp-mode ()
-    (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
@@ -704,7 +698,6 @@ Dependencies:
 ** Clojure
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-clojure-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -716,7 +709,6 @@ Dependencies:
 ** CMake
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-cmake-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
@@ -730,7 +722,6 @@ Dependencies:
 - [[http://www.sbcl.org/platform-table.html][sbcl]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-slime-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -744,7 +735,6 @@ Dependencies:
 ** Emacs Lisp
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-emacs-lisp-mode ()
-    (aggressive-indent-mode 1)
     (company-mode 1)
     (format-all-mode 1)
     (yas-minor-mode 1))
@@ -778,7 +768,6 @@ Dependencies:
 - [[https://golang.org/cmd/gofmt/][gofmt]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-go-mode ()
-    (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
     (format-all-mode 1)
@@ -826,7 +815,6 @@ Dependencies:
 ** HTML / PHP / ASP.NET / Embedded Ruby
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-web-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -850,7 +838,6 @@ Dependencies
 - [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-java-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (panda/enable-clang-format))
 
@@ -864,7 +851,6 @@ Dependencies:
 - [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-javascript-mode ()
-    (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1)
@@ -928,7 +914,6 @@ Dependencies:
 ** PowerShell
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-powershell-mode ()
-    (aggressive-indent-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -976,7 +961,6 @@ Dependencies:
 - [[https://github.com/rust-lang-nursery/rustfmt][rustfmt]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-rust-mode ()
-    (aggressive-indent-mode 1)
     (company-mode 1)
     (if (locate-dominating-file default-directory "Cargo.toml")
         (flycheck-mode 1))
@@ -1010,7 +994,6 @@ Dependencies:
 - [[https://nodejs.org/en/][node.js]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-typescript-mode ()
-    (aggressive-indent-mode 1)
     (company-mode 1)
     (flycheck-mode 1)
     (yas-minor-mode 1))

@@ -1,6 +1,7 @@
 *
 
 !.gitignore
+!.gitmodules
 
 !init.el
 !config.org
