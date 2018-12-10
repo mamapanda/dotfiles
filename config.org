@@ -180,7 +180,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
         inhibit-compacting-font-caches t
         make-backup-files nil)
 
-  (setq-default c-basic-offset 4
+  (setq-default buffer-file-coding-system 'utf-8
+                c-basic-offset 4
                 indent-tabs-mode nil
                 tab-width 4)
 
@@ -640,7 +641,6 @@ Dependencies:
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-c-mode ()
     (aggressive-indent-mode 1)
-    (lsp)
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
@@ -650,9 +650,13 @@ Dependencies:
   (add-hook 'c-mode-hook #'panda/setup-c-mode)
   (add-hook 'c++-mode-hook #'panda/setup-c-mode)
 
-  (use-package lsp-clangd
-    :hook ((c-mode-hook . lsp-clangd-c-enable)
-           (c++-mode-hook . lsp-clangd-c++-enable)))
+  (use-package ccls
+    :hook ((c-mode c++-mode) . (lambda ()
+                                 (interactive)
+                                 (require 'ccls)
+                                 (lsp)))
+    :custom
+    (ccls-executable (expand-file-name "ccls/build/ccls" user-emacs-directory)))
 
   (use-package clang-format
     :defer t
