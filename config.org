@@ -64,6 +64,9 @@ Move Emacs's customize settings to a separate file.
     :after evil
     :config
     (global-evil-surround-mode 1))
+
+  (use-package evil-anzu
+    :after evil)
 #+END_SRC
 * Appearance
 ** Defaults
@@ -97,10 +100,11 @@ Move Emacs's customize settings to a separate file.
 ** Mode Line
 #+BEGIN_SRC emacs-lisp
   (use-package doom-modeline
+    :custom
+    (doom-modeline-icon nil)
+    (doom-modeline-buffer-file-name-style 'relative-from-project)
     :config
-    (doom-modeline-init)
-    (setq doom-modeline-icon nil
-          doom-modeline-buffer-file-name-style 'relative-from-project))
+    (doom-modeline-init))
 #+END_SRC
 ** Diminish
 Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
@@ -147,35 +151,7 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
      :non-normal-prefix "M-p"
      :prefix-map 'panda/leader-map)
     (general-create-definer panda/general-leader
-      :keymaps 'panda/leader-map)
-    (general-create-definer panda/general-buffer
-      :wrapping panda/general-leader
-      :prefix "b"
-      :prefix-command 'buffer-prefix)
-    (general-create-definer panda/general-file
-      :wrapping panda/general-leader
-      :prefix "f"
-      :prefix-command 'file-prefix)
-    (general-create-definer panda/general-git
-      :wrapping panda/general-leader
-      :prefix "g"
-      :prefix-command 'git-prefix)
-    (general-create-definer panda/general-navigation
-      :wrapping panda/general-leader
-      :prefix "n"
-      :prefix-command 'navigation-prefix)
-    (general-create-definer panda/general-workspace
-      :wrapping panda/general-leader
-      :prefix "q"
-      :prefix-command 'workspace-prefix)
-    (general-create-definer panda/general-editing
-      :wrapping panda/general-leader
-      :prefix "e"
-      :prefix-command 'editing-prefix)
-    (general-create-definer panda/general-window
-      :wrapping panda/general-leader
-      :prefix "w"
-      :prefix-command 'window-prefix))
+      :keymaps 'panda/leader-map))
 #+END_SRC
 * Basic Configuration
 ** Defaults
@@ -251,20 +227,20 @@ Dependencies:
     :diminish ivy-mode
     :demand t
     :general
-    (panda/general-leader "s" 'swiper)
-    (panda/general-buffer
-      "b" 'ivy-switch-buffer
-      "k" 'kill-buffer)
+    (panda/general-leader
+      "s" 'swiper
+      "b" 'ivy-switch-buffer)
     (general-imap
       :keymaps 'ivy-minibuffer-map
       "<return>" 'ivy-alt-done)
+    :custom
+    (ivy-wrap t)
+    (ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                             (t . ivy--regex-fuzzy)))
+    (confirm-nonexistent-file-or-buffer t)
+    (ivy-count-format "(%d/%d) ")
     :config
     (ivy-mode 1)
-    (setq ivy-wrap t
-          ivy-re-builders-alist '((swiper . ivy--regex-plus)
-                                  (t . ivy--regex-fuzzy))
-          confirm-nonexistent-file-or-buffer t
-          ivy-count-format "(%d/%d) ")
     (set-face-attribute 'ivy-minibuffer-match-face-2 nil
                         :foreground panda/neon-green
                         :weight 'bold)
@@ -280,11 +256,9 @@ Dependencies:
   (use-package counsel
     :demand t
     :general
-    (panda/general-file
-      "f" 'counsel-find-file)
-    (panda/general-navigation
-      "r" 'counsel-rg)
-    (panda/general-editing
+    (panda/general-leader
+      "f" 'counsel-find-file
+      "r" 'counsel-rg
       "p" 'counsel-yank-pop)
     :config
     (counsel-mode 1))
@@ -293,19 +267,12 @@ Dependencies:
 Miscellaneous functions.
 #+BEGIN_SRC emacs-lisp
   (use-package crux
+    :commands (crux-rename-file-and-buffer crux-delete-file-and-buffer)
     :general
-    (panda/general-file
-      "c" 'crux-copy-file-preserve-attributes
-      "d" 'crux-delete-file-and-buffer
-      "i" 'crux-find-user-init-file
-      "r" 'crux-rename-file-and-buffer)
-    (panda/general-editing
-      "e" 'crux-eval-and-replace)
-    (panda/general-window
-      "t" 'crux-transpose-windows))
+    (panda/general-leader
+      "z" 'crux-find-user-init-file
+      "x" 'crux-eval-and-replace))
 #+END_SRC
-** Buffer
-Empty for now.
 ** Debugging
 Call ~M-x load-library~ on ~realgud~ to load the package.
 Use ~realgud:<debugger-name>~ to run the debugger.
@@ -314,39 +281,6 @@ Use ~realgud:<debugger-name>~ to run the debugger.
     :defer t)
 #+END_SRC
 ** Editing
-*** Anzu
-Better find-and-replace.
-#+BEGIN_SRC emacs-lisp
-  (use-package anzu
-    :general
-    (panda/general-editing "r" 'anzu-query-replace)
-    :config
-    (global-anzu-mode t))
-
-  (use-package evil-anzu)
-#+END_SRC
-*** Corral
-Move braces, brackets, and parentheses.
-#+BEGIN_SRC emacs-lisp
-  (use-package corral
-    :general
-    (panda/general-editing "b" 'hydra-corral/body)
-    :config
-    (defhydra hydra-corral (:hint nil :color pink)
-      "
-  corral
-  [_{_]: braces backward         [_}_]: braces forward
-  [_[_]: brackets backward       [_]_]: brackets forward
-  [_(_]: parentheses backward    [_)_]: parentheses forward
-  [_/_]: cancel"
-        ("{" corral-braces-backward)
-        ("}" corral-braces-forward)
-        ("[" corral-brackets-backward)
-        ("]" corral-brackets-forward)
-        ("(" corral-parentheses-backward)
-        (")" corral-parentheses-forward)
-        ("/" (message "Abort") :color blue)))
-#+END_SRC
 *** Expand Region
 Expand selected region.
 #+BEGIN_SRC emacs-lisp
@@ -359,7 +293,7 @@ Expand selected region.
 #+BEGIN_SRC emacs-lisp
   (use-package multiple-cursors
     :general
-    (panda/general-editing "m" 'hydra-multiple-cursors/body)
+    (panda/general-leader "m" 'hydra-multiple-cursors/body)
     :config
     (defhydra hydra-multiple-cursors (:hint nil :color pink)
       "
@@ -379,13 +313,10 @@ Linear undo and redo.
   (use-package undo-tree
     :demand t
     :general
-    (panda/general-editing
-     "u" 'undo-tree-visualize)
+    (panda/general-leader "u" 'undo-tree-visualize)
     :config
     (global-undo-tree-mode))
 #+END_SRC
-** File
-Empty for now.
 ** Git
 *** Magit
 Git interface.
@@ -395,7 +326,7 @@ Dependencies:
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :general
-    (panda/general-git "g" 'magit-status)
+    (panda/general-leader "g" 'magit-status)
     :custom
     (magit-auto-revert-mode nil))
 
@@ -410,7 +341,7 @@ Dependencies:
 #+BEGIN_SRC emacs-lisp
   (use-package git-timemachine
     :general
-    (panda/general-git "t" 'git-timemachine))
+    (panda/general-leader "t" 'git-timemachine))
 #+END_SRC
 ** Navigation
 *** Avy
@@ -418,8 +349,7 @@ Jump to a word on the screen.
 #+BEGIN_SRC emacs-lisp
   (use-package avy
     :general
-    (panda/general-leader
-      "SPC" 'avy-goto-word-1)
+    (panda/general-leader "SPC" 'avy-goto-word-1)
     :custom
     (avy-background t)
     :config
@@ -441,7 +371,7 @@ Jump between definitions.
 #+BEGIN_SRC emacs-lisp
   (use-package imenu
     :general
-    (panda/general-navigation "i" 'imenu)
+    (panda/general-leader "i" 'imenu)
     :custom
     (imenu-auto-rescan t))
 #+END_SRC
@@ -451,7 +381,11 @@ Navigate a directory.
   (use-package neotree
     :after projectile
     :general
-    (panda/general-file "t" 'panda/neotree-toggle)
+    (panda/general-leader "d" 'panda/neotree-toggle)
+    :custom
+    (neo-theme 'arrow)
+    (neo-window-width 30)
+    (neo-window-position 'left)
     :config
     (defun panda/neotree-toggle ()
       (interactive)
@@ -459,17 +393,14 @@ Navigate a directory.
           (neotree-hide)
         (if (projectile-project-p)
             (neotree-dir (projectile-project-root))
-          (neotree-show))))
-    (setq neo-theme 'arrow
-          neo-window-width 30
-          neo-window-position 'left))
+          (neotree-show)))))
 #+END_SRC
 ** Project
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
     :general
     (panda/general-leader
-      :prefix "p"
+      :prefix "j"
       :prefix-command 'projectile-command-map)
     :custom
     (projectile-indexing-method 'alien)
@@ -478,23 +409,12 @@ Navigate a directory.
     (projectile-mode))
 #+END_SRC
 ** Window
-*** Ace Window
-Jump quickly between multiple windows.
-#+BEGIN_SRC emacs-lisp
-  (use-package ace-window
-    :general
-    (panda/general-window "w" 'ace-window)
-    :config
-    (set-face-attribute 'aw-leading-char-face nil
-                        :foreground panda/neon-green
-                        :weight 'bold))
-#+END_SRC
 *** Eyebrowse
 Workspaces.
 #+BEGIN_SRC emacs-lisp
   (use-package eyebrowse
     :general
-    (panda/general-window
+    (panda/general-leader
       "0" 'eyebrowse-switch-to-window-config-0
       "1" 'eyebrowse-switch-to-window-config-1
       "2" 'eyebrowse-switch-to-window-config-2
@@ -507,17 +427,6 @@ Workspaces.
       "9" 'eyebrowse-switch-to-window-config-9)
     :config
     (eyebrowse-mode 1))
-#+END_SRC
-*** Winner
-Undo/redo changes in window configuration.
-#+BEGIN_SRC emacs-lisp
-  (use-package winner
-    :general
-    (panda/general-window
-      "u" 'winner-undo
-      "r" 'winner-redo)
-    :config
-    (winner-mode t))
 #+END_SRC
 * Per-Language Packages
 ** Company
@@ -546,7 +455,9 @@ Linting. Activate with ~flycheck-mode~.
   (use-package flycheck
     :demand t
     :general
-    (panda/general-navigation "e" 'hydra-flycheck/body)
+    (panda/general-leader "e" 'hydra-flycheck/body)
+    :custom
+    (flycheck-check-syntax-automatically '(mode-enabled save))
     :config
     (defhydra hydra-flycheck (:hint nil :color pink)
       "
@@ -555,8 +466,7 @@ Linting. Activate with ~flycheck-mode~.
   [_/_]: cancel"
       ("p" flycheck-previous-error)
       ("n" flycheck-next-error)
-      ("/" (message "Abort") :color blue))
-    (setq flycheck-check-syntax-automatically '(mode-enabled save)))
+      ("/" (message "Abort") :color blue)))
 #+END_SRC
 ** Lsp
 Activate with ~lsp~.
@@ -594,7 +504,7 @@ Code snippets. Activate with ~yas-minor-mode~.
   (use-package ivy-yasnippet
     :after yasnippet
     :general
-    (panda/general-editing "s" 'ivy-yasnippet))
+    (panda/general-leader "s" 'ivy-yasnippet))
 #+END_SRC
 * Language Modes
 ** Assembly
@@ -646,7 +556,7 @@ Dependencies:
   (use-package clang-format
     :defer t
     :hook ((c-mode c++-mode) . panda/enable-clang-format)
-    :init
+    :config
     (defvar panda/default-clang-format-file
       (expand-file-name "default-files/.clang-format" user-emacs-directory))
     (defun panda/default-clang-format-style ()
