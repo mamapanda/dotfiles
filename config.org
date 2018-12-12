@@ -35,9 +35,10 @@ Move Emacs's customize settings to a separate file.
     :defer t)
 
   (use-package evil
-    :init
-    (setq evil-want-C-u-scroll t
-          evil-want-keybinding nil)
+    :custom
+    (evil-want-C-u-scroll t)
+    (evil-want-fine-undo t)
+    (evil-want-keybinding nil)
     :config
     (evil-mode 1))
 
@@ -46,17 +47,23 @@ Move Emacs's customize settings to a separate file.
 
   (use-package evil-collection
     :after evil
-    :init
-    (setq evil-collection-setup-minibuffer t)
+    :custom
+    (evil-collection-setup-minibuffer t)
     :config
     (evil-collection-init))
 
   (use-package evil-escape
     :after evil
+    :custom
+    (evil-escape-key-sequence "fd")
+    (evil-escape-delay 0.1)
     :config
-    (evil-escape-mode 1)
-    (setq-default evil-escape-key-sequence "fd")
-    (setq-default evil-escape-delay 0.1))
+    (evil-escape-mode 1))
+
+  (use-package evil-surround
+    :after evil
+    :config
+    (global-evil-surround-mode 1))
 #+END_SRC
 * Appearance
 ** Defaults
@@ -106,25 +113,26 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 ** Line Numbers
 #+BEGIN_SRC emacs-lisp
   (use-package linum-relative
+    :custom
+    (linum-relative-backend 'display-line-numbers-mode)
     :config
-    (linum-relative-global-mode 1)
-    (setq linum-relative-backend 'display-line-numbers-mode))
+    (linum-relative-global-mode 1))
 #+END_SRC
 ** Cursor Beacon
 #+BEGIN_SRC emacs-lisp
   (use-package beacon
     :diminish beacon-mode
+    :custom
+    (beacon-blink-when-window-scrolls t)
+    (beacon-blink-when-window-changes t)
+    (beacon-blink-when-point-moves nil)
     :config
-    (setq beacon-blink-when-window-scrolls t
-          beacon-blink-when-window-changes t
-          beacon-blink-when-point-moves nil)
     (beacon-mode 1))
 #+END_SRC
 ** Rainbow Delimiters
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
-    :init
-    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 * Leader Keymap
 #+BEGIN_SRC emacs-lisp
@@ -180,7 +188,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
         inhibit-compacting-font-caches t
         make-backup-files nil)
 
-  (setq-default c-basic-offset 4
+  (setq-default buffer-file-coding-system 'utf-8
+                c-basic-offset 4
                 indent-tabs-mode nil
                 tab-width 4)
 
@@ -195,10 +204,11 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
     :diminish which-key-mode
+    :custom
+    (which-key-popup-type 'side-window)
+    (which-key-side-window-location 'bottom)
+    (which-key-idle-delay 1.0)
     :config
-    (setq which-key-popup-type 'side-window
-          which-key-side-window-location 'bottom
-          which-key-idle-delay 1.0)
     (which-key-mode 1))
 #+END_SRC
 ** Constants
@@ -386,8 +396,8 @@ Dependencies:
   (use-package magit
     :general
     (panda/general-git "g" 'magit-status)
-    :config
-    (setq magit-auto-revert-mode nil))
+    :custom
+    (magit-auto-revert-mode nil))
 
   (use-package evil-magit
     :after magit)
@@ -410,6 +420,8 @@ Jump to a word on the screen.
     :general
     (panda/general-leader
       "SPC" 'avy-goto-word-1)
+    :custom
+    (avy-background t)
     :config
     (set-face-attribute 'avy-lead-face nil
                         :foreground panda/neon-green
@@ -422,18 +434,16 @@ Jump to a word on the screen.
     (set-face-attribute 'avy-lead-face-2 nil
                         :foreground panda/deep-saffron
                         :background (face-attribute 'default :background)
-                        :weight 'bold)
-    (setq avy-background t))
+                        :weight 'bold))
 #+END_SRC
 *** IMenu
 Jump between definitions.
 #+BEGIN_SRC emacs-lisp
   (use-package imenu
-    :defer t
     :general
     (panda/general-navigation "i" 'imenu)
-    :config
-    (setq imenu-auto-rescan t))
+    :custom
+    (imenu-auto-rescan t))
 #+END_SRC
 *** Neotree
 Navigate a directory.
@@ -454,34 +464,6 @@ Navigate a directory.
           neo-window-width 30
           neo-window-position 'left))
 #+END_SRC
-*** Origami
-Show, hide, and navigate code blocks.
-#+BEGIN_SRC emacs-lisp
-  (use-package origami
-    :demand t
-    :general
-    (panda/general-navigation "f" 'hydra-origami/body)
-    :config
-    (defhydra hydra-origami (:hint nil :color pink)
-      "
-  origami
-  [_p_]: previous fold     [_n_]: next fold
-  [_o_]: open fold         [_c_]: close fold         [_t_]: toggle fold         [_s_]: show only fold
-  [_O_]: open all folds    [_C_]: close all folds    [_T_]: toggle all folds
-  [_r_]: reset             [_/_]: cancel"
-        ("p" origami-previous-fold)
-        ("n" origami-forward-fold)
-        ("o" origami-open-node)
-        ("c" origami-close-node)
-        ("t" origami-toggle-node)
-        ("s" origami-show-only-node)
-        ("O" origami-open-all-nodes :color blue)
-        ("C" origami-close-all-nodes :color blue)
-        ("T" origami-toggle-all-nodes :color blue)
-        ("r" origami-reset :color blue)
-        ("/" (message "Abort") :color blue))
-      (global-origami-mode))
-#+END_SRC
 ** Project
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
@@ -489,10 +471,11 @@ Show, hide, and navigate code blocks.
     (panda/general-leader
       :prefix "p"
       :prefix-command 'projectile-command-map)
+    :custom
+    (projectile-indexing-method 'alien)
+    (projectile-completion-system 'ivy)
     :config
-    (projectile-mode)
-    (setq projectile-indexing-method 'alien
-          projectile-completion-system 'ivy))
+    (projectile-mode))
 #+END_SRC
 ** Window
 *** Ace Window
@@ -544,12 +527,13 @@ Activate auto-completion with ~company-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :demand t
+    :custom
+    (company-dabbrev-code-modes nil)
+    (company-idle-delay 0.1)
+    (company-minimum-prefix-length 2)
+    (company-tooltip-align-annotations t)
     :config
-    (delete 'company-dabbrev company-backends)
-    (setq company-dabbrev-code-modes nil
-          company-idle-delay 0.1
-          company-minimum-prefix-length 2
-          company-tooltip-align-annotations t))
+    (delete 'company-dabbrev company-backends))
 #+END_SRC
 ** Format All
 Auto-formats source files on save. Activate with ~format-all-mode~.
@@ -574,17 +558,35 @@ Linting. Activate with ~flycheck-mode~.
       ("/" (message "Abort") :color blue))
     (setq flycheck-check-syntax-automatically '(mode-enabled save)))
 #+END_SRC
+** Lsp
+Activate with ~lsp~.
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :demand t
+    :custom
+    (lsp-prefer-flymake nil)
+    :config
+    (require 'lsp-clients)
+    (require 'lsp-ui-flycheck))
+
+  (use-package company-lsp
+    :defer t)
+
+  (use-package lsp-ui
+    :defer t)
+#+END_SRC
 ** Yasnippet
 Code snippets. Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :demand t
+    :custom
+    (yas-triggers-in-field nil)
+    (yas-indent-line 'auto)
+    (yas-also-auto-indent-first-line t)
     :config
     (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
-    (yas-reload-all)
-    (setq yas-triggers-in-field t
-          yas-indent-line 'auto
-          yas-also-auto-indent-first-line t))
+    (yas-reload-all))
 
   (use-package yasnippet-snippets
     :after yasnippet)
@@ -609,19 +611,20 @@ Dependencies:
 
   (use-package asm-mode
     :defer t
+    :custom
+    (asm-comment-char ?#)
     :config
-    (add-hook 'asm-mode-hook #'panda/setup-asm-mode)
-    (setq asm-comment-char ?#))
+    (add-hook 'asm-mode-hook #'panda/setup-asm-mode))
 #+END_SRC
 ** C / C++
+The ccls executable is expected to be at ~<user-emacs-directory>/ccls/build/ccls~.
+
 Dependencies:
-- [[https://releases.llvm.org/download.html][clang]]
+- [[https://github.com/MaskRay/ccls][ccls]]
 - [[https://releases.llvm.org/download.html][libclang]]
 - [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-c-mode ()
-    (company-mode 1)
-    (flycheck-mode 1)
     (yas-minor-mode 1)
     (c-set-style "linux")
     (c-set-offset 'inline-open '0)
@@ -631,35 +634,18 @@ Dependencies:
   (add-hook 'c-mode-hook #'panda/setup-c-mode)
   (add-hook 'c++-mode-hook #'panda/setup-c-mode)
 
-  (use-package irony
-    :defer t
-    :init
-    (add-hook 'c-mode-hook 'irony-mode)
-    (add-hook 'c++-mode-hook 'irony-mode)
-    :config
-    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-    (when (boundp 'w32-pipe-read-delay)
-      (setq w32-pipe-read-delay 0))
-    (when (boundp 'w32-pipe-buffer-size)
-      (setq irony-server-w32-pipe-buffer-size (* 64 1024))))
-
-  (use-package company-irony
-    :after company-irony-c-headers
-    :config
-    (add-to-list 'company-backends 'company-irony))
-
-  (use-package company-irony-c-headers
-    :after irony
-    :config
-    (add-to-list 'company-backends 'company-irony-c-headers))
-
-  (use-package flycheck-irony
-    :after irony
-    :config
-    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+  (use-package ccls
+    :hook ((c-mode c++-mode) . (lambda ()
+                                 (interactive)
+                                 (require 'ccls)
+                                 (lsp)))
+    :custom
+    (ccls-executable
+     (expand-file-name "ccls/build/ccls" user-emacs-directory)))
 
   (use-package clang-format
     :defer t
+    :hook ((c-mode c++-mode) . panda/enable-clang-format)
     :init
     (defvar panda/default-clang-format-file
       (expand-file-name "default-files/.clang-format" user-emacs-directory))
@@ -673,9 +659,7 @@ Dependencies:
                   (if (locate-dominating-file "." ".clang-format")
                       "file"
                     (panda/default-clang-format-style)))
-      (add-hook 'before-save-hook #'clang-format-buffer nil t))
-    (add-hook 'c-mode-hook #'panda/enable-clang-format)
-    (add-hook 'c++-mode-hook #'panda/enable-clang-format))
+      (add-hook 'before-save-hook #'clang-format-buffer nil t)))
 #+END_SRC
 ** C#
 Dependencies:
@@ -699,17 +683,6 @@ Dependencies:
     (add-hook 'csharp-mode-hook #'omnisharp-mode)
     :config
     (add-to-list 'company-backends 'company-omnisharp))
-#+END_SRC
-** Clojure
-#+BEGIN_SRC emacs-lisp
-  (defun panda/setup-clojure-mode ()
-    (yas-minor-mode 1)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
-
-  (use-package clojure-mode
-    :defer t
-    :config
-    (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
 #+END_SRC
 ** CMake
 #+BEGIN_SRC emacs-lisp
