@@ -30,6 +30,7 @@ Move Emacs's customize settings to a separate file.
   (load custom-file 'noerror)
 #+END_SRC
 * Evil
+Vim-like keybindings.
 #+BEGIN_SRC emacs-lisp
   (use-package goto-chg
     :defer t)
@@ -40,6 +41,7 @@ Move Emacs's customize settings to a separate file.
     (evil-want-fine-undo t)
     (evil-want-keybinding nil)
     :config
+    (add-hook 'prog-mode-hook #'hs-minor-mode)
     (evil-mode 1))
 
   (use-package evil-tutor
@@ -176,6 +178,10 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
   (global-auto-revert-mode t)
 #+END_SRC
 ** Key Definitions
+*** Remaps
+#+BEGIN_SRC emacs-lisp
+  (panda/general-leader "k" 'kill-this-buffer)
+#+END_SRC
 *** Keybind Help
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
@@ -436,6 +442,9 @@ Activate auto-completion with ~company-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :demand t
+    :general
+    (general-def :keymaps 'company-active-map
+      "<return>" 'company-complete-selection)
     :custom
     (company-dabbrev-code-modes nil)
     (company-idle-delay 0.1)
@@ -474,10 +483,11 @@ Activate with ~lsp~.
   (use-package lsp-mode
     :demand t
     :custom
+    (lsp-enable-indentation nil)
+    (lsp-enable-on-type-formatting nil)
     (lsp-prefer-flymake nil)
     :config
-    (require 'lsp-clients)
-    (require 'lsp-ui-flycheck))
+    (require 'lsp-clients))
 
   (use-package company-lsp
     :defer t)
@@ -490,13 +500,22 @@ Code snippets. Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :demand t
+    :general
+    (general-def :keymaps 'yas-minor-mode-map
+      "<tab>" nil
+      "TAB" nil
+      "<backtab>" 'yas-expand)
     :custom
     (yas-triggers-in-field nil)
     (yas-indent-line 'auto)
     (yas-also-auto-indent-first-line t)
     :config
     (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
-    (yas-reload-all))
+    (yas-reload-all)
+    (eval-after-load 'company
+      (define-advice company-select-previous (:around (old-func &rest args))
+        (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
+          (apply old-func args)))))
 
   (use-package yasnippet-snippets
     :after yasnippet)
@@ -504,7 +523,7 @@ Code snippets. Activate with ~yas-minor-mode~.
   (use-package ivy-yasnippet
     :after yasnippet
     :general
-    (panda/general-leader "s" 'ivy-yasnippet))
+    (panda/general-leader "y" 'ivy-yasnippet))
 #+END_SRC
 * Language Modes
 ** Assembly
@@ -527,17 +546,14 @@ Dependencies:
     (add-hook 'asm-mode-hook #'panda/setup-asm-mode))
 #+END_SRC
 ** C / C++
-The ccls executable is expected to be at ~<user-emacs-directory>/ccls/build/ccls~.
-
 Dependencies:
 - [[https://github.com/MaskRay/ccls][ccls]]
-- [[https://releases.llvm.org/download.html][libclang]]
 - [[https://releases.llvm.org/download.html][clang-format]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-c-mode ()
     (yas-minor-mode 1)
     (c-set-style "linux")
-    (c-set-offset 'inline-open '0)
+    (c-set-offset 'inline-open 0)
     (c-set-offset 'innamespace 0)
     (setq c-basic-offset 4))
 
@@ -548,22 +564,22 @@ Dependencies:
     :hook ((c-mode c++-mode) . (lambda ()
                                  (interactive)
                                  (require 'ccls)
-                                 (lsp)))
-    :custom
-    (ccls-executable
-     (expand-file-name "ccls/build/ccls" user-emacs-directory)))
+                                 (lsp))))
 
   (use-package clang-format
     :defer t
     :hook ((c-mode c++-mode) . panda/enable-clang-format)
     :config
-    (defvar panda/default-clang-format-file
-      (expand-file-name "default-files/.clang-format" user-emacs-directory))
+    (defvar panda/clang-format-settings-file
+      (expand-file-name "clang-format-defaults.json" user-emacs-directory)
+      "A JSON file containing default clang-format settings.")
     (defun panda/default-clang-format-style ()
+      "Reads the JSON file defined by `panda/clang-format-settings-file'"
       (with-temp-buffer
-        (insert-file-contents panda/default-clang-format-file)
-        (let ((lines (split-string (buffer-string) "\n" t)))
-          (format "{%s}" (string-join lines ", ")))))
+        (insert-file-contents panda/clang-format-settings-file)
+        (let ((inhibit-message t))
+          (replace-regexp "[\n\"]" ""))
+        (buffer-string)))
     (defun panda/enable-clang-format ()
       (setq-local clang-format-style
                   (if (locate-dominating-file "." ".clang-format")
@@ -812,7 +828,7 @@ Dependencies:
 #+END_SRC
 ** Python
 Dependencies:
-- [[https://www.python.org/downloads/][python]]
+- [[https://www.python.org/downloads/][python3]]
 - [[https://pypi.org/project/setuptools/][setuptools]]
 - [[https://flake8.readthedocs.io/en/latest/][flake8]] or [[https://pylint.org/#install][pylint]]
 - [[https://github.com/ambv/black][black]]
@@ -820,16 +836,24 @@ Dependencies:
   (defun panda/setup-python-mode ()
     (company-mode 1)
     (flycheck-mode 1)
-    (format-all-mode 1)
     (yas-minor-mode 1)
     (setq-local yas-indent-line 'fixed)
     (setq-local yas-also-auto-indent-first-line nil))
 
   (use-package python
     :defer t
+    :interpreter "python3"
+    :custom
+    (flycheck-python-flake8-executable "python3")
+    (python-shell-interpreter "python3")
     :config
     (add-hook 'python-mode-hook #'panda/setup-python-mode)
     (setq python-indent-offset 4))
+
+  (use-package blacken
+    :hook (python-mode . blacken-mode)
+    :custom
+    (blacken-line-length 80))
 
   (use-package anaconda-mode
     :defer t

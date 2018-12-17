@@ -1,3 +1,0 @@
-[submodule "ccls"]
-	path = ccls
-	url = https://github.com/maskray/ccls

@@ -1,0 +1,15 @@
+{
+    "BasedOnStyle": "Google",
+    "AccessModifierOffset": -4,
+    "AlignConsecutiveAssignments": true,
+    "AlignConsecutiveDeclarations": true,
+    "AlignTrailingComments": true,
+    "AllowShortBlocksOnASingleLine": false,
+    "AllowShortCaseLabelsOnASingleLine": false,
+    "AllowShortFunctionsOnASingleLine": "None",
+    "AllowShortIfStatementsOnASingleLine": false,
+    "AllowShortLoopsOnASingleLine": false,
+    "BreakBeforeBraces": "Allman",
+    "IndentCaseLabels": false,
+    "IndentWidth": 4
+}

@@ -1,7 +1,6 @@
 *
 
 !.gitignore
-!.gitmodules
 
 !init.el
 !config.org
@@ -11,7 +10,6 @@
 !snippets/*/
 !snippets/*/*
 
-!default-files/
-!default-files/*
+!clang-format-defaults.json
 
 !.mc-lists.el

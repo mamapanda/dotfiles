@@ -17,11 +17,15 @@
         evil-backward-char
         evil-delete-char
         evil-emacs-state
+        evil-forward-char
         evil-insert
         evil-next-line
         evil-previous-line
         evil-replace
         evil-scroll-line-down
+        evil-search-forward
+        evil-visual-char
+        evil-yank
         hs-hide-block
         indent-for-tab-command
         markdown-cycle
