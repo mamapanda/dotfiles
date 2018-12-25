@@ -37,15 +37,11 @@ Vim-like keybindings.
 
   (use-package evil
     :custom
-    (evil-want-C-u-scroll t)
     (evil-want-fine-undo t)
     (evil-want-keybinding nil)
     :config
     (add-hook 'prog-mode-hook #'hs-minor-mode)
     (evil-mode 1))
-
-  (use-package evil-tutor
-    :defer t)
 
   (use-package evil-collection
     :after evil
@@ -61,11 +57,6 @@ Vim-like keybindings.
     (evil-escape-delay 0.1)
     :config
     (evil-escape-mode 1))
-
-  (use-package evil-surround
-    :after evil
-    :config
-    (global-evil-surround-mode 1))
 
   (use-package evil-anzu
     :after evil)
@@ -277,7 +268,10 @@ Miscellaneous functions.
     :general
     (panda/general-leader
       "z" 'crux-find-user-init-file
-      "x" 'crux-eval-and-replace))
+      "x" 'crux-eval-and-replace)
+    :config
+    (define-advice crux-find-user-init-file (:override ())
+      (find-file org-config-path)))
 #+END_SRC
 ** Debugging
 Call ~M-x load-library~ on ~realgud~ to load the package.
@@ -287,6 +281,45 @@ Use ~realgud:<debugger-name>~ to run the debugger.
     :defer t)
 #+END_SRC
 ** Editing
+*** Evil Multiple Cursors
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-mc
+    :general
+    (panda/general-leader "m" 'panda/evil-mc/body)
+    :init
+    (defvar evil-mc-key-map (make-sparse-keymap))
+    :config
+    (defhydra panda/evil-mc (:hint nil :color pink :post (anzu--reset-mode-line))
+      "
+  evil-mc
+  [_c_]: make cursor here     [_a_]: make cursors (all)    [_s_]: stop cursors          [_r_]: resume cursors
+  [_p_]: prev match           [_n_]: next match            [_b_]: prev cursor           [_f_]: next cursor
+  [_P_]: prev match (skip)    [_N_]: next match (skip)     [_B_]: prev cursor (skip)    [_F_]: next cursor (skip)
+  [_u_]: undo all             [_/_]: cancel"
+      ("c" evil-mc-make-cursor-here)
+      ("a" evil-mc-make-all-cursors)
+      ("s" evil-mc-pause-cursors)
+      ("r" evil-mc-resume-cursors)
+      ("p" evil-mc-make-and-goto-prev-match)
+      ("n" evil-mc-make-and-goto-next-match)
+      ("b" evil-mc-make-and-goto-prev-cursor)
+      ("f" evil-mc-make-and-goto-next-cursor)
+      ("P" evil-mc-skip-and-goto-prev-match)
+      ("N" evil-mc-skip-and-goto-next-match)
+      ("B" evil-mc-skip-and-goto-prev-cursor)
+      ("F" evil-mc-skip-and-goto-next-cursor)
+      ("u" evil-mc-undo-all-cursors :color blue)
+      ("/" (message "Abort") :color blue))
+    (global-evil-mc-mode 1))
+#+END_SRC
+*** Evil Surround
+Edit delimiters like Vim Surround.
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-surround
+    :after evil
+    :config
+    (global-evil-surround-mode 1))
+#+END_SRC
 *** Expand Region
 Expand selected region.
 #+BEGIN_SRC emacs-lisp
@@ -294,24 +327,6 @@ Expand selected region.
     :general
     (general-imap "C-;" 'er/expand-region)
     (general-vmap ";" 'er/expand-region))
-#+END_SRC
-*** Multiple Cursors
-#+BEGIN_SRC emacs-lisp
-  (use-package multiple-cursors
-    :general
-    (panda/general-leader "m" 'hydra-multiple-cursors/body)
-    :config
-    (defhydra hydra-multiple-cursors (:hint nil :color pink)
-      "
-  multiple-cursors
-  [_p_]: mc/mark-previous-like-this    [_n_]: mc/mark-next-like-this
-  [_l_]: mc/edit-lines                 [_a_]: mc/mark-all-like-this
-  [_/_]: cancel"
-        ("p" mc/mark-previous-like-this)
-        ("n" mc/mark-next-like-this)
-        ("l" mc/edit-lines :color blue)
-        ("a" mc/mark-all-like-this :color blue)
-        ("/" (message "Abort") :color blue)))
 #+END_SRC
 *** Undo Tree
 Linear undo and redo.
@@ -437,8 +452,6 @@ Workspaces.
 * Per-Language Packages
 ** Company
 Activate auto-completion with ~company-mode~.
-
-~C-w~ is unbound in ~company-active-map~ because it interferes with ~kill-line~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :demand t
@@ -464,18 +477,27 @@ Linting. Activate with ~flycheck-mode~.
   (use-package flycheck
     :demand t
     :general
-    (panda/general-leader "e" 'hydra-flycheck/body)
+    (panda/general-leader "e" 'panda/flycheck/body)
     :custom
     (flycheck-check-syntax-automatically '(mode-enabled save))
     :config
-    (defhydra hydra-flycheck (:hint nil :color pink)
+    (defhydra panda/flycheck (:hint nil :color pink)
       "
   flycheck
-  [_p_]: previous error    [_n_]: next error
-  [_/_]: cancel"
+  [_p_]: previous error    [_n_]: next error    [_/_]: cancel"
       ("p" flycheck-previous-error)
       ("n" flycheck-next-error)
       ("/" (message "Abort") :color blue)))
+#+END_SRC
+** Lispy
+Efficient lisp editing. Activate with ~lispy-mode~.
+
+This might be confusing, but to enter brackets, type ~}~ instead of ~[~.
+#+BEGIN_SRC emacs-lisp
+  (use-package lispy)
+
+  (use-package lispyville
+    :hook (lispy-mode . lispyville-mode))
 #+END_SRC
 ** Lsp
 Activate with ~lsp~.
@@ -621,11 +643,36 @@ Dependencies:
     :config
     (add-hook 'cmake-mode-hook #'panda/setup-cmake-mode))
 #+END_SRC
+** Clojure
+Java hell. Activate cider with ~M-x cider-jack-in~. No hook is added because cider start-up can be slow.
+
+Dependencies:
+- [[https://github.com/technomancy/leiningen][leiningen]] or [[https://github.com/boot-clj/boot][boot]]
+#+BEGIN_SRC emacs-lisp
+  (defun panda/setup-clojure-mode ()
+    (lispy-mode 1)
+    (yas-minor-mode 1)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+  (use-package clojure-mode
+    :defer t
+    :config
+    (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
+
+  (use-package cider
+    :defer t
+    :config
+    (add-hook 'cider-mode-hook (lambda ()
+                                 (interactive)
+                                 (company-mode 1)
+                                 (add-hook 'before-save-hook #'cider-format-buffer nil t))))
+#+END_SRC
 ** Common Lisp
 Dependencies:
 - [[http://www.sbcl.org/platform-table.html][sbcl]]
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-slime-mode ()
+    (lispy-mode 1)
     (yas-minor-mode 1)
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -641,6 +688,7 @@ Dependencies:
   (defun panda/setup-emacs-lisp-mode ()
     (company-mode 1)
     (format-all-mode 1)
+    (lispy-mode 1)
     (yas-minor-mode 1))
 
   (add-hook 'emacs-lisp-mode-hook #'panda/setup-emacs-lisp-mode)

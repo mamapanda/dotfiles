@@ -20,6 +20,7 @@
         evil-forward-char
         evil-insert
         evil-next-line
+        evil-normal-state
         evil-previous-line
         evil-replace
         evil-scroll-line-down
