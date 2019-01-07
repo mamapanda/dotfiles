@@ -68,8 +68,6 @@ Vim-like keybindings.
         ring-bell-function 'ignore
         visible-bell nil)
 
-  (setq-default truncate-lines t)
-
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
   (tool-bar-mode -1)
@@ -824,6 +822,20 @@ Dependencies:
     :config
     (add-to-list 'company-backends 'company-tern))
 #+END_SRC
+** Latex
+#+BEGIN_SRC emacs-lisp
+  (defun panda/setup-latex-mode ()
+    (yas-minor-mode 1)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+  (add-hook 'LaTeX-mode-hook #'panda/setup-latex-mode)
+
+  (use-package auctex
+    :defer t
+    :custom
+    (TeX-auto-save t)
+    (TeX-parse-self t))
+#+END_SRC
 ** Makefile
 #+BEGIN_SRC emacs-lisp
   (defun panda/setup-makefile-mode ()
@@ -876,7 +888,6 @@ Dependencies:
 #+END_SRC
 ** Python
 Dependencies:
-- [[https://www.python.org/downloads/][python3]]
 - [[https://pypi.org/project/setuptools/][setuptools]]
 - [[https://flake8.readthedocs.io/en/latest/][flake8]] or [[https://pylint.org/#install][pylint]]
 - [[https://github.com/ambv/black][black]]
@@ -890,10 +901,6 @@ Dependencies:
 
   (use-package python
     :defer t
-    :interpreter "python3"
-    :custom
-    (flycheck-python-flake8-executable "python3")
-    (python-shell-interpreter "python3")
     :config
     (add-hook 'python-mode-hook #'panda/setup-python-mode)
     (setq python-indent-offset 4))
@@ -913,6 +920,18 @@ Dependencies:
     :after anaconda-mode
     :config
     (add-to-list 'company-backends 'company-anaconda))
+#+END_SRC
+** R
+#+BEGIN_SRC emacs-lisp
+  (defun panda/setup-r-mode ()
+    (company-mode 1)
+    (yas-minor-mode 1)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+  (use-package ess
+    :commands R
+    :config
+    (add-hook 'ess-r-mode-hook #'panda/setup-r-mode))
 #+END_SRC
 ** Rust
 Dependencies:
