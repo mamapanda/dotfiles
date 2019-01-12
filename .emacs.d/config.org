@@ -65,19 +65,14 @@ Vim-like keybindings.
 * Appearance
 ** Defaults
 #+BEGIN_SRC emacs-lisp
-  (setq inhibit-startup-screen t
+  (setq default-frame-alist '((fullscreen . maximized)
+                              (font . "Consolas-11")
+                              (menu-bar-lines . 0)
+                              (tool-bar-lines . 0)
+                              (vertical-scroll-bars . nil))
+        inhibit-startup-screen t
         ring-bell-function 'ignore
         visible-bell nil)
-
-  (menu-bar-mode -1)
-  (toggle-scroll-bar -1)
-  (tool-bar-mode -1)
-
-  (set-frame-font "Consolas-10")
-#+END_SRC
-** Full Screen on Start
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+END_SRC
 ** Theme
 #+BEGIN_SRC emacs-lisp
