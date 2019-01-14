@@ -21,7 +21,8 @@
     (package-install 'use-package))
 
   (require 'use-package)
-  (setq use-package-always-ensure t)
+  (setq use-package-always-ensure t
+        use-package-always-demand t)
 #+END_SRC
 * Customize File
 Move Emacs's customize settings to a separate file.
@@ -32,8 +33,7 @@ Move Emacs's customize settings to a separate file.
 * Evil
 Vim-like keybindings.
 #+BEGIN_SRC emacs-lisp
-  (use-package goto-chg
-    :defer t)
+  (use-package goto-chg)
 
   (use-package evil
     :custom
@@ -77,11 +77,7 @@ Vim-like keybindings.
 #+END_SRC
 ** Theme
 #+BEGIN_SRC emacs-lisp
-  (use-package monokai-theme
-    :defer t)
-
-  (use-package spacemacs-theme
-    :defer t)
+  (use-package monokai-theme)
 
   (load-theme 'monokai t)
 #+END_SRC
@@ -189,17 +185,13 @@ Colors that look nice with Monokai.
 #+END_SRC
 * Miscellaneous Packages
 #+BEGIN_SRC emacs-lisp
-  (use-package esup
-    :defer t)
+  (use-package esup)
 
-  (use-package fireplace
-    :defer t)
+  (use-package fireplace)
 
-  (use-package hydra
-    :defer t)
+  (use-package hydra)
 
-  (use-package pacmacs
-    :defer t)
+  (use-package pacmacs)
 #+END_SRC
 * Global Packages
 ** Multi-Purpose
@@ -209,15 +201,12 @@ Colors that look nice with Monokai.
 Dependencies:
 - [[https://github.com/BurntSushi/ripgrep][ripgrep]]
 #+BEGIN_SRC emacs-lisp
-  (use-package flx
-    :defer t)
+  (use-package flx)
 
-  (use-package smex
-    :defer t)
+  (use-package smex)
 
   (use-package ivy
     :diminish ivy-mode
-    :demand t
     :general
     (panda/general-leader
       "s" 'swiper
@@ -246,7 +235,6 @@ Dependencies:
                         :foreground panda/neon-green))
 
   (use-package counsel
-    :demand t
     :general
     (panda/general-leader
       "f" 'counsel-find-file
@@ -284,17 +272,12 @@ Miscellaneous functions.
 Run code from the current buffer with ~M-x quickrun~.
 For interactive code, use ~M-x quickrun-shell~.
 #+BEGIN_SRC emacs-lisp
-  (use-package quickrun
-    :defer t)
+  (use-package quickrun)
 #+END_SRC
 *** Realgud
-Package for debugging code.
-
-Call ~M-x load-library~ on ~realgud~ to load the package.
-Use ~realgud:<debugger-name>~ to run a debugger.
+Package for debugging code. Use ~realgud:<debugger-name>~ to run a debugger.
 #+BEGIN_SRC emacs-lisp
-  (use-package realgud
-    :defer t)
+  (use-package realgud)
 #+END_SRC
 ** Editing
 *** Evil Multiple Cursors
@@ -348,7 +331,6 @@ Expand selected region.
 Linear undo and redo.
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
-    :demand t
     :general
     (panda/general-leader "u" 'undo-tree-visualize)
     :config
@@ -470,7 +452,6 @@ Workspaces.
 Activate auto-completion with ~company-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package company
-    :demand t
     :general
     (general-def :keymaps 'company-active-map
       "<return>" 'company-complete-selection)
@@ -491,7 +472,6 @@ Auto-formats source files on save. Activate with ~format-all-mode~.
 Linting. Activate with ~flycheck-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
-    :demand t
     :general
     (panda/general-leader "e" 'panda/flycheck/body)
     :custom
@@ -519,7 +499,6 @@ This might be confusing, but to enter brackets, type ~}~ instead of ~[~.
 Activate with ~lsp~.
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
-    :demand t
     :custom
     (lsp-enable-indentation nil)
     (lsp-enable-on-type-formatting nil)
@@ -528,16 +507,15 @@ Activate with ~lsp~.
     (require 'lsp-clients))
 
   (use-package company-lsp
-    :defer t)
+    :after lsp-mode)
 
   (use-package lsp-ui
-    :defer t)
+    :after lsp-mode)
 #+END_SRC
 ** Yasnippet
 Code snippets. Activate with ~yas-minor-mode~.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
-    :demand t
     :general
     (general-def :keymaps 'yas-minor-mode-map
       "<tab>" nil
@@ -577,7 +555,6 @@ Dependencies:
     (setq-local tab-always-indent (default-value 'tab-always-indent)))
 
   (use-package asm-mode
-    :defer t
     :custom
     (asm-comment-char ?#)
     :config
@@ -599,13 +576,9 @@ Dependencies:
   (add-hook 'c++-mode-hook #'panda/setup-c-mode)
 
   (use-package ccls
-    :hook ((c-mode c++-mode) . (lambda ()
-                                 (interactive)
-                                 (require 'ccls)
-                                 (lsp))))
+    :hook ((c-mode c++-mode) . lsp))
 
   (use-package clang-format
-    :defer t
     :hook ((c-mode c++-mode) . panda/enable-clang-format)
     :config
     (defvar panda/clang-format-settings-file
@@ -637,12 +610,10 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package csharp-mode
-    :defer t
     :config
     (add-hook 'csharp-mode-hook #'panda/setup-csharp-mode))
 
   (use-package omnisharp
-    :defer t
     :init
     (add-hook 'csharp-mode-hook #'omnisharp-mode)
     :config
@@ -655,7 +626,6 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
   (use-package cmake-mode
-    :defer t
     :config
     (add-hook 'cmake-mode-hook #'panda/setup-cmake-mode))
 #+END_SRC
@@ -671,12 +641,10 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package clojure-mode
-    :defer t
     :config
     (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
 
   (use-package cider
-    :defer t
     :config
     (add-hook 'cider-mode-hook (lambda ()
                                  (interactive)
@@ -693,7 +661,6 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package slime
-    :defer t
     :config
     (add-hook 'slime-mode-hook #'panda/setup-slime-mode)
     (setq inferior-lisp-program (executable-find "sbcl"))
@@ -716,17 +683,14 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package gitattributes-mode
-    :defer t
     :config
     (add-hook 'gitattributes-mode-hook #'panda/setup-gitfiles-mode))
 
   (use-package gitconfig-mode
-    :defer t
     :config
     (add-hook 'gitconfig-mode-hook #'panda/setup-gitfiles-mode))
 
   (use-package gitignore-mode
-    :defer t
     :config
     (add-hook 'gitignore-mode-hook #'panda/setup-gitfiles-mode))
 #+END_SRC
@@ -743,17 +707,14 @@ Dependencies:
     (setq indent-tabs-mode t))
 
   (use-package go-mode
-    :defer t
     :config
     (add-hook 'go-mode-hook #'panda/setup-go-mode))
 
   (use-package go-eldoc
-    :after go-mode
     :config
     (add-hook 'go-mode-hook 'go-eldoc-setup))
 
   (use-package company-go
-    :after go-mode
     :config
     (add-to-list 'company-backends 'company-go))
 #+END_SRC
@@ -769,12 +730,10 @@ Dependencies:
     (yas-minor-mode 1))
 
   (use-package haskell-mode
-    :defer t
     :config
     (add-hook 'haskell-mode-hook #'panda/setup-haskell-mode))
 
   (use-package intero
-    :after haskell-mode
     :init
     (add-hook 'haskell-mode-hook #'intero-mode)
     :config
@@ -787,7 +746,6 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package web-mode
-    :defer t
     :mode (("\\.php\\'" . web-mode)
            ("\\.as[cp]x\\'" . web-mode)
            ("\\.erb\\'" . web-mode)
@@ -825,13 +783,11 @@ Dependencies:
     (panda/enable-clang-format))
 
   (use-package js2-mode
-    :defer t
     :mode (("\\.js\\'" . js2-mode))
     :config
     (add-hook 'js2-mode-hook #'panda/setup-javascript-mode))
 
   (use-package tern
-    :defer t
     :init
     (add-hook 'js2-mode-hook #'tern-mode))
 
@@ -848,8 +804,8 @@ Dependencies:
 
   (add-hook 'LaTeX-mode-hook #'panda/setup-latex-mode)
 
-  (use-package auctex
-    :defer t
+  (use-package tex
+    :ensure auctex
     :custom
     (TeX-auto-save t)
     (TeX-parse-self t))
@@ -870,7 +826,6 @@ Dependencies:
     (yas-minor-mode 1))
 
   (use-package markdown-mode
-    :defer t
     :config
     (add-hook 'markdown-mode-hook #'panda/setup-markdown-mode))
 #+END_SRC
@@ -880,14 +835,12 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package org
-    :defer t
     :config
     (add-hook 'org-mode-hook #'panda/setup-org-mode)
     (setq org-src-fontify-natively t
           org-src-tab-acts-natively t))
 
   (use-package evil-org
-    :after org
     :config
     (add-hook 'org-mode-hook #'evil-org-mode)
     (add-hook 'evil-org-mode-hook
@@ -900,7 +853,6 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package powershell
-    :defer t
     :config
     (add-hook 'powershell-mode-hook #'panda/setup-powershell-mode))
 #+END_SRC
@@ -918,7 +870,6 @@ Dependencies:
     (setq-local yas-also-auto-indent-first-line nil))
 
   (use-package python
-    :defer t
     :config
     (add-hook 'python-mode-hook #'panda/setup-python-mode)
     (setq python-indent-offset 4))
@@ -929,7 +880,6 @@ Dependencies:
     (blacken-line-length 80))
 
   (use-package anaconda-mode
-    :defer t
     :init
     (add-hook 'python-mode-hook #'anaconda-mode)
     (add-hook 'python-mode-hook #'anaconda-eldoc-mode))
@@ -965,23 +915,19 @@ Dependencies:
     (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
   (use-package rust-mode
-    :defer t
     :config
     (add-hook 'rust-mode-hook #'panda/setup-rust-mode)
     (setq rust-format-on-save t))
 
   (use-package cargo
-    :defer t
     :init
     (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
   (use-package racer
-    :defer t
     :init
     (add-hook 'rust-mode-hook #'racer-mode))
 
   (use-package flycheck-rust
-    :defer t
     :init
     (add-hook 'rust-mode-hook #'flycheck-rust-setup))
 #+END_SRC
@@ -996,12 +942,10 @@ Dependencies:
     (yas-minor-mode 1))
 
   (use-package typescript-mode
-    :defer t
     :config
     (add-hook 'typescript-mode-hook #'panda/setup-typescript-mode))
 
   (use-package tide
-    :defer t
     :init
     (defun setup-tide-mode ()
       (interactive)

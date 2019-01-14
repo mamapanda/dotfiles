@@ -73,10 +73,7 @@ shopt -s histappend
 #---------------------------------| End Manjaro Defaults |------------------------------------
 
 alias ls='ls -F --group-directories-first'
-
-start() {
-    xdg-open "$@" &> /dev/null
-}
+alias start='xdg-open &> /dev/null'
 
 alias emacsclient='emacsclient --quiet'
 alias emacsframe='emacsclient -c' # expands to 'emacsclient --quiet -c'
