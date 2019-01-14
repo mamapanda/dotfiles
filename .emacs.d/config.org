@@ -40,6 +40,7 @@ Vim-like keybindings.
     (evil-move-beyond-eol nil)
     (evil-want-fine-undo t)
     (evil-want-keybinding nil)
+    (evil-want-Y-yank-to-eol t)
     :config
     (add-hook 'prog-mode-hook #'hs-minor-mode)
     (evil-mode 1))
@@ -278,9 +279,19 @@ Miscellaneous functions.
           (forward-char)
           (call-interactively old-func)))))
 #+END_SRC
-** Debugging
+** Executing Code
+*** Quickrun
+Run code from the current buffer with ~M-x quickrun~.
+For interactive code, use ~M-x quickrun-shell~.
+#+BEGIN_SRC emacs-lisp
+  (use-package quickrun
+    :defer t)
+#+END_SRC
+*** Realgud
+Package for debugging code.
+
 Call ~M-x load-library~ on ~realgud~ to load the package.
-Use ~realgud:<debugger-name>~ to run the debugger.
+Use ~realgud:<debugger-name>~ to run a debugger.
 #+BEGIN_SRC emacs-lisp
   (use-package realgud
     :defer t)
