@@ -48,7 +48,7 @@ Vim-like keybindings.
   (use-package evil-collection
     :after evil
     :custom
-    (evil-collection-setup-minibuffer t)
+    (evil-collection-setup-minibuffer nil)
     :config
     (evil-collection-init))
 
@@ -62,6 +62,21 @@ Vim-like keybindings.
 
   (use-package evil-anzu
     :after evil)
+#+END_SRC
+* Leader Keymap
+#+BEGIN_SRC emacs-lisp
+  (use-package general
+    :config
+    (general-override-mode)
+    (general-evil-setup)
+    (general-define-key
+     :states '(insert normal operator motion visual)
+     :keymaps 'override
+     :prefix "SPC"
+     :non-normal-prefix "M-p"
+     :prefix-map 'panda/leader-map)
+    (general-create-definer panda/general-leader
+      :keymaps 'panda/leader-map))
 #+END_SRC
 * Appearance
 ** Defaults
@@ -105,6 +120,8 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
     (linum-relative-backend 'display-line-numbers-mode)
     :config
     (linum-relative-global-mode 1))
+
+  (column-number-mode 1)
 #+END_SRC
 ** Cursor Beacon
 #+BEGIN_SRC emacs-lisp
@@ -121,21 +138,6 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
-#+END_SRC
-* Leader Keymap
-#+BEGIN_SRC emacs-lisp
-  (use-package general
-    :config
-    (general-override-mode)
-    (general-evil-setup)
-    (general-define-key
-     :states '(insert normal operator motion replace visual)
-     :keymaps 'override
-     :prefix "SPC"
-     :non-normal-prefix "M-p"
-     :prefix-map 'panda/leader-map)
-    (general-create-definer panda/general-leader
-      :keymaps 'panda/leader-map))
 #+END_SRC
 * Basic Configuration
 ** Defaults
@@ -162,7 +164,10 @@ Hide ~abbrev-mode~ and ~auto-revert-mode~ from the mode line.
 ** Key Definitions
 *** Remaps
 #+BEGIN_SRC emacs-lisp
-  (panda/general-leader "k" 'kill-this-buffer)
+  (panda/general-leader
+    "k" 'kill-buffer
+    "o" 'occur
+    "O" 'multi-occur)
 #+END_SRC
 *** Keybind Help
 #+BEGIN_SRC emacs-lisp
@@ -196,6 +201,7 @@ Colors that look nice with Monokai.
 * Global Packages
 ** Multi-Purpose
 *** Ivy / Counsel / Swiper
+Completion for emacs commands.
 ~flx~ and ~smex~ give better regex sorting and completion sorting, respectively.
 
 Dependencies:
@@ -511,6 +517,11 @@ Activate with ~lsp~.
 
   (use-package lsp-ui
     :after lsp-mode)
+#+END_SRC
+** Outshine
+Activate with ~outshine-mode~.
+#+BEGIN_SRC emacs-lisp
+  (use-package outshine)
 #+END_SRC
 ** Yasnippet
 Code snippets. Activate with ~yas-minor-mode~.

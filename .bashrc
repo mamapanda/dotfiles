@@ -76,7 +76,7 @@ alias ls='ls -F --group-directories-first'
 alias start='xdg-open &> /dev/null'
 
 alias emacsclient='emacsclient --quiet'
-alias emacsframe='emacsclient -c' # expands to 'emacsclient --quiet -c'
+alias em='emacsclient -c' # expands to 'emacsclient --quiet -c'
 
 if [ "$(emacsclient -e '(daemonp)' 2> /dev/null)" != 't' ]; then
     (emacs --daemon &> /dev/null &)
