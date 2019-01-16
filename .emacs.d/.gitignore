@@ -3,7 +3,6 @@
 !.gitignore
 
 !init.el
-!config.org
 !custom-file.el
 
 !snippets/
