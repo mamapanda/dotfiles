@@ -70,9 +70,9 @@
    :keymaps 'override
    :prefix "SPC"
    :non-normal-prefix "M-p"
-   :prefix-map 'panda/leader-map)
-  (general-create-definer panda/general-leader
-    :keymaps 'panda/leader-map))
+   :prefix-map 'panda-leader-map)
+  (general-create-definer panda-general-leader
+    :keymaps 'panda-leader-map))
 
 ;;; Appearance
 (setq default-frame-alist '((fullscreen . maximized)
@@ -94,13 +94,22 @@
   :config
   (doom-modeline-init))
 
-(use-package linum-relative
+(use-package display-line-numbers
+  ;; built into emacs 26
+  :general
+  (panda-general-leader "l" 'panda-toggle-line-numbers)
   :custom
-  (linum-relative-backend 'display-line-numbers-mode)
+  (display-line-numbers-type 'relative)
   :config
-  (linum-relative-global-mode 1))
-
-(column-number-mode 1)
+  (defun panda-toggle-line-numbers ()
+    (interactive)
+    (setq display-line-numbers-type (if (eq display-line-numbers-type t)
+                                        'relative
+                                      t))
+    (global-display-line-numbers-mode -1)
+    (global-display-line-numbers-mode 1))
+  (global-display-line-numbers-mode 1)
+  (column-number-mode 1))
 
 (use-package diminish
   :config
@@ -142,7 +151,7 @@
 
 ;;;; Key Definitions
 ;;;;; Remaps
-(panda/general-leader
+(panda-general-leader
   "k" 'kill-buffer
   "o" 'occur
   "O" 'multi-occur)
@@ -158,9 +167,9 @@
   (which-key-mode 1))
 
 ;;;; Constants
-(defconst panda/neon-green "#39FF14")
-(defconst panda/light-blue "#67C8FF")
-(defconst panda/deep-saffron "#FF9933")
+(defconst panda-neon-green "#39FF14")
+(defconst panda-light-blue "#67C8FF")
+(defconst panda-deep-saffron "#FF9933")
 
 ;;; Miscellaneous Packages
 (use-package esup)
@@ -176,10 +185,9 @@
 (use-package ivy
   :diminish ivy-mode
   :general
-  (panda/general-leader
-    "s" 'swiper
-    "b" 'ivy-switch-buffer)
-  (general-imap
+  (panda-general-leader
+    "s" 'swiper)
+  (general-def
     :keymaps 'ivy-minibuffer-map
     "<return>" 'ivy-alt-done)
   :custom
@@ -191,26 +199,26 @@
   :config
   (ivy-mode 1)
   (set-face-attribute 'ivy-minibuffer-match-face-2 nil
-                      :foreground panda/neon-green
+                      :foreground panda-neon-green
                       :weight 'bold)
   (set-face-attribute 'ivy-minibuffer-match-face-3 nil
-                      :foreground panda/light-blue
+                      :foreground panda-light-blue
                       :weight 'bold)
   (set-face-attribute 'ivy-minibuffer-match-face-4 nil
-                      :foreground panda/deep-saffron
+                      :foreground panda-deep-saffron
                       :weight 'bold)
   (set-face-attribute 'ivy-confirm-face nil
-                      :foreground panda/neon-green))
+                      :foreground panda-neon-green))
 
 (use-package counsel
   :general
-  (panda/general-leader
+  (panda-general-leader
     "f" 'counsel-find-file
     "r" 'counsel-rg
     "P" 'counsel-yank-pop
-    "p" 'panda/counsel-yank-pop-after)
+    "p" 'panda-counsel-yank-pop-after)
   :config
-  (defun panda/counsel-yank-pop-after (&optional arg)
+  (defun panda-counsel-yank-pop-after (&optional arg)
     (interactive)
     (let ((evil-move-beyond-eol t))
       (forward-char)
@@ -220,7 +228,7 @@
 (use-package crux
   :commands (crux-rename-file-and-buffer crux-delete-file-and-buffer)
   :general
-  (panda/general-leader
+  (panda-general-leader
     "z" 'crux-find-user-init-file
     "x" 'crux-eval-and-replace)
   :config
@@ -237,11 +245,11 @@
 ;;;; Editing
 (use-package evil-mc
   :general
-  (panda/general-leader "m" 'panda/evil-mc/body)
+  (panda-general-leader "m" 'panda-evil-mc/body)
   :init
   (defvar evil-mc-key-map (make-sparse-keymap))
   :config
-  (defhydra panda/evil-mc (:hint nil :color pink :post (anzu--reset-mode-line))
+  (defhydra panda-evil-mc (:hint nil :color pink :post (anzu--reset-mode-line))
     "
   evil-mc
   [_c_]: make cursor here     [_a_]: make cursors (all)    [_s_]: stop cursors          [_r_]: resume cursors
@@ -276,14 +284,14 @@
 
 (use-package undo-tree
   :general
-  (panda/general-leader "u" 'undo-tree-visualize)
+  (panda-general-leader "u" 'undo-tree-visualize)
   :config
   (global-undo-tree-mode))
 
 ;;;; Git
 (use-package magit
   :general
-  (panda/general-leader "g" 'magit-status)
+  (panda-general-leader "g" 'magit-status)
   :custom
   (magit-auto-revert-mode nil))
 
@@ -292,44 +300,44 @@
 
 (use-package git-timemachine
   :general
-  (panda/general-leader "t" 'git-timemachine))
+  (panda-general-leader "t" 'git-timemachine))
 
 ;;;; Navigation
 (use-package avy
   :general
-  (panda/general-leader "SPC" 'avy-goto-word-1)
+  (panda-general-leader "SPC" 'avy-goto-word-1)
   :custom
   (avy-background t)
   :config
   (set-face-attribute 'avy-lead-face nil
-                      :foreground panda/neon-green
+                      :foreground panda-neon-green
                       :background (face-attribute 'default :background)
                       :weight 'bold)
   (set-face-attribute 'avy-lead-face-0 nil
-                      :foreground panda/light-blue
+                      :foreground panda-light-blue
                       :background (face-attribute 'default :background)
                       :weight 'bold)
   (set-face-attribute 'avy-lead-face-2 nil
-                      :foreground panda/deep-saffron
+                      :foreground panda-deep-saffron
                       :background (face-attribute 'default :background)
                       :weight 'bold))
 
 (use-package imenu
   :general
-  (panda/general-leader "i" 'imenu)
+  (panda-general-leader "i" 'imenu)
   :custom
   (imenu-auto-rescan t))
 
 (use-package neotree
   :after projectile
   :general
-  (panda/general-leader "d" 'panda/neotree-toggle)
+  (panda-general-leader "d" 'panda-neotree-toggle)
   :custom
   (neo-theme 'arrow)
   (neo-window-width 30)
   (neo-window-position 'left)
   :config
-  (defun panda/neotree-toggle ()
+  (defun panda-neotree-toggle ()
     (interactive)
     (if (get-buffer-window " *NeoTree*" 'visible)
         (neotree-hide)
@@ -339,7 +347,7 @@
 
 (use-package projectile
   :general
-  (panda/general-leader
+  (panda-general-leader
     :prefix "j"
     :prefix-command 'projectile-command-map)
   :custom
@@ -351,7 +359,7 @@
 ;;;; Windows
 (use-package eyebrowse
   :general
-  (panda/general-leader
+  (panda-general-leader
     "0" 'eyebrowse-switch-to-window-config-0
     "1" 'eyebrowse-switch-to-window-config-1
     "2" 'eyebrowse-switch-to-window-config-2
@@ -382,11 +390,11 @@
 
 (use-package flycheck
   :general
-  (panda/general-leader "e" 'panda/flycheck/body)
+  (panda-general-leader "e" 'panda-flycheck/body)
   :custom
   (flycheck-check-syntax-automatically '(mode-enabled save))
   :config
-  (defhydra panda/flycheck (:hint nil :color pink)
+  (defhydra panda-flycheck (:hint nil :color pink)
     "
   flycheck
   [_p_]: previous error    [_n_]: next error    [_/_]: cancel"
@@ -412,6 +420,8 @@
 
 (use-package lsp-ui
   :after lsp-mode)
+
+(use-package reformatter)
 
 (use-package outshine)
 
@@ -439,11 +449,11 @@
 (use-package ivy-yasnippet
   :after yasnippet
   :general
-  (panda/general-leader "y" 'ivy-yasnippet))
+  (panda-general-leader "y" 'ivy-yasnippet))
 
 ;;; Language Modes
 ;;;; Assembly
-(defun panda/setup-asm-mode ()
+(defun panda-setup-asm-mode ()
   (format-all-mode 1)
   (yas-minor-mode 1)
   (setq indent-tabs-mode t)
@@ -453,44 +463,44 @@
   :custom
   (asm-comment-char ?#)
   :config
-  (add-hook 'asm-mode-hook #'panda/setup-asm-mode))
+  (add-hook 'asm-mode-hook #'panda-setup-asm-mode))
 
 ;;;; C / C++
-(defun panda/setup-c-mode ()
+(defun panda-setup-c-mode ()
   (yas-minor-mode 1)
   (c-set-style "linux")
   (c-set-offset 'inline-open 0)
   (c-set-offset 'innamespace 0)
   (setq c-basic-offset 4))
 
-(add-hook 'c-mode-hook #'panda/setup-c-mode)
-(add-hook 'c++-mode-hook #'panda/setup-c-mode)
+(add-hook 'c-mode-hook #'panda-setup-c-mode)
+(add-hook 'c++-mode-hook #'panda-setup-c-mode)
 
 (use-package ccls
   :hook ((c-mode c++-mode) . lsp))
 
 (use-package clang-format
-  :hook ((c-mode c++-mode) . panda/enable-clang-format)
+  :hook ((c-mode c++-mode) . panda-enable-clang-format)
   :config
-  (defvar panda/clang-format-settings-file
+  (defvar panda-clang-format-settings-file
     (expand-file-name "clang-format-defaults.json" user-emacs-directory)
     "A JSON file containing default clang-format settings.")
-  (defun panda/default-clang-format-style ()
-    "Reads the JSON file defined by `panda/clang-format-settings-file'"
+  (defun panda-default-clang-format-style ()
+    "Reads the JSON file defined by `panda-clang-format-settings-file'"
     (with-temp-buffer
-      (insert-file-contents panda/clang-format-settings-file)
+      (insert-file-contents panda-clang-format-settings-file)
       (let ((inhibit-message t))
         (replace-regexp "[\n\"]" ""))
       (buffer-string)))
-  (defun panda/enable-clang-format ()
+  (defun panda-enable-clang-format ()
     (setq-local clang-format-style
                 (if (locate-dominating-file "." ".clang-format")
                     "file"
-                  (panda/default-clang-format-style)))
+                  (panda-default-clang-format-style)))
     (add-hook 'before-save-hook #'clang-format-buffer nil t)))
 
 ;;;; C#
-(defun panda/setup-csharp-mode ()
+(defun panda-setup-csharp-mode ()
   (company-mode 1)
   (flycheck-mode 1)
   (yas-minor-mode 1)
@@ -498,7 +508,7 @@
 
 (use-package csharp-mode
   :config
-  (add-hook 'csharp-mode-hook #'panda/setup-csharp-mode))
+  (add-hook 'csharp-mode-hook #'panda-setup-csharp-mode))
 
 (use-package omnisharp
   :init
@@ -507,23 +517,23 @@
   (add-to-list 'company-backends 'company-omnisharp))
 
 ;;;; CMake
-(defun panda/setup-cmake-mode ()
+(defun panda-setup-cmake-mode ()
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace))
 
 (use-package cmake-mode
   :config
-  (add-hook 'cmake-mode-hook #'panda/setup-cmake-mode))
+  (add-hook 'cmake-mode-hook #'panda-setup-cmake-mode))
 
 ;;;; Clojure
-(defun panda/setup-clojure-mode ()
+(defun panda-setup-clojure-mode ()
   (lispy-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package clojure-mode
   :config
-  (add-hook 'clojure-mode-hook #'panda/setup-clojure-mode))
+  (add-hook 'clojure-mode-hook #'panda-setup-clojure-mode))
 
 (use-package cider
   :config
@@ -533,45 +543,66 @@
                                (add-hook 'before-save-hook #'cider-format-buffer nil t))))
 
 ;;;; Common Lisp
-(defun panda/setup-slime-mode ()
+(defun panda-setup-slime-mode ()
   (lispy-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package slime
   :config
-  (add-hook 'slime-mode-hook #'panda/setup-slime-mode)
+  (add-hook 'slime-mode-hook #'panda-setup-slime-mode)
   (setq inferior-lisp-program (executable-find "sbcl"))
   (slime-setup '(slime-fancy)))
 
+;;;; D
+(reformatter-define panda-dfmt
+  :program "dfmt"
+  :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
+
+(defun panda-setup-d-mode ()
+  (company-mode 1)
+  (flycheck-mode 1)
+  (panda-dfmt-on-save-mode 1)
+  (yas-minor-mode 1))
+
+(use-package d-mode
+  :config
+  (add-hook 'd-mode-hook #'panda-setup-d-mode))
+
+(use-package company-dcd
+  :hook (d-mode . company-dcd-mode))
+
+(use-package flycheck-dmd-dub
+  :hook (d-mode . flycheck-dmd-dub-set-variables))
+
 ;;;; Emacs Lisp
-(defun panda/setup-emacs-lisp-mode ()
+(defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
   (format-all-mode 1)
   (lispy-mode 1)
   (yas-minor-mode 1))
 
-(add-hook 'emacs-lisp-mode-hook #'panda/setup-emacs-lisp-mode)
+(add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
 
 ;;;; Git Files
-(defun panda/setup-gitfiles-mode ()
+(defun panda-setup-gitfiles-mode ()
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package gitattributes-mode
   :config
-  (add-hook 'gitattributes-mode-hook #'panda/setup-gitfiles-mode))
+  (add-hook 'gitattributes-mode-hook #'panda-setup-gitfiles-mode))
 
 (use-package gitconfig-mode
   :config
-  (add-hook 'gitconfig-mode-hook #'panda/setup-gitfiles-mode))
+  (add-hook 'gitconfig-mode-hook #'panda-setup-gitfiles-mode))
 
 (use-package gitignore-mode
   :config
-  (add-hook 'gitignore-mode-hook #'panda/setup-gitfiles-mode))
+  (add-hook 'gitignore-mode-hook #'panda-setup-gitfiles-mode))
 
 ;;;; Go
-(defun panda/setup-go-mode ()
+(defun panda-setup-go-mode ()
   (company-mode 1)
   (flycheck-mode 1)
   (format-all-mode 1)
@@ -580,7 +611,7 @@
 
 (use-package go-mode
   :config
-  (add-hook 'go-mode-hook #'panda/setup-go-mode))
+  (add-hook 'go-mode-hook #'panda-setup-go-mode))
 
 (use-package go-eldoc
   :config
@@ -591,7 +622,7 @@
   (add-to-list 'company-backends 'company-go))
 
 ;;;; Haskell
-(defun panda/setup-haskell-mode ()
+(defun panda-setup-haskell-mode ()
   (company-mode 1)
   (flycheck-mode 1)
   (format-all-mode 1)
@@ -599,7 +630,7 @@
 
 (use-package haskell-mode
   :config
-  (add-hook 'haskell-mode-hook #'panda/setup-haskell-mode))
+  (add-hook 'haskell-mode-hook #'panda-setup-haskell-mode))
 
 (use-package intero
   :init
@@ -608,7 +639,7 @@
   (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
 
 ;;;; HTML / PHP / ASP.NET / Embedded Ruby
-(defun panda/setup-web-mode ()
+(defun panda-setup-web-mode ()
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -618,30 +649,30 @@
          ("\\.erb\\'" . web-mode)
          ("\\.html?\\'" . web-mode))
   :config
-  (add-hook 'web-mode-hook #'panda/setup-web-mode)
+  (add-hook 'web-mode-hook #'panda-setup-web-mode)
   (setq web-mode-markup-indent-offset 2
         web-mode-style-padding 4
         web-mode-script-padding 4
         web-mode-block-padding 4))
 
 ;;;; Java
-(defun panda/setup-java-mode ()
+(defun panda-setup-java-mode ()
   (yas-minor-mode 1)
-  (panda/enable-clang-format))
+  (panda-enable-clang-format))
 
-(add-hook 'java-mode-hook #'panda/setup-java-mode)
+(add-hook 'java-mode-hook #'panda-setup-java-mode)
 
 ;;;; JavaScript
-(defun panda/setup-javascript-mode ()
+(defun panda-setup-javascript-mode ()
   (company-mode 1)
   (flycheck-mode 1)
   (yas-minor-mode 1)
-  (panda/enable-clang-format))
+  (panda-enable-clang-format))
 
 (use-package js2-mode
   :mode (("\\.js\\'" . js2-mode))
   :config
-  (add-hook 'js2-mode-hook #'panda/setup-javascript-mode))
+  (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
 
 (use-package tern
   :init
@@ -653,11 +684,11 @@
   (add-to-list 'company-backends 'company-tern))
 
 ;;;; Latex
-(defun panda/setup-latex-mode ()
+(defun panda-setup-latex-mode ()
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
-(add-hook 'LaTeX-mode-hook #'panda/setup-latex-mode)
+(add-hook 'LaTeX-mode-hook #'panda-setup-latex-mode)
 
 (use-package tex
   :ensure auctex
@@ -666,27 +697,27 @@
   (TeX-parse-self t))
 
 ;;;; Makefile
-(defun panda/setup-makefile-mode ()
+(defun panda-setup-makefile-mode ()
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
-(add-hook 'makefile-mode-hook #'panda/setup-makefile-mode)
+(add-hook 'makefile-mode-hook #'panda-setup-makefile-mode)
 
 ;;;; Markdown
-(defun panda/setup-markdown-mode ()
+(defun panda-setup-markdown-mode ()
   (format-all-mode 1)
   (yas-minor-mode 1))
 
 (use-package markdown-mode
   :config
-  (add-hook 'markdown-mode-hook #'panda/setup-markdown-mode))
+  (add-hook 'markdown-mode-hook #'panda-setup-markdown-mode))
 
 ;;;; Org
-(defun panda/setup-org-mode ()
+(defun panda-setup-org-mode ()
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package org
   :config
-  (add-hook 'org-mode-hook #'panda/setup-org-mode)
+  (add-hook 'org-mode-hook #'panda-setup-org-mode)
   (setq org-src-fontify-natively t
         org-src-tab-acts-natively t))
 
@@ -697,16 +728,16 @@
             (lambda () (evil-org-set-key-theme))))
 
 ;;;; PowerShell
-(defun panda/setup-powershell-mode ()
+(defun panda-setup-powershell-mode ()
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package powershell
   :config
-  (add-hook 'powershell-mode-hook #'panda/setup-powershell-mode))
+  (add-hook 'powershell-mode-hook #'panda-setup-powershell-mode))
 
 ;;;; Python
-(defun panda/setup-python-mode ()
+(defun panda-setup-python-mode ()
   (company-mode 1)
   (flycheck-mode 1)
   (yas-minor-mode 1)
@@ -715,7 +746,7 @@
 
 (use-package python
   :config
-  (add-hook 'python-mode-hook #'panda/setup-python-mode)
+  (add-hook 'python-mode-hook #'panda-setup-python-mode)
   (setq python-indent-offset 4))
 
 (use-package blacken
@@ -734,7 +765,7 @@
   (add-to-list 'company-backends 'company-anaconda))
 
 ;;;; R
-(defun panda/setup-r-mode ()
+(defun panda-setup-r-mode ()
   (company-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
@@ -742,19 +773,18 @@
 (use-package ess
   :commands R
   :config
-  (add-hook 'ess-r-mode-hook #'panda/setup-r-mode))
+  (add-hook 'ess-r-mode-hook #'panda-setup-r-mode))
 
 ;;;; Rust
-(defun panda/setup-rust-mode ()
+(defun panda-setup-rust-mode ()
   (company-mode 1)
-  (if (locate-dominating-file default-directory "Cargo.toml")
-      (flycheck-mode 1))
+  (flycheck-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package rust-mode
   :config
-  (add-hook 'rust-mode-hook #'panda/setup-rust-mode)
+  (add-hook 'rust-mode-hook #'panda-setup-rust-mode)
   (setq rust-format-on-save t))
 
 (use-package cargo
@@ -770,14 +800,14 @@
   (add-hook 'rust-mode-hook #'flycheck-rust-setup))
 
 ;;;; TypeScript
-(defun panda/setup-typescript-mode ()
+(defun panda-setup-typescript-mode ()
   (company-mode 1)
   (flycheck-mode 1)
   (yas-minor-mode 1))
 
 (use-package typescript-mode
   :config
-  (add-hook 'typescript-mode-hook #'panda/setup-typescript-mode))
+  (add-hook 'typescript-mode-hook #'panda-setup-typescript-mode))
 
 (use-package tide
   :init
