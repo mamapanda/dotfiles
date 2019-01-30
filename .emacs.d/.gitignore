@@ -10,5 +10,6 @@
 !snippets/*/*
 
 !clang-format-defaults.json
+!styler.R
 
 !.mc-lists.el

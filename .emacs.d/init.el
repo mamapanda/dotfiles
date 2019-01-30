@@ -765,8 +765,13 @@
   (add-to-list 'company-backends 'company-anaconda))
 
 ;;;; R
+(reformatter-define panda-styler
+  ;; styler slow af
+  :program (expand-file-name "styler.R" user-emacs-directory))
+
 (defun panda-setup-r-mode ()
   (company-mode 1)
+  (panda-styler-on-save-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
