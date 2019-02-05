@@ -35,6 +35,7 @@
 (use-package evil
   :custom
   (evil-move-beyond-eol nil)
+  (evil-want-C-u-scroll t)
   (evil-want-fine-undo t)
   (evil-want-keybinding nil)
   (evil-want-Y-yank-to-eol t)
@@ -111,11 +112,6 @@
   (global-display-line-numbers-mode 1)
   (column-number-mode 1))
 
-(use-package diminish
-  :config
-  (diminish 'abbrev-mode)
-  (diminish 'auto-revert-mode))
-
 (use-package beacon
   :diminish beacon-mode
   :custom
@@ -136,7 +132,8 @@
                         (other . "linux"))
       disabled-command-function nil
       inhibit-compacting-font-caches t
-      make-backup-files nil)
+      make-backup-files nil
+      vc-follow-symlinks t)
 
 (setq-default buffer-file-coding-system 'utf-8
               c-basic-offset 4
@@ -173,9 +170,7 @@
 
 ;;; Miscellaneous Packages
 (use-package esup)
-(use-package fireplace)
 (use-package hydra)
-(use-package pacmacs)
 
 ;;; Global Packages
 ;;;; Multi-Purpose
@@ -185,8 +180,6 @@
 (use-package ivy
   :diminish ivy-mode
   :general
-  (panda-general-leader
-    "s" 'swiper)
   (general-def
     :keymaps 'ivy-minibuffer-map
     "<return>" 'ivy-alt-done)
@@ -214,29 +207,9 @@
   :general
   (panda-general-leader
     "f" 'counsel-find-file
-    "r" 'counsel-rg
-    "P" 'counsel-yank-pop
-    "p" 'panda-counsel-yank-pop-after)
+    "r" 'counsel-rg)
   :config
-  (defun panda-counsel-yank-pop-after (&optional arg)
-    (interactive)
-    (let ((evil-move-beyond-eol t))
-      (forward-char)
-      (call-interactively #'counsel-yank-pop arg)))
   (counsel-mode 1))
-
-(use-package crux
-  :commands (crux-rename-file-and-buffer crux-delete-file-and-buffer)
-  :general
-  (panda-general-leader
-    "z" 'crux-find-user-init-file
-    "x" 'crux-eval-and-replace)
-  :config
-  (define-advice crux-eval-and-replace (:around (old-func))
-    (let ((evil-move-beyond-eol t))
-      (save-excursion
-        (forward-char)
-        (call-interactively old-func)))))
 
 ;;;; Executing Code
 (use-package quickrun)
@@ -276,11 +249,6 @@
   :after evil
   :config
   (global-evil-surround-mode 1))
-
-(use-package expand-region
-  :general
-  (general-imap "C-;" 'er/expand-region)
-  (general-vmap ";" 'er/expand-region))
 
 (use-package undo-tree
   :general
@@ -328,27 +296,10 @@
   :custom
   (imenu-auto-rescan t))
 
-(use-package neotree
-  :after projectile
-  :general
-  (panda-general-leader "d" 'panda-neotree-toggle)
-  :custom
-  (neo-theme 'arrow)
-  (neo-window-width 30)
-  (neo-window-position 'left)
-  :config
-  (defun panda-neotree-toggle ()
-    (interactive)
-    (if (get-buffer-window " *NeoTree*" 'visible)
-        (neotree-hide)
-      (if (projectile-project-p)
-          (neotree-dir (projectile-project-root))
-        (neotree-show)))))
-
 (use-package projectile
   :general
   (panda-general-leader
-    :prefix "j"
+    :prefix "p"
     :prefix-command 'projectile-command-map)
   :custom
   (projectile-indexing-method 'alien)
