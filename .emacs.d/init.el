@@ -36,7 +36,7 @@
   :custom
   (evil-move-beyond-eol nil)
   (evil-want-C-u-scroll t)
-  (evil-want-fine-undo t)
+  (evil-want-fine-undo nil)
   (evil-want-keybinding nil)
   (evil-want-Y-yank-to-eol t)
   :config
@@ -147,12 +147,6 @@
 (global-auto-revert-mode t)
 
 ;;;; Key Definitions
-;;;;; Remaps
-(panda-general-leader
-  "k" 'kill-buffer
-  "o" 'occur
-  "O" 'multi-occur)
-
 ;;;;; Keybind Help
 (use-package which-key
   :diminish which-key-mode
@@ -169,7 +163,6 @@
 (defconst panda-deep-saffron "#FF9933")
 
 ;;; Miscellaneous Packages
-(use-package esup)
 (use-package hydra)
 
 ;;; Global Packages
@@ -216,6 +209,12 @@
 (use-package realgud)
 
 ;;;; Editing
+(use-package auto-yasnippet
+  :general
+  (panda-general-leader
+    "a" 'aya-expand
+    "A" 'aya-create))
+
 (use-package evil-mc
   :general
   (panda-general-leader "m" 'panda-evil-mc/body)
@@ -324,7 +323,8 @@
   :config
   (eyebrowse-mode 1))
 
-;;; Per-Language Packages
+;;; Per-Language Configuration
+;;;; Completion / Linting
 (use-package company
   :general
   (general-def :keymaps 'company-active-map
@@ -336,8 +336,6 @@
   (company-tooltip-align-annotations t)
   :config
   (delete 'company-dabbrev company-backends))
-
-(use-package format-all)
 
 (use-package flycheck
   :general
@@ -353,11 +351,62 @@
     ("n" flycheck-next-error)
     ("/" (message "Abort") :color blue)))
 
-(use-package lispy)
+;;;; Formatting
+(defun panda-generic-format-buffer ()
+  (interactive)
+  (let ((inhibit-message t))
+    (indent-region (point-min) (point-max))
+    (delete-trailing-whitespace)))
 
-(use-package lispyville
-  :hook (lispy-mode . lispyville-mode))
+(defun panda-generic-format-on-save ()
+  (add-hook 'before-save-hook #'panda-generic-format-buffer nil t))
 
+(defun panda-trim-whitespace-on-save ()
+  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+(defvar panda-clang-format-settings-file
+  (expand-file-name "clang-format-defaults.json" user-emacs-directory)
+  "A JSON file containing default clang-format settings.")
+
+(defun panda-default-clang-format-style ()
+  "Reads the JSON file defined by `panda-clang-format-settings-file'"
+  (with-temp-buffer
+    (insert-file-contents panda-clang-format-settings-file)
+    (let ((inhibit-message t))
+      (replace-regexp "[\n\"]" ""))
+    (buffer-string)))
+
+(use-package reformatter
+  :config
+  (reformatter-define asmfmt
+    :program "asmfmt")
+  (reformatter-define black
+    :program "black"
+    :args '("--line-length" "80"))
+  (reformatter-define brittany
+    :program "brittany")
+  (reformatter-define clang-format
+    :program "clang-format"
+    :args `("-style" ,(if (locate-dominating-file "." ".clang-format")
+                          "file"
+                        (panda-default-clang-format-style))))
+  (reformatter-define dfmt
+    :program "dfmt"
+    :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
+  (reformatter-define gofmt
+    :program "gofmt")
+  (reformatter-define prettier
+    :program "prettier"
+    :args '("--stdin"))
+  (reformatter-define prettier-4
+    :program "prettier"
+    :args '("--stdin" "--tab-width" "4"))
+  (reformatter-define rustfmt
+    :program "rustfmt")
+  (reformatter-define styler
+    :program (expand-file-name "styler.R" user-emacs-directory)))
+
+;;;; Language Server
 (use-package lsp-mode
   :custom
   (lsp-enable-indentation nil)
@@ -372,10 +421,16 @@
 (use-package lsp-ui
   :after lsp-mode)
 
-(use-package reformatter)
+;;;; Lisp
+(use-package lispy)
 
+(use-package lispyville
+  :hook (lispy-mode . lispyville-mode))
+
+;;;; Organization
 (use-package outshine)
 
+;;;; Snippets
 (use-package yasnippet
   :general
   (general-def :keymaps 'yas-minor-mode-map
@@ -405,7 +460,7 @@
 ;;; Language Modes
 ;;;; Assembly
 (defun panda-setup-asm-mode ()
-  (format-all-mode 1)
+  (asmfmt-on-save-mode 1)
   (yas-minor-mode 1)
   (setq indent-tabs-mode t)
   (setq-local tab-always-indent (default-value 'tab-always-indent)))
@@ -418,6 +473,7 @@
 
 ;;;; C / C++
 (defun panda-setup-c-mode ()
+  (clang-format-on-save-mode 1)
   (yas-minor-mode 1)
   (c-set-style "linux")
   (c-set-offset 'inline-open 0)
@@ -430,32 +486,12 @@
 (use-package ccls
   :hook ((c-mode c++-mode) . lsp))
 
-(use-package clang-format
-  :hook ((c-mode c++-mode) . panda-enable-clang-format)
-  :config
-  (defvar panda-clang-format-settings-file
-    (expand-file-name "clang-format-defaults.json" user-emacs-directory)
-    "A JSON file containing default clang-format settings.")
-  (defun panda-default-clang-format-style ()
-    "Reads the JSON file defined by `panda-clang-format-settings-file'"
-    (with-temp-buffer
-      (insert-file-contents panda-clang-format-settings-file)
-      (let ((inhibit-message t))
-        (replace-regexp "[\n\"]" ""))
-      (buffer-string)))
-  (defun panda-enable-clang-format ()
-    (setq-local clang-format-style
-                (if (locate-dominating-file "." ".clang-format")
-                    "file"
-                  (panda-default-clang-format-style)))
-    (add-hook 'before-save-hook #'clang-format-buffer nil t)))
-
 ;;;; C#
 (defun panda-setup-csharp-mode ()
   (company-mode 1)
   (flycheck-mode 1)
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
 
 (use-package csharp-mode
   :config
@@ -469,8 +505,8 @@
 
 ;;;; CMake
 (defun panda-setup-cmake-mode ()
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace))
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
 
 (use-package cmake-mode
   :config
@@ -479,8 +515,8 @@
 ;;;; Clojure
 (defun panda-setup-clojure-mode ()
   (lispy-mode 1)
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
 
 (use-package clojure-mode
   :config
@@ -490,14 +526,13 @@
   :config
   (add-hook 'cider-mode-hook (lambda ()
                                (interactive)
-                               (company-mode 1)
-                               (add-hook 'before-save-hook #'cider-format-buffer nil t))))
+                               (company-mode 1))))
 
 ;;;; Common Lisp
 (defun panda-setup-slime-mode ()
   (lispy-mode 1)
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
 
 (use-package slime
   :config
@@ -506,14 +541,10 @@
   (slime-setup '(slime-fancy)))
 
 ;;;; D
-(reformatter-define panda-dfmt
-  :program "dfmt"
-  :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
-
 (defun panda-setup-d-mode ()
   (company-mode 1)
+  (dfmt-on-save-mode 1)
   (flycheck-mode 1)
-  (panda-dfmt-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package d-mode
@@ -529,14 +560,15 @@
 ;;;; Emacs Lisp
 (defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
-  (format-all-mode 1)
   (lispy-mode 1)
+  (panda-generic-format-on-save)
   (yas-minor-mode 1))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
 
 ;;;; Git Files
 (defun panda-setup-gitfiles-mode ()
+  (panda-generic-format-on-save)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -556,7 +588,7 @@
 (defun panda-setup-go-mode ()
   (company-mode 1)
   (flycheck-mode 1)
-  (format-all-mode 1)
+  (gofmt-on-save-mode 1)
   (yas-minor-mode 1)
   (setq indent-tabs-mode t))
 
@@ -574,9 +606,9 @@
 
 ;;;; Haskell
 (defun panda-setup-haskell-mode ()
+  (brittany-on-save-mode 1)
   (company-mode 1)
   (flycheck-mode 1)
-  (format-all-mode 1)
   (yas-minor-mode 1))
 
 (use-package haskell-mode
@@ -591,8 +623,8 @@
 
 ;;;; HTML / PHP / ASP.NET / Embedded Ruby
 (defun panda-setup-web-mode ()
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (prettier-on-save-mode 1)
+  (yas-minor-mode 1))
 
 (use-package web-mode
   :mode (("\\.php\\'" . web-mode)
@@ -608,8 +640,8 @@
 
 ;;;; Java
 (defun panda-setup-java-mode ()
-  (yas-minor-mode 1)
-  (panda-enable-clang-format))
+  (clang-format-on-save-mode 1)
+  (yas-minor-mode 1))
 
 (add-hook 'java-mode-hook #'panda-setup-java-mode)
 
@@ -617,8 +649,8 @@
 (defun panda-setup-javascript-mode ()
   (company-mode 1)
   (flycheck-mode 1)
-  (yas-minor-mode 1)
-  (panda-enable-clang-format))
+  (prettier-4-on-save-mode 1)
+  (yas-minor-mode 1))
 
 (use-package js2-mode
   :mode (("\\.js\\'" . js2-mode))
@@ -636,8 +668,8 @@
 
 ;;;; Latex
 (defun panda-setup-latex-mode ()
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
 
 (add-hook 'LaTeX-mode-hook #'panda-setup-latex-mode)
 
@@ -649,13 +681,13 @@
 
 ;;;; Makefile
 (defun panda-setup-makefile-mode ()
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save))
 
 (add-hook 'makefile-mode-hook #'panda-setup-makefile-mode)
 
 ;;;; Markdown
 (defun panda-setup-markdown-mode ()
-  (format-all-mode 1)
+  (prettier-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package markdown-mode
@@ -664,7 +696,7 @@
 
 ;;;; Org
 (defun panda-setup-org-mode ()
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save))
 
 (use-package org
   :config
@@ -680,8 +712,8 @@
 
 ;;;; PowerShell
 (defun panda-setup-powershell-mode ()
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
 
 (use-package powershell
   :config
@@ -689,6 +721,7 @@
 
 ;;;; Python
 (defun panda-setup-python-mode ()
+  (black-on-save-mode 1)
   (company-mode 1)
   (flycheck-mode 1)
   (yas-minor-mode 1)
@@ -699,11 +732,6 @@
   :config
   (add-hook 'python-mode-hook #'panda-setup-python-mode)
   (setq python-indent-offset 4))
-
-(use-package blacken
-  :hook (python-mode . blacken-mode)
-  :custom
-  (blacken-line-length 80))
 
 (use-package anaconda-mode
   :init
@@ -716,13 +744,9 @@
   (add-to-list 'company-backends 'company-anaconda))
 
 ;;;; R
-(reformatter-define panda-styler
-  ;; styler slow af
-  :program (expand-file-name "styler.R" user-emacs-directory))
-
 (defun panda-setup-r-mode ()
   (company-mode 1)
-  (panda-styler-on-save-mode 1)
+  (styler-on-save-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
@@ -735,13 +759,13 @@
 (defun panda-setup-rust-mode ()
   (company-mode 1)
   (flycheck-mode 1)
+  (rustfmt-on-save-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
 (use-package rust-mode
   :config
-  (add-hook 'rust-mode-hook #'panda-setup-rust-mode)
-  (setq rust-format-on-save t))
+  (add-hook 'rust-mode-hook #'panda-setup-rust-mode))
 
 (use-package cargo
   :init
@@ -759,6 +783,7 @@
 (defun panda-setup-typescript-mode ()
   (company-mode 1)
   (flycheck-mode 1)
+  (prettier-4-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package typescript-mode
@@ -770,8 +795,7 @@
   (defun setup-tide-mode ()
     (interactive)
     (tide-setup)
-    (tide-hl-identifier-mode +1)
-    (add-hook 'before-save-hook #'tide-format-before-save nil t))
+    (tide-hl-identifier-mode +1))
   (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
 ;;; End Init
