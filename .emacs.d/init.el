@@ -337,20 +337,6 @@
   :config
   (delete 'company-dabbrev company-backends))
 
-(use-package flycheck
-  :general
-  (panda-general-leader "e" 'panda-flycheck/body)
-  :custom
-  (flycheck-check-syntax-automatically '(mode-enabled save))
-  :config
-  (defhydra panda-flycheck (:hint nil :color pink)
-    "
-  flycheck
-  [_p_]: previous error    [_n_]: next error    [_/_]: cancel"
-    ("p" flycheck-previous-error)
-    ("n" flycheck-next-error)
-    ("/" (message "Abort") :color blue)))
-
 ;;;; Formatting
 (defun panda-generic-format-buffer ()
   (interactive)
@@ -416,19 +402,7 @@
     :program (expand-file-name "styler.R" user-emacs-directory)))
 
 ;;;; Language Server
-(use-package lsp-mode
-  :custom
-  (lsp-enable-indentation nil)
-  (lsp-enable-on-type-formatting nil)
-  (lsp-prefer-flymake nil)
-  :config
-  (require 'lsp-clients))
-
-(use-package company-lsp
-  :after lsp-mode)
-
-(use-package lsp-ui
-  :after lsp-mode)
+(use-package eglot)
 
 ;;;; Lisp
 (use-package lispy)
@@ -483,6 +457,7 @@
 ;;;; C / C++
 (defun panda-setup-c-mode ()
   (clang-format-on-save-mode 1)
+  (eglot-ensure)
   (yas-minor-mode 1)
   (c-set-style "linux")
   (c-set-offset 'inline-open 0)
@@ -491,26 +466,6 @@
 
 (add-hook 'c-mode-hook #'panda-setup-c-mode)
 (add-hook 'c++-mode-hook #'panda-setup-c-mode)
-
-(use-package ccls
-  :hook ((c-mode c++-mode) . lsp))
-
-;;;; C#
-(defun panda-setup-csharp-mode ()
-  (company-mode 1)
-  (flycheck-mode 1)
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
-
-(use-package csharp-mode
-  :config
-  (add-hook 'csharp-mode-hook #'panda-setup-csharp-mode))
-
-(use-package omnisharp
-  :init
-  (add-hook 'csharp-mode-hook #'omnisharp-mode)
-  :config
-  (add-to-list 'company-backends 'company-omnisharp))
 
 ;;;; CMake
 (defun panda-setup-cmake-mode ()
@@ -553,18 +508,14 @@
 (defun panda-setup-d-mode ()
   (company-mode 1)
   (dfmt-on-save-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (yas-minor-mode 1))
 
 (use-package d-mode
   :config
+  (add-to-list 'eglot-server-programs '(d-mode . ("~/.dub/packages/.bin/dls-latest/dls")))
   (add-hook 'd-mode-hook #'panda-setup-d-mode))
-
-(use-package company-dcd
-  :hook (d-mode . company-dcd-mode))
-
-(use-package flycheck-dmd-dub
-  :hook (d-mode . flycheck-dmd-dub-set-variables))
 
 ;;;; Emacs Lisp
 (defun panda-setup-emacs-lisp-mode ()
@@ -596,6 +547,7 @@
 ;;;; Go
 (defun panda-setup-go-mode ()
   (company-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (gofmt-on-save-mode 1)
   (yas-minor-mode 1)
@@ -603,6 +555,7 @@
 
 (use-package go-mode
   :config
+  (add-to-list 'eglot-server-programs '(go-mode . ("bingo")))
   (add-hook 'go-mode-hook #'panda-setup-go-mode))
 
 (use-package go-eldoc
@@ -617,18 +570,13 @@
 (defun panda-setup-haskell-mode ()
   (brittany-on-save-mode 1)
   (company-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (yas-minor-mode 1))
 
 (use-package haskell-mode
   :config
   (add-hook 'haskell-mode-hook #'panda-setup-haskell-mode))
-
-(use-package intero
-  :init
-  (add-hook 'haskell-mode-hook #'intero-mode)
-  :config
-  (flycheck-add-next-checker 'intero '(info . haskell-hlint)))
 
 ;;;; HTML / PHP / ASP.NET / Embedded Ruby
 (defun panda-setup-web-mode ()
@@ -657,6 +605,7 @@
 ;;;; JavaScript
 (defun panda-setup-javascript-mode ()
   (company-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (prettier-javascript-on-save-mode 1)
   (yas-minor-mode 1))
@@ -666,14 +615,6 @@
   :config
   (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
 
-(use-package tern
-  :init
-  (add-hook 'js2-mode-hook #'tern-mode))
-
-(use-package company-tern
-  :after tern
-  :config
-  (add-to-list 'company-backends 'company-tern))
 
 ;;;; Latex
 (defun panda-setup-latex-mode ()
@@ -732,6 +673,7 @@
 (defun panda-setup-python-mode ()
   (black-on-save-mode 1)
   (company-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (yas-minor-mode 1)
   (setq-local yas-indent-line 'fixed)
@@ -742,19 +684,10 @@
   (add-hook 'python-mode-hook #'panda-setup-python-mode)
   (setq python-indent-offset 4))
 
-(use-package anaconda-mode
-  :init
-  (add-hook 'python-mode-hook #'anaconda-mode)
-  (add-hook 'python-mode-hook #'anaconda-eldoc-mode))
-
-(use-package company-anaconda
-  :after anaconda-mode
-  :config
-  (add-to-list 'company-backends 'company-anaconda))
-
 ;;;; R
 (defun panda-setup-r-mode ()
   (company-mode 1)
+  (eglot-ensure)
   (styler-on-save-mode 1)
   (yas-minor-mode 1)
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
@@ -767,10 +700,10 @@
 ;;;; Rust
 (defun panda-setup-rust-mode ()
   (company-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (rustfmt-on-save-mode 1)
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (yas-minor-mode 1))
 
 (use-package rust-mode
   :config
@@ -780,10 +713,6 @@
   :init
   (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
-(use-package racer
-  :init
-  (add-hook 'rust-mode-hook #'racer-mode))
-
 (use-package flycheck-rust
   :init
   (add-hook 'rust-mode-hook #'flycheck-rust-setup))
@@ -791,6 +720,7 @@
 ;;;; TypeScript
 (defun panda-setup-typescript-mode ()
   (company-mode 1)
+  (eglot-ensure)
   (flycheck-mode 1)
   (prettier-typescript-on-save-mode 1)
   (yas-minor-mode 1))
@@ -798,14 +728,6 @@
 (use-package typescript-mode
   :config
   (add-hook 'typescript-mode-hook #'panda-setup-typescript-mode))
-
-(use-package tide
-  :init
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (tide-hl-identifier-mode +1))
-  (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
 ;;; End Init
 (provide 'init)
