@@ -395,12 +395,21 @@
     :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
   (reformatter-define gofmt
     :program "gofmt")
-  (reformatter-define prettier
+  (reformatter-define prettier-html
     :program "prettier"
-    :args '("--stdin"))
-  (reformatter-define prettier-4
+    :args '("--stdin" "--parser" "html"))
+  (reformatter-define prettier-css
     :program "prettier"
-    :args '("--stdin" "--tab-width" "4"))
+    :args '("--stdin" "--parser" "css" "--tab-width" "4"))
+  (reformatter-define prettier-javascript
+    :program "prettier"
+    :args '("--stdin" "--parser" "javascript" "--tab-width" "4"))
+  (reformatter-define prettier-markdown
+    :program "prettier"
+    :args '("--stdin" "--parser" "markdown"))
+  (reformatter-define prettier-typescript
+    :program "prettier"
+    :args '("--stdin" "--parser" "typescript" "--tab-width" "4"))
   (reformatter-define rustfmt
     :program "rustfmt")
   (reformatter-define styler
@@ -623,7 +632,7 @@
 
 ;;;; HTML / PHP / ASP.NET / Embedded Ruby
 (defun panda-setup-web-mode ()
-  (prettier-on-save-mode 1)
+  (prettier-html-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package web-mode
@@ -649,7 +658,7 @@
 (defun panda-setup-javascript-mode ()
   (company-mode 1)
   (flycheck-mode 1)
-  (prettier-4-on-save-mode 1)
+  (prettier-javascript-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package js2-mode
@@ -687,7 +696,7 @@
 
 ;;;; Markdown
 (defun panda-setup-markdown-mode ()
-  (prettier-on-save-mode 1)
+  (prettier-markdown-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package markdown-mode
@@ -783,7 +792,7 @@
 (defun panda-setup-typescript-mode ()
   (company-mode 1)
   (flycheck-mode 1)
-  (prettier-4-on-save-mode 1)
+  (prettier-typescript-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package typescript-mode
