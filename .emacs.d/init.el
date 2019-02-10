@@ -337,6 +337,12 @@
   :config
   (delete 'company-dabbrev company-backends))
 
+(use-package flymake
+  :general
+  (general-def :keymaps 'flymake-mode-map
+    "M-p" 'flymake-goto-prev-error
+    "M-n" 'flymake-goto-next-error))
+
 ;;;; Formatting
 (defun panda-generic-format-buffer ()
   (interactive)
@@ -368,7 +374,7 @@
     :program "asmfmt")
   (reformatter-define black
     :program "black"
-    :args '("--line-length" "80"))
+    :args '("-" "--quiet" "--line-length" "80"))
   (reformatter-define brittany
     :program "brittany")
   (reformatter-define clang-format
@@ -509,7 +515,6 @@
   (company-mode 1)
   (dfmt-on-save-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (yas-minor-mode 1))
 
 (use-package d-mode
@@ -548,30 +553,19 @@
 (defun panda-setup-go-mode ()
   (company-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (gofmt-on-save-mode 1)
   (yas-minor-mode 1)
   (setq indent-tabs-mode t))
 
 (use-package go-mode
   :config
-  (add-to-list 'eglot-server-programs '(go-mode . ("bingo")))
   (add-hook 'go-mode-hook #'panda-setup-go-mode))
-
-(use-package go-eldoc
-  :config
-  (add-hook 'go-mode-hook 'go-eldoc-setup))
-
-(use-package company-go
-  :config
-  (add-to-list 'company-backends 'company-go))
 
 ;;;; Haskell
 (defun panda-setup-haskell-mode ()
   (brittany-on-save-mode 1)
   (company-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (yas-minor-mode 1))
 
 (use-package haskell-mode
@@ -606,7 +600,6 @@
 (defun panda-setup-javascript-mode ()
   (company-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (prettier-javascript-on-save-mode 1)
   (yas-minor-mode 1))
 
@@ -614,7 +607,6 @@
   :mode (("\\.js\\'" . js2-mode))
   :config
   (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
-
 
 ;;;; Latex
 (defun panda-setup-latex-mode ()
@@ -674,7 +666,6 @@
   (black-on-save-mode 1)
   (company-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (yas-minor-mode 1)
   (setq-local yas-indent-line 'fixed)
   (setq-local yas-also-auto-indent-first-line nil))
@@ -689,11 +680,12 @@
   (company-mode 1)
   (eglot-ensure)
   (styler-on-save-mode 1)
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (yas-minor-mode 1))
 
 (use-package ess
   :commands R
+  :custom
+  (ess-use-flymake nil)
   :config
   (add-hook 'ess-r-mode-hook #'panda-setup-r-mode))
 
@@ -701,7 +693,6 @@
 (defun panda-setup-rust-mode ()
   (company-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (rustfmt-on-save-mode 1)
   (yas-minor-mode 1))
 
@@ -713,15 +704,10 @@
   :init
   (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
-(use-package flycheck-rust
-  :init
-  (add-hook 'rust-mode-hook #'flycheck-rust-setup))
-
 ;;;; TypeScript
 (defun panda-setup-typescript-mode ()
   (company-mode 1)
   (eglot-ensure)
-  (flycheck-mode 1)
   (prettier-typescript-on-save-mode 1)
   (yas-minor-mode 1))
 
