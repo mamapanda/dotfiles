@@ -41,6 +41,8 @@
   (evil-want-Y-yank-to-eol t)
   :config
   (add-hook 'prog-mode-hook #'hs-minor-mode)
+  (evil-global-set-key 'insert (kbd "C-z") nil)
+  (evil-global-set-key 'motion (kbd "C-z") nil)
   (evil-mode 1))
 
 (use-package evil-collection
@@ -66,13 +68,13 @@
   :config
   (general-override-mode)
   (general-evil-setup)
-  (general-define-key
-   :states '(insert normal operator motion visual)
-   :keymaps 'override
-   :prefix "SPC"
-   :non-normal-prefix "M-p"
-   :prefix-map 'panda-leader-map)
-  (general-create-definer panda-general-leader
+  (general-create-definer panda-override-evil
+    :states '(normal operator motion visual)
+    :keymaps 'override)
+  (panda-override-evil
+    :prefix "<backspace>"
+    :prefix-map 'panda-leader-map)
+  (general-create-definer panda-leader-def
     :keymaps 'panda-leader-map))
 
 ;;; Appearance
@@ -85,6 +87,8 @@
       ring-bell-function 'ignore
       visible-bell nil)
 
+(column-number-mode 1)
+
 (use-package monokai-theme)
 (load-theme 'monokai t)
 
@@ -94,23 +98,6 @@
   (doom-modeline-buffer-file-name-style 'relative-from-project)
   :config
   (doom-modeline-init))
-
-(use-package display-line-numbers
-  ;; built into emacs 26
-  :general
-  (panda-general-leader "l" 'panda-toggle-line-numbers)
-  :custom
-  (display-line-numbers-type 'relative)
-  :config
-  (defun panda-toggle-line-numbers ()
-    (interactive)
-    (setq display-line-numbers-type (if (eq display-line-numbers-type t)
-                                        'relative
-                                      t))
-    (global-display-line-numbers-mode -1)
-    (global-display-line-numbers-mode 1))
-  (global-display-line-numbers-mode 1)
-  (column-number-mode 1))
 
 (use-package beacon
   :diminish beacon-mode
@@ -130,6 +117,7 @@
       c-default-style '((java-mode . "java")
                         (awk-mode . "awk")
                         (other . "linux"))
+      delete-by-moving-to-trash t
       disabled-command-function nil
       inhibit-compacting-font-caches t
       make-backup-files nil
@@ -198,7 +186,7 @@
 
 (use-package counsel
   :general
-  (panda-general-leader
+  (panda-leader-def
     "f" 'counsel-find-file
     "r" 'counsel-rg)
   :config
@@ -211,13 +199,21 @@
 ;;;; Editing
 (use-package auto-yasnippet
   :general
-  (panda-general-leader
+  (panda-leader-def
     "a" 'aya-expand
     "A" 'aya-create))
 
+(use-package evil-commentary
+  :config
+  (evil-commentary-mode 1))
+
+(use-package evil-exchange
+  :config
+  (evil-exchange-install))
+
 (use-package evil-mc
   :general
-  (panda-general-leader "m" 'panda-evil-mc/body)
+  (panda-leader-def "m" 'panda-evil-mc/body)
   :init
   (defvar evil-mc-key-map (make-sparse-keymap))
   :config
@@ -249,16 +245,20 @@
   :config
   (global-evil-surround-mode 1))
 
+(use-package expand-region
+  :general
+  (general-vmap "v" 'er/expand-region))
+
 (use-package undo-tree
   :general
-  (panda-general-leader "u" 'undo-tree-visualize)
+  (panda-leader-def "u" 'undo-tree-visualize)
   :config
   (global-undo-tree-mode))
 
 ;;;; Git
 (use-package magit
   :general
-  (panda-general-leader "g" 'magit-status)
+  (panda-leader-def "g" 'magit-status)
   :custom
   (magit-auto-revert-mode nil))
 
@@ -267,12 +267,14 @@
 
 (use-package git-timemachine
   :general
-  (panda-general-leader "t" 'git-timemachine))
+  (panda-leader-def "t" 'git-timemachine))
 
 ;;;; Navigation
 (use-package avy
   :general
-  (panda-general-leader "SPC" 'avy-goto-word-1)
+  (panda-override-evil
+    "SPC" 'avy-goto-word-1
+    "S-SPC" 'avy-goto-line)
   :custom
   (avy-background t)
   :config
@@ -289,15 +291,23 @@
                       :background (face-attribute 'default :background)
                       :weight 'bold))
 
+(use-package evil-snipe
+  :custom
+  (evil-snipe-scope 'visible)
+  (evil-snipe-repeat-scope 'visible)
+  :config
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
+
 (use-package imenu
   :general
-  (panda-general-leader "i" 'imenu)
+  (panda-leader-def "i" 'imenu)
   :custom
   (imenu-auto-rescan t))
 
 (use-package projectile
   :general
-  (panda-general-leader
+  (panda-leader-def
     :prefix "p"
     :prefix-command 'projectile-command-map)
   :custom
@@ -309,7 +319,7 @@
 ;;;; Windows
 (use-package eyebrowse
   :general
-  (panda-general-leader
+  (panda-leader-def
     "0" 'eyebrowse-switch-to-window-config-0
     "1" 'eyebrowse-switch-to-window-config-1
     "2" 'eyebrowse-switch-to-window-config-2
@@ -444,7 +454,7 @@
 (use-package ivy-yasnippet
   :after yasnippet
   :general
-  (panda-general-leader "y" 'ivy-yasnippet))
+  (panda-leader-def "y" 'ivy-yasnippet))
 
 ;;; Language Modes
 ;;;; Assembly
