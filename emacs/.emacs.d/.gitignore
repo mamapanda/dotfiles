@@ -1,0 +1,12 @@
+*
+
+!.gitignore
+
+!init.el
+
+!snippets/
+!snippets/*/
+!snippets/*/*
+
+!files/
+!files/*

@@ -25,8 +25,11 @@
 (setq use-package-always-ensure t
       use-package-always-demand t)
 
-;;; Customize File
-(setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
+;;; Extra Files
+(defun panda-extra-file (filename)
+  (expand-file-name (concat "files/" filename) user-emacs-directory))
+
+(setq custom-file (panda-extra-file "custom-file.el"))
 (load custom-file 'noerror)
 
 ;;; Evil
@@ -366,14 +369,10 @@
 (defun panda-trim-whitespace-on-save ()
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
-(defvar panda-clang-format-settings-file
-  (expand-file-name "clang-format-defaults.json" user-emacs-directory)
-  "A JSON file containing default clang-format settings.")
-
 (defun panda-default-clang-format-style ()
-  "Reads the JSON file defined by `panda-clang-format-settings-file'"
+  "Obtain the default clang-format style as a string."
   (with-temp-buffer
-    (insert-file-contents panda-clang-format-settings-file)
+    (insert-file-contents (panda-extra-file "clang-format-defaults.json"))
     (let ((inhibit-message t))
       (replace-regexp "[\n\"]" ""))
     (buffer-string)))
@@ -415,7 +414,7 @@
   (reformatter-define rustfmt
     :program "rustfmt")
   (reformatter-define styler
-    :program (expand-file-name "styler.R" user-emacs-directory)))
+    :program (panda-extra-file "styler.R")))
 
 ;;;; Language Server
 (use-package eglot)
