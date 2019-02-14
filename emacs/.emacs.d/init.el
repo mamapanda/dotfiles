@@ -29,7 +29,7 @@
 (defun panda-extra-file (filename)
   (expand-file-name (concat "files/" filename) user-emacs-directory))
 
-(setq custom-file (panda-extra-file "custom-file.el"))
+(setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
 (load custom-file 'noerror)
 
 ;;; Evil
@@ -103,7 +103,6 @@
   (doom-modeline-init))
 
 (use-package beacon
-  :diminish beacon-mode
   :custom
   (beacon-blink-when-window-scrolls t)
   (beacon-blink-when-window-changes t)
@@ -140,7 +139,6 @@
 ;;;; Key Definitions
 ;;;;; Keybind Help
 (use-package which-key
-  :diminish which-key-mode
   :custom
   (which-key-popup-type 'side-window)
   (which-key-side-window-location 'bottom)
@@ -154,6 +152,7 @@
 (defconst panda-deep-saffron "#FF9933")
 
 ;;; Miscellaneous Packages
+(require 'cl)
 (use-package hydra)
 
 ;;; Global Packages
@@ -162,7 +161,6 @@
 (use-package smex)
 
 (use-package ivy
-  :diminish ivy-mode
   :general
   (general-def
     :keymaps 'ivy-minibuffer-map
@@ -196,7 +194,12 @@
   (counsel-mode 1))
 
 ;;;; Executing Code
-(use-package quickrun)
+(use-package quickrun
+  :general
+  (panda-leader-def
+    "q" 'quickrun
+    "Q" 'quickrun-shell))
+
 (use-package realgud)
 
 ;;;; Editing
@@ -213,6 +216,19 @@
 (use-package evil-exchange
   :config
   (evil-exchange-install))
+
+(use-package evil-goggles
+  :config
+  (defun panda-evil-goggles-add (command based-on-command)
+    (catch 'break-loop
+      (dolist (cmd-config evil-goggles--commands)
+        (when (eq (car cmd-config) based-on-command)
+          (add-to-list 'evil-goggles--commands (cons command (cdr cmd-config)))
+          (when (bound-and-true-p evil-goggles-mode)
+            (evil-goggles-mode 1))
+          (throw 'break-loop t)))))
+  (evil-goggles-use-diff-refine-faces)
+  (evil-goggles-mode 1))
 
 (use-package evil-mc
   :general
@@ -277,7 +293,8 @@
   :general
   (panda-override-evil
     "SPC" 'avy-goto-word-1
-    "S-SPC" 'avy-goto-line)
+    "S-SPC" 'avy-goto-line
+    "?" 'avy-goto-char-timer)
   :custom
   (avy-background t)
   :config
@@ -318,6 +335,10 @@
   (projectile-completion-system 'ivy)
   :config
   (projectile-mode))
+
+(use-package swiper
+  :general
+  (panda-override-evil "/" 'swiper))
 
 ;;;; Windows
 (use-package eyebrowse
@@ -420,18 +441,34 @@
 (use-package eglot)
 
 ;;;; Lisp
-(use-package lispy)
-
 (use-package lispyville
-  :hook (lispy-mode . lispyville-mode))
+  :config
+  (lispyville-set-key-theme '(operators))
+  (eval-after-load 'evil-goggles
+    (progn (dolist (operators '((evil-yank . lispyville-yank)
+                                (evil-delete . lispyville-delete)
+                                (evil-change . lispyville-change)
+                                (evil-yank-line . lispyville-yank-line)
+                                (evil-delete-line . lispyville-delete-line)
+                                (evil-change-line . lispyville-change-line)
+                                (evil-delete-char . lispyville-delete-char-or-splice)
+                                (evil-delete-backward-char . lispyville-delete-char-or-splice-backwards)
+                                (evil-substitute . lispyville-substitute)
+                                (evil-change-whole-line . lispyville-change-whole-line)
+                                (evil-join . lispyville-join)))
+             (destructuring-bind (evil-operator . lispyville-operator) operators
+               (panda-evil-goggles-add lispyville-operator evil-operator))))))
 
 ;;;; Organization
-(use-package outshine)
+(use-package outshine
+  :general
+  (general-mmap :keymaps 'outshine-mode-map
+    "TAB" (lookup-key outshine-mode-map (kbd "TAB"))))
 
 ;;;; Snippets
 (use-package yasnippet
   :general
-  (general-def :keymaps 'yas-minor-mode-map
+  (general-imap :keymaps 'yas-minor-mode-map
     "<tab>" nil
     "TAB" nil
     "<backtab>" 'yas-expand)
@@ -443,9 +480,12 @@
   (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
   (yas-reload-all)
   (eval-after-load 'company
-    (define-advice company-select-previous (:around (old-func &rest args))
-      (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
-        (call-interactively old-func args)))))
+    (progn
+      (defun panda-company-yas-tab-advice (old-func &rest args)
+        (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
+          (call-interactively old-func args)))
+      (let ((company-tab-func (lookup-key company-active-map (kbd "<backtab>"))))
+        (advice-add company-tab-func :around #'panda-company-yas-tab-advice)))))
 
 (use-package yasnippet-snippets
   :after yasnippet)
@@ -492,10 +532,7 @@
   (add-hook 'cmake-mode-hook #'panda-setup-cmake-mode))
 
 ;;;; Clojure
-(defun panda-setup-clojure-mode ()
-  (lispy-mode 1)
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
+(defalias 'panda-setup-clojure-mode 'panda-setup-emacs-lisp-mode)
 
 (use-package clojure-mode
   :config
@@ -503,20 +540,16 @@
 
 (use-package cider
   :config
-  (add-hook 'cider-mode-hook (lambda ()
-                               (interactive)
-                               (company-mode 1))))
+  (add-hook 'cider-mode-hook #'company-mode))
 
 ;;;; Common Lisp
-(defun panda-setup-slime-mode ()
-  (lispy-mode 1)
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
+(defalias 'panda-setup-common-lisp-mode 'panda-setup-emacs-lisp-mode)
 
 (use-package slime
+  :custom
+  (inferior-lisp-program "sbcl")
   :config
-  (add-hook 'slime-mode-hook #'panda-setup-slime-mode)
-  (setq inferior-lisp-program (executable-find "sbcl"))
+  (add-hook 'slime-mode-hook #'panda-setup-common-lisp-mode)
   (slime-setup '(slime-fancy)))
 
 ;;;; D
@@ -534,7 +567,7 @@
 ;;;; Emacs Lisp
 (defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
-  (lispy-mode 1)
+  (lispyville-mode 1)
   (panda-generic-format-on-save)
   (yas-minor-mode 1))
 
@@ -543,8 +576,7 @@
 ;;;; Git Files
 (defun panda-setup-gitfiles-mode ()
   (panda-generic-format-on-save)
-  (yas-minor-mode 1)
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+  (yas-minor-mode 1))
 
 (use-package gitattributes-mode
   :config
@@ -581,16 +613,13 @@
   :config
   (add-hook 'haskell-mode-hook #'panda-setup-haskell-mode))
 
-;;;; HTML / PHP / ASP.NET / Embedded Ruby
+;;;; HTML
 (defun panda-setup-web-mode ()
   (prettier-html-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package web-mode
-  :mode (("\\.php\\'" . web-mode)
-         ("\\.as[cp]x\\'" . web-mode)
-         ("\\.erb\\'" . web-mode)
-         ("\\.html?\\'" . web-mode))
+  :mode (("\\.html?\\'" . web-mode))
   :config
   (add-hook 'web-mode-hook #'panda-setup-web-mode)
   (setq web-mode-markup-indent-offset 2
@@ -661,15 +690,6 @@
   (add-hook 'evil-org-mode-hook
             (lambda () (evil-org-set-key-theme))))
 
-;;;; PowerShell
-(defun panda-setup-powershell-mode ()
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
-
-(use-package powershell
-  :config
-  (add-hook 'powershell-mode-hook #'panda-setup-powershell-mode))
-
 ;;;; Python
 (defun panda-setup-python-mode ()
   (black-on-save-mode 1)
@@ -694,6 +714,7 @@
 (use-package ess
   :commands R
   :custom
+  (ess-ask-for-ess-directory nil)
   (ess-use-flymake nil)
   :config
   (add-hook 'ess-r-mode-hook #'panda-setup-r-mode))
