@@ -4,6 +4,10 @@
 
 !init.el
 
+!straight/
+!straight/versions
+!straight/versions/default.el
+
 !snippets/
 !snippets/*/
 !snippets/*/*

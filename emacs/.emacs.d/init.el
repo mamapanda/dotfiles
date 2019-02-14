@@ -1,28 +1,29 @@
 ;;; Package Management
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;               bootstrap code taken from `straight.el' README                ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar bootstrap-version)
 
-;; added by package.el
-;; (package-initialize)
-
-(require 'package)
-
-(setq-default package-archives
-              '(("gnu"     . "https://elpa.gnu.org/packages/")
-                ("melpa"        . "https://melpa.org/packages/")
-                ("melpa-stable" . "https://stable.melpa.org/packages/"))
-              package-archive-priorities
-              '(("gnu" . 1)
-                ("melpa" . 10)
-                ("melpa-stable" . 0)))
+(let ((bootstrap-file (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                                        user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                             end bootstrap code                              ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq package-enable-at-startup nil)
-(package-initialize)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
+(straight-use-package 'use-package)
 (require 'use-package)
-(setq use-package-always-ensure t
+(setq straight-use-package-by-default t
       use-package-always-demand t)
 
 ;;; Extra Files
@@ -654,7 +655,7 @@
 (add-hook 'LaTeX-mode-hook #'panda-setup-latex-mode)
 
 (use-package tex
-  :ensure auctex
+  :straight auctex
   :custom
   (TeX-auto-save t)
   (TeX-parse-self t))
