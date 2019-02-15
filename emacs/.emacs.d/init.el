@@ -282,6 +282,7 @@
   (magit-auto-revert-mode nil))
 
 (use-package evil-magit
+  :disabled t
   :after magit)
 
 (use-package git-timemachine
@@ -511,6 +512,7 @@
 
 ;;;; C / C++
 (defun panda-setup-c-mode ()
+  (company-mode 1)
   (clang-format-on-save-mode 1)
   (eglot-ensure)
   (yas-minor-mode 1)
