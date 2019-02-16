@@ -103,6 +103,8 @@
   (doom-modeline-init))
 
 (use-package beacon
+  :general
+  (panda-leader-def "b" 'beacon-blink)
   :custom
   (beacon-blink-when-window-scrolls t)
   (beacon-blink-when-window-changes t)
@@ -123,6 +125,7 @@
       disabled-command-function nil
       inhibit-compacting-font-caches t
       make-backup-files nil
+      save-abbrevs nil
       vc-follow-symlinks t)
 
 (setq-default buffer-file-coding-system 'utf-8
@@ -153,6 +156,8 @@
 
 ;;; Miscellaneous Packages
 (require 'cl)
+(use-package dash)
+(use-package s)
 (use-package hydra)
 
 ;;; Global Packages
@@ -162,8 +167,7 @@
 
 (use-package ivy
   :general
-  (general-def
-    :keymaps 'ivy-minibuffer-map
+  (general-def :keymaps 'ivy-minibuffer-map
     "<return>" 'ivy-alt-done)
   :custom
   (ivy-wrap t)
@@ -206,8 +210,26 @@
 (use-package auto-yasnippet
   :general
   (panda-leader-def
-    "a" 'aya-expand
-    "A" 'aya-create))
+    "a" 'panda-aya-expand
+    "A" 'panda-evil-aya-create)
+  :config
+  (evil-define-operator panda-evil-aya-create (begin end &optional type)
+    (save-excursion
+      (evil-visual-make-selection begin end type)
+      (aya-create)
+      (evil-normal-state 1))
+    (message "Current snippet:\n%s" aya-current))
+  (defun panda-aya-expand ()
+    (interactive)
+    (aya-expand)
+    (evil-insert-state 1)))
+
+(use-package evil-args
+  :general
+  (general-def :keymaps 'evil-inner-text-objects-map
+    "a" 'evil-inner-arg)
+  (general-def :keymaps 'evil-outer-text-objects-map
+    "a" 'evil-outer-arg))
 
 (use-package evil-commentary
   :config
@@ -229,6 +251,10 @@
           (throw 'break-loop t)))))
   (evil-goggles-use-diff-refine-faces)
   (evil-goggles-mode 1))
+
+(use-package evil-lion
+  :config
+  (evil-lion-mode 1))
 
 (use-package evil-mc
   :general
@@ -282,7 +308,6 @@
   (magit-auto-revert-mode nil))
 
 (use-package evil-magit
-  :disabled t
   :after magit)
 
 (use-package git-timemachine
@@ -293,9 +318,8 @@
 (use-package avy
   :general
   (panda-override-evil
-    "SPC" 'avy-goto-word-1
-    "S-SPC" 'avy-goto-line
-    "?" 'avy-goto-char-timer)
+    "SPC" 'evil-avy-goto-word-1
+    "S-SPC" 'evil-avy-goto-line)
   :custom
   (avy-background t)
   :config
@@ -339,7 +363,24 @@
 
 (use-package swiper
   :general
-  (panda-override-evil "/" 'swiper))
+  (panda-override-evil
+    "/" 'swiper
+    "?" 'panda-swiper-repeat)
+  :custom
+  (swiper-goto-start-of-match t)
+  :config
+  (eval-after-load 'evil
+    (progn
+      (defmacro panda-fix-evil-search (search-func)
+        `(define-advice ,search-func (:around (old-func &optional count))
+           "Make evil's repeated search move in a constant direction."
+           (let ((isearch-forward t))
+             (apply old-func count))))
+      (panda-fix-evil-search evil-search-previous)
+      (panda-fix-evil-search evil-search-next)))
+  (defun panda-swiper-repeat ()
+    (interactive)
+    (swiper (car-safe regexp-search-ring))))
 
 ;;;; Windows
 (use-package eyebrowse
@@ -355,6 +396,8 @@
     "7" 'eyebrowse-switch-to-window-config-7
     "8" 'eyebrowse-switch-to-window-config-8
     "9" 'eyebrowse-switch-to-window-config-9)
+  :init
+  (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
   (eyebrowse-mode 1))
 
@@ -401,41 +444,56 @@
 
 (use-package reformatter
   :config
-  (reformatter-define asmfmt
+  (cl-defmacro panda-reformatter-define (name &rest key-pairs)
+    "A wrapper around `reformatter-define' that also creates
+a variable for the formatter program's arguments."
+    (declare (indent defun))
+    (assert (symbolp name))
+    (let* ((args-symbol (intern (format "%s-args" name)))
+           (chunks (-split-on :args key-pairs))
+           (chunk-1 (car chunks))
+           (chunk-2 (cadr chunks))
+           (args (car chunk-2))
+           (rest-key-pairs (append chunk-1 (cdr chunk-2))))
+      `(progn
+         (defvar ,args-symbol ,args
+           "Arguments for the formatter program.")
+         (reformatter-define ,name
+           :args ,args-symbol
+           ,@rest-key-pairs))))
+  (panda-reformatter-define asmfmt
     :program "asmfmt")
-  (reformatter-define black
+  (panda-reformatter-define black
     :program "black"
     :args '("-" "--quiet" "--line-length" "80"))
-  (reformatter-define brittany
+  (panda-reformatter-define brittany
     :program "brittany")
-  (reformatter-define clang-format
+  (panda-reformatter-define clang-format
     :program "clang-format"
-    :args `("-style" ,(if (locate-dominating-file "." ".clang-format")
-                          "file"
-                        (panda-default-clang-format-style))))
-  (reformatter-define dfmt
+    :args (list "-style" (panda-default-clang-format-style)))
+  (panda-reformatter-define dfmt
     :program "dfmt"
     :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
-  (reformatter-define gofmt
+  (panda-reformatter-define gofmt
     :program "gofmt")
-  (reformatter-define prettier-html
+  (panda-reformatter-define prettier-html
     :program "prettier"
     :args '("--stdin" "--parser" "html"))
-  (reformatter-define prettier-css
+  (panda-reformatter-define prettier-css
     :program "prettier"
     :args '("--stdin" "--parser" "css" "--tab-width" "4"))
-  (reformatter-define prettier-javascript
+  (panda-reformatter-define prettier-javascript
     :program "prettier"
     :args '("--stdin" "--parser" "javascript" "--tab-width" "4"))
-  (reformatter-define prettier-markdown
+  (panda-reformatter-define prettier-markdown
     :program "prettier"
     :args '("--stdin" "--parser" "markdown"))
-  (reformatter-define prettier-typescript
+  (panda-reformatter-define prettier-typescript
     :program "prettier"
     :args '("--stdin" "--parser" "typescript" "--tab-width" "4"))
-  (reformatter-define rustfmt
+  (panda-reformatter-define rustfmt
     :program "rustfmt")
-  (reformatter-define styler
+  (panda-reformatter-define styler
     :program (panda-extra-file "styler.R")))
 
 ;;;; Language Server
@@ -469,7 +527,7 @@
 ;;;; Snippets
 (use-package yasnippet
   :general
-  (general-imap :keymaps 'yas-minor-mode-map
+  (general-def :keymaps 'yas-minor-mode-map
     "<tab>" nil
     "TAB" nil
     "<backtab>" 'yas-expand)
@@ -533,17 +591,6 @@
   :config
   (add-hook 'cmake-mode-hook #'panda-setup-cmake-mode))
 
-;;;; Clojure
-(defalias 'panda-setup-clojure-mode 'panda-setup-emacs-lisp-mode)
-
-(use-package clojure-mode
-  :config
-  (add-hook 'clojure-mode-hook #'panda-setup-clojure-mode))
-
-(use-package cider
-  :config
-  (add-hook 'cider-mode-hook #'company-mode))
-
 ;;;; Common Lisp
 (defalias 'panda-setup-common-lisp-mode 'panda-setup-emacs-lisp-mode)
 
@@ -563,7 +610,7 @@
 
 (use-package d-mode
   :config
-  (add-to-list 'eglot-server-programs '(d-mode . ("~/.dub/packages/.bin/dls-latest/dls")))
+  (add-to-list 'eglot-server-programs '(d-mode . ("dls")))
   (add-hook 'd-mode-hook #'panda-setup-d-mode))
 
 ;;;; Emacs Lisp
@@ -571,7 +618,8 @@
   (company-mode 1)
   (lispyville-mode 1)
   (panda-generic-format-on-save)
-  (yas-minor-mode 1))
+  (yas-minor-mode 1)
+  (setq-local evil-args-delimiters '(" ")))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
 
