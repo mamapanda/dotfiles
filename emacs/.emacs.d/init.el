@@ -36,12 +36,11 @@
 (use-package goto-chg)
 
 (use-package evil
-  :custom
-  (evil-move-beyond-eol nil)
-  (evil-want-C-u-scroll t)
-  (evil-want-fine-undo nil)
-  (evil-want-keybinding nil)
-  (evil-want-Y-yank-to-eol t)
+  :init
+  (setq evil-want-C-d-scroll t
+        evil-want-C-u-scroll t
+        evil-want-keybinding nil
+        evil-want-Y-yank-to-eol t)
   :config
   (add-hook 'prog-mode-hook #'hs-minor-mode)
   (evil-global-set-key 'insert (kbd "C-z") nil)
@@ -49,22 +48,17 @@
   (evil-mode 1))
 
 (use-package evil-collection
-  :after evil
-  :custom
-  (evil-collection-setup-minibuffer nil)
   :config
   (evil-collection-init))
 
 (use-package evil-escape
-  :after evil
-  :custom
-  (evil-escape-key-sequence "fd")
-  (evil-escape-delay 0.1)
+  :init
+  (setq evil-escape-key-sequence "fd"
+        evil-escape-delay 0.1)
   :config
   (evil-escape-mode 1))
 
-(use-package evil-anzu
-  :after evil)
+(use-package evil-anzu)
 
 ;;; Leader Keymap
 (use-package general
@@ -96,19 +90,19 @@
 (load-theme 'monokai t)
 
 (use-package doom-modeline
-  :custom
-  (doom-modeline-icon nil)
-  (doom-modeline-buffer-file-name-style 'relative-from-project)
+  :init
+  (setq doom-modeline-buffer-file-name-style 'relative-from-project
+        doom-modeline-icon nil)
   :config
   (doom-modeline-init))
 
 (use-package beacon
   :general
   (panda-leader-def "b" 'beacon-blink)
-  :custom
-  (beacon-blink-when-window-scrolls t)
-  (beacon-blink-when-window-changes t)
-  (beacon-blink-when-point-moves nil)
+  :init
+  (setq beacon-blink-when-window-scrolls t
+        beacon-blink-when-window-changes t
+        beacon-blink-when-point-moves nil)
   :config
   (beacon-mode 1))
 
@@ -131,7 +125,8 @@
 (setq-default buffer-file-coding-system 'utf-8
               c-basic-offset 4
               indent-tabs-mode nil
-              tab-width 4)
+              tab-width 4
+              truncate-lines t)
 
 (delete-selection-mode 1)
 (electric-pair-mode 1)
@@ -142,10 +137,10 @@
 ;;;; Key Definitions
 ;;;;; Keybind Help
 (use-package which-key
-  :custom
-  (which-key-popup-type 'side-window)
-  (which-key-side-window-location 'bottom)
-  (which-key-idle-delay 1.0)
+  :init
+  (setq which-key-popup-type 'side-window
+        which-key-side-window-location 'bottom
+        which-key-idle-delay 1.0)
   :config
   (which-key-mode 1))
 
@@ -169,31 +164,26 @@
   :general
   (general-def :keymaps 'ivy-minibuffer-map
     "<return>" 'ivy-alt-done)
-  :custom
-  (ivy-wrap t)
-  (ivy-re-builders-alist '((swiper . ivy--regex-plus)
-                           (t . ivy--regex-fuzzy)))
-  (confirm-nonexistent-file-or-buffer t)
-  (ivy-count-format "(%d/%d) ")
+  :init
+  (setq ivy-wrap t
+        ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                                (t . ivy--regex-fuzzy))
+        confirm-nonexistent-file-or-buffer t
+        ivy-count-format "(%d/%d) ")
   :config
   (ivy-mode 1)
   (set-face-attribute 'ivy-minibuffer-match-face-2 nil
-                      :foreground panda-neon-green
-                      :weight 'bold)
+                      :foreground panda-neon-green)
   (set-face-attribute 'ivy-minibuffer-match-face-3 nil
-                      :foreground panda-light-blue
-                      :weight 'bold)
+                      :foreground panda-light-blue)
   (set-face-attribute 'ivy-minibuffer-match-face-4 nil
-                      :foreground panda-deep-saffron
-                      :weight 'bold)
+                      :foreground panda-deep-saffron)
   (set-face-attribute 'ivy-confirm-face nil
                       :foreground panda-neon-green))
 
 (use-package counsel
   :general
-  (panda-leader-def
-    "f" 'counsel-find-file
-    "r" 'counsel-rg)
+  (panda-leader-def "r" 'counsel-rg)
   :config
   (counsel-mode 1))
 
@@ -286,7 +276,6 @@
   (global-evil-mc-mode 1))
 
 (use-package evil-surround
-  :after evil
   :config
   (global-evil-surround-mode 1))
 
@@ -304,11 +293,10 @@
 (use-package magit
   :general
   (panda-leader-def "g" 'magit-status)
-  :custom
-  (magit-auto-revert-mode nil))
+  :init
+  (setq magit-auto-revert-mode nil))
 
-(use-package evil-magit
-  :after magit)
+(use-package evil-magit)
 
 (use-package git-timemachine
   :general
@@ -318,46 +306,42 @@
 (use-package avy
   :general
   (panda-override-evil
-    "SPC" 'evil-avy-goto-word-1
+    "SPC" 'evil-avy-goto-char-timer
     "S-SPC" 'evil-avy-goto-line)
-  :custom
-  (avy-background t)
+  :init
+  (setq avy-background t)
   :config
   (set-face-attribute 'avy-lead-face nil
                       :foreground panda-neon-green
-                      :background (face-attribute 'default :background)
-                      :weight 'bold)
+                      :background (face-attribute 'default :background))
   (set-face-attribute 'avy-lead-face-0 nil
                       :foreground panda-light-blue
-                      :background (face-attribute 'default :background)
-                      :weight 'bold)
+                      :background (face-attribute 'default :background))
   (set-face-attribute 'avy-lead-face-2 nil
                       :foreground panda-deep-saffron
-                      :background (face-attribute 'default :background)
-                      :weight 'bold))
+                      :background (face-attribute 'default :background)))
 
 (use-package evil-snipe
-  :custom
-  (evil-snipe-scope 'visible)
-  (evil-snipe-repeat-scope 'visible)
+  :init
+  (setq evil-snipe-scope 'visible
+        evil-snipe-repeat-scope 'visible)
   :config
-  (evil-snipe-mode 1)
-  (evil-snipe-override-mode 1))
+  (evil-snipe-mode 1))
 
 (use-package imenu
   :general
   (panda-leader-def "i" 'imenu)
-  :custom
-  (imenu-auto-rescan t))
+  :init
+  (setq imenu-auto-rescan t))
 
 (use-package projectile
   :general
   (panda-leader-def
     :prefix "p"
     :prefix-command 'projectile-command-map)
-  :custom
-  (projectile-indexing-method 'alien)
-  (projectile-completion-system 'ivy)
+  :init
+  (setq projectile-indexing-method 'alien
+        projectile-completion-system 'ivy)
   :config
   (projectile-mode))
 
@@ -366,8 +350,8 @@
   (panda-override-evil
     "/" 'swiper
     "?" 'panda-swiper-repeat)
-  :custom
-  (swiper-goto-start-of-match t)
+  :init
+  (setq swiper-goto-start-of-match t)
   :config
   (eval-after-load 'evil
     (progn
@@ -407,11 +391,11 @@
   :general
   (general-def :keymaps 'company-active-map
     "<return>" 'company-complete-selection)
-  :custom
-  (company-dabbrev-code-modes nil)
-  (company-idle-delay 0.1)
-  (company-minimum-prefix-length 2)
-  (company-tooltip-align-annotations t)
+  :init
+  (setq company-dabbrev-code-modes nil
+        company-idle-delay 0.1
+        company-minimum-prefix-length 2
+        company-tooltip-align-annotations t)
   :config
   (delete 'company-dabbrev company-backends))
 
@@ -531,10 +515,10 @@ a variable for the formatter program's arguments."
     "<tab>" nil
     "TAB" nil
     "<backtab>" 'yas-expand)
-  :custom
-  (yas-triggers-in-field nil)
-  (yas-indent-line 'auto)
-  (yas-also-auto-indent-first-line t)
+  :init
+  (setq yas-triggers-in-field nil
+        yas-indent-line 'auto
+        yas-also-auto-indent-first-line t)
   :config
   (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
   (yas-reload-all)
@@ -546,11 +530,9 @@ a variable for the formatter program's arguments."
       (let ((company-tab-func (lookup-key company-active-map (kbd "<backtab>"))))
         (advice-add company-tab-func :around #'panda-company-yas-tab-advice)))))
 
-(use-package yasnippet-snippets
-  :after yasnippet)
+(use-package yasnippet-snippets)
 
 (use-package ivy-yasnippet
-  :after yasnippet
   :general
   (panda-leader-def "y" 'ivy-yasnippet))
 
@@ -563,8 +545,8 @@ a variable for the formatter program's arguments."
   (setq-local tab-always-indent (default-value 'tab-always-indent)))
 
 (use-package asm-mode
-  :custom
-  (asm-comment-char ?#)
+  :init
+  (setq asm-comment-char ?#)
   :config
   (add-hook 'asm-mode-hook #'panda-setup-asm-mode))
 
@@ -595,8 +577,8 @@ a variable for the formatter program's arguments."
 (defalias 'panda-setup-common-lisp-mode 'panda-setup-emacs-lisp-mode)
 
 (use-package slime
-  :custom
-  (inferior-lisp-program "sbcl")
+  :init
+  (setq inferior-lisp-program "sbcl")
   :config
   (add-hook 'slime-mode-hook #'panda-setup-common-lisp-mode)
   (slime-setup '(slime-fancy)))
@@ -670,12 +652,13 @@ a variable for the formatter program's arguments."
 
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode))
-  :config
-  (add-hook 'web-mode-hook #'panda-setup-web-mode)
+  :init
   (setq web-mode-markup-indent-offset 2
         web-mode-style-padding 4
         web-mode-script-padding 4
-        web-mode-block-padding 4))
+        web-mode-block-padding 4)
+  :config
+  (add-hook 'web-mode-hook #'panda-setup-web-mode))
 
 ;;;; Java
 (defun panda-setup-java-mode ()
@@ -705,9 +688,9 @@ a variable for the formatter program's arguments."
 
 (use-package tex
   :ensure auctex
-  :custom
-  (TeX-auto-save t)
-  (TeX-parse-self t))
+  :init
+  (setq TeX-auto-save t
+        TeX-parse-self t))
 
 ;;;; Makefile
 (defun panda-setup-makefile-mode ()
@@ -729,10 +712,11 @@ a variable for the formatter program's arguments."
   (panda-generic-format-on-save))
 
 (use-package org
-  :config
-  (add-hook 'org-mode-hook #'panda-setup-org-mode)
+  :init
   (setq org-src-fontify-natively t
-        org-src-tab-acts-natively t))
+        org-src-tab-acts-natively t)
+  :config
+  (add-hook 'org-mode-hook #'panda-setup-org-mode))
 
 (use-package evil-org
   :config
@@ -750,9 +734,10 @@ a variable for the formatter program's arguments."
   (setq-local yas-also-auto-indent-first-line nil))
 
 (use-package python
+  :init
+  (setq python-indent-offset 4)
   :config
-  (add-hook 'python-mode-hook #'panda-setup-python-mode)
-  (setq python-indent-offset 4))
+  (add-hook 'python-mode-hook #'panda-setup-python-mode))
 
 ;;;; R
 (defun panda-setup-r-mode ()
@@ -763,9 +748,9 @@ a variable for the formatter program's arguments."
 
 (use-package ess
   :commands R
-  :custom
-  (ess-ask-for-ess-directory nil)
-  (ess-use-flymake nil)
+  :init
+  (setq ess-ask-for-ess-directory nil
+        ess-use-flymake nil)
   :config
   (add-hook 'ess-r-mode-hook #'panda-setup-r-mode))
 
