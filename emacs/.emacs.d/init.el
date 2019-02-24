@@ -6,8 +6,8 @@
 (require 'package)
 
 (setq-default package-archives
-              '(("gnu"     . "https://elpa.gnu.org/packages/")
-                ("melpa"        . "https://melpa.org/packages/")
+              '(("gnu" . "https://elpa.gnu.org/packages/")
+                ("melpa" . "https://melpa.org/packages/")
                 ("melpa-stable" . "https://stable.melpa.org/packages/"))
               package-archive-priorities
               '(("gnu" . 1)
@@ -26,15 +26,16 @@
       use-package-always-demand t)
 
 ;;; Extra Files
-(defun panda-extra-file (filename)
-  (expand-file-name (concat "files/" filename) user-emacs-directory))
+(use-package no-littering)
 
-(setq custom-file (expand-file-name "custom-file.el" user-emacs-directory))
-(load custom-file 'noerror)
+(defalias 'panda-var-file 'no-littering-expand-var-file-name)
+(defalias 'panda-etc-file 'no-littering-expand-etc-file-name)
+
+(setq custom-file (panda-etc-file "custom.el"))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 ;;; Evil
-(use-package goto-chg)
-
 (use-package evil
   :init
   (setq evil-want-C-d-scroll t
@@ -57,8 +58,6 @@
         evil-escape-delay 0.1)
   :config
   (evil-escape-mode 1))
-
-(use-package evil-anzu)
 
 ;;; Leader Keymap
 (use-package general
@@ -84,10 +83,30 @@
       ring-bell-function 'ignore
       visible-bell nil)
 
-(column-number-mode 1)
-
 (use-package monokai-theme)
 (load-theme 'monokai t)
+
+(use-package display-line-numbers
+  :general
+  (panda-leader-def "l" 'panda-toggle-line-numbers)
+  :init
+  (setq-default display-line-numbers-type 'relative)
+  :config
+  (defun panda-display-line-numbers-in-frame (frame)
+    "Display line numbers in `frame'."
+    (with-selected-frame frame
+      (global-display-line-numbers-mode 1)))
+  (add-to-list 'after-make-frame-functions #'panda-display-line-numbers-in-frame)
+  (defun panda-toggle-line-numbers ()
+    "Toggle between relative and absolute line numbers in current buffer."
+    (interactive)
+    (setq-local display-line-numbers-type (case display-line-numbers-type
+                                            (relative t)
+                                            ((t) 'relative)
+                                            (otherwise 'relative)))
+    (display-line-numbers-mode 1))
+  (global-display-line-numbers-mode 1)
+  (column-number-mode 1))
 
 (use-package doom-modeline
   :init
@@ -95,16 +114,6 @@
         doom-modeline-icon nil)
   :config
   (doom-modeline-init))
-
-(use-package beacon
-  :general
-  (panda-leader-def "b" 'beacon-blink)
-  :init
-  (setq beacon-blink-when-window-scrolls t
-        beacon-blink-when-window-changes t
-        beacon-blink-when-point-moves nil)
-  :config
-  (beacon-mode 1))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -197,23 +206,6 @@
 (use-package realgud)
 
 ;;;; Editing
-(use-package auto-yasnippet
-  :general
-  (panda-leader-def
-    "a" 'panda-aya-expand
-    "A" 'panda-evil-aya-create)
-  :config
-  (evil-define-operator panda-evil-aya-create (begin end &optional type)
-    (save-excursion
-      (evil-visual-make-selection begin end type)
-      (aya-create)
-      (evil-normal-state 1))
-    (message "Current snippet:\n%s" aya-current))
-  (defun panda-aya-expand ()
-    (interactive)
-    (aya-expand)
-    (evil-insert-state 1)))
-
 (use-package evil-args
   :general
   (general-def :keymaps 'evil-inner-text-objects-map
@@ -252,28 +244,35 @@
   :init
   (defvar evil-mc-key-map (make-sparse-keymap))
   :config
-  (defhydra panda-evil-mc (:hint nil :color pink :post (anzu--reset-mode-line))
+  (defhydra panda-evil-mc (:hint nil :color pink)
     "
-  evil-mc
-  [_c_]: make cursor here     [_a_]: make cursors (all)    [_s_]: stop cursors          [_r_]: resume cursors
-  [_p_]: prev match           [_n_]: next match            [_b_]: prev cursor           [_f_]: next cursor
-  [_P_]: prev match (skip)    [_N_]: next match (skip)     [_B_]: prev cursor (skip)    [_F_]: next cursor (skip)
-  [_u_]: undo all             [_/_]: cancel"
+ Manage Cursors^^                Go To Match^^                   Control^^
+---------------^^---------------------------^^--------------------------^^---------------
+ [_c_]: cursor here              [_a_]: all matches              [_s_]: stop cursors
+ [_b_]: back cursor              [_p_]: previous match           [_r_]: resume cursors
+ [_f_]: forward cursor           [_n_]: next match               [_u_]: undo all cursors
+ [_B_]: back cursor (skip)       [_P_]: previous match (skip)    [_q_]: quit hydra
+ [_F_]: forward cursor (skip)    [_N_]: next match (skip)"
+    ;; Manage Cursors
     ("c" evil-mc-make-cursor-here)
-    ("a" evil-mc-make-all-cursors)
-    ("s" evil-mc-pause-cursors)
-    ("r" evil-mc-resume-cursors)
-    ("p" evil-mc-make-and-goto-prev-match)
-    ("n" evil-mc-make-and-goto-next-match)
     ("b" evil-mc-make-and-goto-prev-cursor)
     ("f" evil-mc-make-and-goto-next-cursor)
-    ("P" evil-mc-skip-and-goto-prev-match)
-    ("N" evil-mc-skip-and-goto-next-match)
     ("B" evil-mc-skip-and-goto-prev-cursor)
     ("F" evil-mc-skip-and-goto-next-cursor)
+    ;; Go To Match
+    ("a" evil-mc-make-all-cursors)
+    ("p" evil-mc-make-and-goto-prev-match)
+    ("n" evil-mc-make-and-goto-next-match)
+    ("P" evil-mc-skip-and-goto-prev-match)
+    ("N" evil-mc-skip-and-goto-next-match)
+    ;; Control
+    ("s" evil-mc-pause-cursors)
+    ("r" evil-mc-resume-cursors)
     ("u" evil-mc-undo-all-cursors :color blue)
-    ("/" (message "Abort") :color blue))
-  (global-evil-mc-mode 1))
+    ("q" (message "Abort") :color blue))
+  (global-evil-mc-mode 1)
+  (push 'evil-escape-mode evil-mc-incompatible-minor-modes)
+  (push 'outshine-mode evil-mc-incompatible-minor-modes))
 
 (use-package evil-surround
   :config
@@ -286,6 +285,8 @@
 (use-package undo-tree
   :general
   (panda-leader-def "u" 'undo-tree-visualize)
+  :init
+  (setq undo-tree-enable-undo-in-region nil)
   :config
   (global-undo-tree-mode))
 
@@ -306,8 +307,7 @@
 (use-package avy
   :general
   (panda-override-evil
-    "SPC" 'evil-avy-goto-char-timer
-    "S-SPC" 'evil-avy-goto-line)
+    "SPC" 'evil-avy-goto-char-timer)
   :init
   (setq avy-background t)
   :config
@@ -320,6 +320,12 @@
   (set-face-attribute 'avy-lead-face-2 nil
                       :foreground panda-deep-saffron
                       :background (face-attribute 'default :background)))
+
+(use-package dired-sidebar
+  :general
+  (panda-leader-def "d" 'dired-sidebar-toggle-sidebar)
+  :init
+  (setq dired-sidebar-theme 'none))
 
 (use-package evil-snipe
   :init
@@ -421,7 +427,7 @@
 (defun panda-default-clang-format-style ()
   "Obtain the default clang-format style as a string."
   (with-temp-buffer
-    (insert-file-contents (panda-extra-file "clang-format-defaults.json"))
+    (insert-file-contents (panda-etc-file "clang-format-defaults.json"))
     (let ((inhibit-message t))
       (replace-regexp "[\n\"]" ""))
     (buffer-string)))
@@ -476,9 +482,7 @@ a variable for the formatter program's arguments."
     :program "prettier"
     :args '("--stdin" "--parser" "typescript" "--tab-width" "4"))
   (panda-reformatter-define rustfmt
-    :program "rustfmt")
-  (panda-reformatter-define styler
-    :program (panda-extra-file "styler.R")))
+    :program "rustfmt"))
 
 ;;;; Language Server
 (use-package eglot)
@@ -520,7 +524,6 @@ a variable for the formatter program's arguments."
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t)
   :config
-  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
   (yas-reload-all)
   (eval-after-load 'company
     (progn
@@ -743,7 +746,6 @@ a variable for the formatter program's arguments."
 (defun panda-setup-r-mode ()
   (company-mode 1)
   (eglot-ensure)
-  (styler-on-save-mode 1)
   (yas-minor-mode 1))
 
 (use-package ess
