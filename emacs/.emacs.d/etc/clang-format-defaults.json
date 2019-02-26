@@ -9,7 +9,7 @@
     "AllowShortFunctionsOnASingleLine": "None",
     "AllowShortIfStatementsOnASingleLine": false,
     "AllowShortLoopsOnASingleLine": false,
-    "BreakBeforeBraces": "Allman",
+    "BreakBeforeBraces": "Attach",
     "IndentCaseLabels": false,
     "IndentWidth": 4
 }

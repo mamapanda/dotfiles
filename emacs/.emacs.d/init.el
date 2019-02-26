@@ -25,6 +25,11 @@
 (setq use-package-always-ensure t
       use-package-always-demand t)
 
+(use-package quelpa)
+(use-package quelpa-use-package)
+(setq quelpa-update-melpa-p nil)
+(quelpa-use-package-activate-advice)
+
 ;;; Extra Files
 (use-package no-littering)
 
@@ -123,7 +128,7 @@
 (setq auto-save-default nil
       c-default-style '((java-mode . "java")
                         (awk-mode . "awk")
-                        (other . "linux"))
+                        (other . "stroustrup"))
       delete-by-moving-to-trash t
       disabled-command-function nil
       inhibit-compacting-font-caches t
@@ -221,6 +226,10 @@
   :config
   (evil-exchange-install))
 
+(use-package evil-indent-plus
+  :config
+  (evil-indent-plus-default-bindings))
+
 (use-package evil-goggles
   :config
   (defun panda-evil-goggles-add (command based-on-command)
@@ -251,7 +260,7 @@
  [_c_]: cursor here              [_a_]: all matches              [_s_]: stop cursors
  [_b_]: back cursor              [_p_]: previous match           [_r_]: resume cursors
  [_f_]: forward cursor           [_n_]: next match               [_u_]: undo all cursors
- [_B_]: back cursor (skip)       [_P_]: previous match (skip)    [_q_]: quit hydra
+ [_B_]: back cursor (skip)       [_P_]: previous match (skip)
  [_F_]: forward cursor (skip)    [_N_]: next match (skip)"
     ;; Manage Cursors
     ("c" evil-mc-make-cursor-here)
@@ -269,7 +278,8 @@
     ("s" evil-mc-pause-cursors)
     ("r" evil-mc-resume-cursors)
     ("u" evil-mc-undo-all-cursors :color blue)
-    ("q" (message "Abort") :color blue))
+    ;; Quit
+    ("q" nil :exit t))
   (global-evil-mc-mode 1)
   (push 'evil-escape-mode evil-mc-incompatible-minor-modes)
   (push 'outshine-mode evil-mc-incompatible-minor-modes))
@@ -281,6 +291,11 @@
 (use-package expand-region
   :general
   (general-vmap "v" 'er/expand-region))
+
+(use-package targets
+  :quelpa (targets :fetcher github :repo "noctuid/targets.el")
+  :config
+  (targets-setup t))
 
 (use-package undo-tree
   :general
@@ -332,7 +347,8 @@
   (setq evil-snipe-scope 'visible
         evil-snipe-repeat-scope 'visible)
   :config
-  (evil-snipe-mode 1))
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
 
 (use-package imenu
   :general
@@ -374,22 +390,47 @@
 
 ;;;; Windows
 (use-package eyebrowse
-  :general
-  (panda-leader-def
-    "0" 'eyebrowse-switch-to-window-config-0
-    "1" 'eyebrowse-switch-to-window-config-1
-    "2" 'eyebrowse-switch-to-window-config-2
-    "3" 'eyebrowse-switch-to-window-config-3
-    "4" 'eyebrowse-switch-to-window-config-4
-    "5" 'eyebrowse-switch-to-window-config-5
-    "6" 'eyebrowse-switch-to-window-config-6
-    "7" 'eyebrowse-switch-to-window-config-7
-    "8" 'eyebrowse-switch-to-window-config-8
-    "9" 'eyebrowse-switch-to-window-config-9)
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
   (eyebrowse-mode 1))
+
+(use-package winner
+  :config
+  (winner-mode 1))
+
+(defhydra panda-manage-windows (:hint nil :color blue)
+  "
+ Window Configs^^^^                    Manage Window Configs^^    Undo/Redo Window Changes^^
+---------------^^^^-----------------------------------------^^----------------------------^^-
+ [_1_]: config 1    [_6_]: config 6    [_s_]: switch config       [_u_]: undo
+ [_2_]: config 2    [_7_]: config 7    [_c_]: create config       [_r_]: redo
+ [_3_]: config 3    [_8_]: config 8    [_t_]: tag config
+ [_4_]: config 4    [_9_]: config 9    [_k_]: kill config
+ [_5_]: config 5    [_0_]: config 0"
+  ;; Switch Window Configs
+  ("1" eyebrowse-switch-to-window-config-1)
+  ("2" eyebrowse-switch-to-window-config-2)
+  ("3" eyebrowse-switch-to-window-config-3)
+  ("4" eyebrowse-switch-to-window-config-4)
+  ("5" eyebrowse-switch-to-window-config-5)
+  ("6" eyebrowse-switch-to-window-config-6)
+  ("7" eyebrowse-switch-to-window-config-7)
+  ("8" eyebrowse-switch-to-window-config-8)
+  ("9" eyebrowse-switch-to-window-config-9)
+  ("0" eyebrowse-switch-to-window-config-0)
+  ;; Manage Window Configs
+  ("s" eyebrowse-switch-to-window-config)
+  ("c" eyebrowse-create-window-config)
+  ("t" eyebrowse-rename-window-config)
+  ("k" eyebrowse-close-window-config)
+  ;; Undo/Redo Window Changes
+  ("u" winner-undo :color red)
+  ("r" winner-redo :color red)
+  ;; Quit
+  ("q" nil :exit t))
+
+(panda-leader-def "w" 'panda-manage-windows/body)
 
 ;;; Per-Language Configuration
 ;;;; Completion / Linting
@@ -440,17 +481,13 @@ a variable for the formatter program's arguments."
     (declare (indent defun))
     (assert (symbolp name))
     (let* ((args-symbol (intern (format "%s-args" name)))
-           (chunks (-split-on :args key-pairs))
-           (chunk-1 (car chunks))
-           (chunk-2 (cadr chunks))
-           (args (car chunk-2))
-           (rest-key-pairs (append chunk-1 (cdr chunk-2))))
+           (args (plist-get key-pairs :args)))
+      (plist-put key-pairs :args args-symbol)
       `(progn
          (defvar ,args-symbol ,args
            "Arguments for the formatter program.")
          (reformatter-define ,name
-           :args ,args-symbol
-           ,@rest-key-pairs))))
+           ,@key-pairs))))
   (panda-reformatter-define asmfmt
     :program "asmfmt")
   (panda-reformatter-define black
@@ -559,10 +596,7 @@ a variable for the formatter program's arguments."
   (clang-format-on-save-mode 1)
   (eglot-ensure)
   (yas-minor-mode 1)
-  (c-set-style "linux")
-  (c-set-offset 'inline-open 0)
-  (c-set-offset 'innamespace 0)
-  (setq c-basic-offset 4))
+  (c-set-offset 'innamespace 0))
 
 (add-hook 'c-mode-hook #'panda-setup-c-mode)
 (add-hook 'c++-mode-hook #'panda-setup-c-mode)
@@ -697,7 +731,8 @@ a variable for the formatter program's arguments."
 
 ;;;; Makefile
 (defun panda-setup-makefile-mode ()
-  (panda-generic-format-on-save))
+  (panda-trim-whitespace-on-save)
+  (yas-minor-mode 1))
 
 (add-hook 'makefile-mode-hook #'panda-setup-makefile-mode)
 
@@ -746,10 +781,10 @@ a variable for the formatter program's arguments."
 (defun panda-setup-r-mode ()
   (company-mode 1)
   (eglot-ensure)
+  (panda-generic-format-on-save)
   (yas-minor-mode 1))
 
 (use-package ess
-  :commands R
   :init
   (setq ess-ask-for-ess-directory nil
         ess-use-flymake nil)
