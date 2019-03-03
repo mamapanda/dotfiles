@@ -40,43 +40,11 @@
 (when (file-exists-p custom-file)
   (load custom-file))
 
-;;; Evil
-(use-package evil
-  :init
-  (setq evil-want-C-d-scroll t
-        evil-want-C-u-scroll t
-        evil-want-keybinding nil
-        evil-want-Y-yank-to-eol t)
-  :config
-  (add-hook 'prog-mode-hook #'hs-minor-mode)
-  (evil-global-set-key 'insert (kbd "C-z") nil)
-  (evil-global-set-key 'motion (kbd "C-z") nil)
-  (evil-mode 1))
-
-(use-package evil-collection
-  :config
-  (evil-collection-init))
-
-(use-package evil-escape
-  :init
-  (setq evil-escape-key-sequence "fd"
-        evil-escape-delay 0.1)
-  :config
-  (evil-escape-mode 1))
-
-;;; Leader Keymap
-(use-package general
-  :config
-  (general-override-mode)
-  (general-evil-setup)
-  (general-create-definer panda-override-evil
-    :states '(normal operator motion visual)
-    :keymaps 'override)
-  (panda-override-evil
-    :prefix "<backspace>"
-    :prefix-map 'panda-leader-map)
-  (general-create-definer panda-leader-def
-    :keymaps 'panda-leader-map))
+;;; Libraries
+(require 'cl)
+(use-package dash)
+(use-package s)
+(use-package hydra)
 
 ;;; Appearance
 (setq default-frame-alist '((fullscreen . maximized)
@@ -92,8 +60,7 @@
 (load-theme 'monokai t)
 
 (use-package display-line-numbers
-  :general
-  (panda-leader-def "l" 'panda-toggle-line-numbers)
+  :bind (("C-c l" . panda-toggle-line-number))
   :init
   (setq-default display-line-numbers-type 'relative)
   :config
@@ -148,8 +115,20 @@
 
 (global-auto-revert-mode t)
 
-;;;; Key Definitions
-;;;;; Keybind Help
+;;;; Definitions
+;;;;; Constants
+(defconst panda-neon-green "#39FF14")
+(defconst panda-light-blue "#67C8FF")
+(defconst panda-deep-saffron "#FF9933")
+
+;;;;; Modifications
+(defun panda-end-isearch-forward ()
+  (when (and isearch-forward isearch-other-end)
+    (goto-char isearch-other-end)))
+
+(add-to-list 'isearch-mode-end-hook #'panda-end-isearch-forward)
+
+;;;;; Help
 (use-package which-key
   :init
   (setq which-key-popup-type 'side-window
@@ -158,26 +137,14 @@
   :config
   (which-key-mode 1))
 
-;;;; Constants
-(defconst panda-neon-green "#39FF14")
-(defconst panda-light-blue "#67C8FF")
-(defconst panda-deep-saffron "#FF9933")
-
-;;; Miscellaneous Packages
-(require 'cl)
-(use-package dash)
-(use-package s)
-(use-package hydra)
-
 ;;; Global Packages
 ;;;; Multi-Purpose
 (use-package flx)
 (use-package smex)
 
 (use-package ivy
-  :general
-  (general-def :keymaps 'ivy-minibuffer-map
-    "<return>" 'ivy-alt-done)
+  :bind (:map ivy-minibuffer-map
+              ("<return>" . ivy-alt-done))
   :init
   (setq ivy-wrap t
         ivy-re-builders-alist '((swiper . ivy--regex-plus)
@@ -196,110 +163,22 @@
                       :foreground panda-neon-green))
 
 (use-package counsel
-  :general
-  (panda-leader-def "r" 'counsel-rg)
+  :bind (("C-c r" . counsel-rg))
   :config
   (counsel-mode 1))
 
 ;;;; Executing Code
 (use-package quickrun
-  :general
-  (panda-leader-def
-    "q" 'quickrun
-    "Q" 'quickrun-shell))
+  :bind (("C-c q" . quickrun)
+         ("C-c Q" . quickrun-shell)))
 
 (use-package realgud)
 
 ;;;; Editing
-(use-package evil-args
-  :general
-  (general-def :keymaps 'evil-inner-text-objects-map
-    "a" 'evil-inner-arg)
-  (general-def :keymaps 'evil-outer-text-objects-map
-    "a" 'evil-outer-arg))
-
-(use-package evil-commentary
-  :config
-  (evil-commentary-mode 1))
-
-(use-package evil-exchange
-  :config
-  (evil-exchange-install))
-
-(use-package evil-indent-plus
-  :config
-  (evil-indent-plus-default-bindings))
-
-(use-package evil-goggles
-  :config
-  (defun panda-evil-goggles-add (command based-on-command)
-    (catch 'break-loop
-      (dolist (cmd-config evil-goggles--commands)
-        (when (eq (car cmd-config) based-on-command)
-          (add-to-list 'evil-goggles--commands (cons command (cdr cmd-config)))
-          (when (bound-and-true-p evil-goggles-mode)
-            (evil-goggles-mode 1))
-          (throw 'break-loop t)))))
-  (evil-goggles-use-diff-refine-faces)
-  (evil-goggles-mode 1))
-
-(use-package evil-lion
-  :config
-  (evil-lion-mode 1))
-
-(use-package evil-mc
-  :general
-  (panda-leader-def "m" 'panda-evil-mc/body)
-  :init
-  (defvar evil-mc-key-map (make-sparse-keymap))
-  :config
-  (defhydra panda-evil-mc (:hint nil :color pink)
-    "
- Manage Cursors^^                Go To Match^^                   Control^^
----------------^^---------------------------^^--------------------------^^---------------
- [_c_]: cursor here              [_a_]: all matches              [_s_]: stop cursors
- [_b_]: back cursor              [_p_]: previous match           [_r_]: resume cursors
- [_f_]: forward cursor           [_n_]: next match               [_u_]: undo all cursors
- [_B_]: back cursor (skip)       [_P_]: previous match (skip)
- [_F_]: forward cursor (skip)    [_N_]: next match (skip)"
-    ;; Manage Cursors
-    ("c" evil-mc-make-cursor-here)
-    ("b" evil-mc-make-and-goto-prev-cursor)
-    ("f" evil-mc-make-and-goto-next-cursor)
-    ("B" evil-mc-skip-and-goto-prev-cursor)
-    ("F" evil-mc-skip-and-goto-next-cursor)
-    ;; Go To Match
-    ("a" evil-mc-make-all-cursors)
-    ("p" evil-mc-make-and-goto-prev-match)
-    ("n" evil-mc-make-and-goto-next-match)
-    ("P" evil-mc-skip-and-goto-prev-match)
-    ("N" evil-mc-skip-and-goto-next-match)
-    ;; Control
-    ("s" evil-mc-pause-cursors)
-    ("r" evil-mc-resume-cursors)
-    ("u" evil-mc-undo-all-cursors :color blue)
-    ;; Quit
-    ("q" nil :exit t))
-  (global-evil-mc-mode 1)
-  (push 'evil-escape-mode evil-mc-incompatible-minor-modes)
-  (push 'outshine-mode evil-mc-incompatible-minor-modes))
-
-(use-package evil-surround
-  :config
-  (global-evil-surround-mode 1))
-
 (use-package expand-region
-  :general
-  (general-vmap "v" 'er/expand-region))
-
-(use-package targets
-  :quelpa (targets :fetcher github :repo "noctuid/targets.el")
-  :config
-  (targets-setup t))
+  :bind (("C-'" . expand-region)))
 
 (use-package undo-tree
-  :general
-  (panda-leader-def "u" 'undo-tree-visualize)
   :init
   (setq undo-tree-enable-undo-in-region nil)
   :config
@@ -307,22 +186,16 @@
 
 ;;;; Git
 (use-package magit
-  :general
-  (panda-leader-def "g" 'magit-status)
+  :bind (("C-c g" . magit-status))
   :init
   (setq magit-auto-revert-mode nil))
 
-(use-package evil-magit)
-
 (use-package git-timemachine
-  :general
-  (panda-leader-def "t" 'git-timemachine))
+  :bind (("C-c t" . git-timemachine)))
 
 ;;;; Navigation
 (use-package avy
-  :general
-  (panda-override-evil
-    "SPC" 'evil-avy-goto-char-timer)
+  :bind (("C-;" . avy-goto-char-timer))
   :init
   (setq avy-background t)
   :config
@@ -337,56 +210,22 @@
                       :background (face-attribute 'default :background)))
 
 (use-package dired-sidebar
-  :general
-  (panda-leader-def "d" 'dired-sidebar-toggle-sidebar)
+  :bind (("C-c d" . dired-sidebar-toggle-sidebar))
   :init
   (setq dired-sidebar-theme 'none))
 
-(use-package evil-snipe
-  :init
-  (setq evil-snipe-scope 'visible
-        evil-snipe-repeat-scope 'visible)
-  :config
-  (evil-snipe-mode 1)
-  (evil-snipe-override-mode 1))
-
 (use-package imenu
-  :general
-  (panda-leader-def "i" 'imenu)
+  :bind (("C-c i" . imenu))
   :init
   (setq imenu-auto-rescan t))
 
 (use-package projectile
-  :general
-  (panda-leader-def
-    :prefix "p"
-    :prefix-command 'projectile-command-map)
+  :bind (("C-c p" . projectile-command-map))
   :init
   (setq projectile-indexing-method 'alien
         projectile-completion-system 'ivy)
   :config
   (projectile-mode))
-
-(use-package swiper
-  :general
-  (panda-override-evil
-    "/" 'swiper
-    "?" 'panda-swiper-repeat)
-  :init
-  (setq swiper-goto-start-of-match t)
-  :config
-  (eval-after-load 'evil
-    (progn
-      (defmacro panda-fix-evil-search (search-func)
-        `(define-advice ,search-func (:around (old-func &optional count))
-           "Make evil's repeated search move in a constant direction."
-           (let ((isearch-forward t))
-             (apply old-func count))))
-      (panda-fix-evil-search evil-search-previous)
-      (panda-fix-evil-search evil-search-next)))
-  (defun panda-swiper-repeat ()
-    (interactive)
-    (swiper (car-safe regexp-search-ring))))
 
 ;;;; Windows
 (use-package eyebrowse
@@ -430,14 +269,11 @@
   ;; Quit
   ("q" nil :exit t))
 
-(panda-leader-def "w" 'panda-manage-windows/body)
+(bind-key "C-c w" #'panda-manage-windows/body)
 
 ;;; Per-Language Configuration
 ;;;; Completion / Linting
 (use-package company
-  :general
-  (general-def :keymaps 'company-active-map
-    "<return>" 'company-complete-selection)
   :init
   (setq company-dabbrev-code-modes nil
         company-idle-delay 0.1
@@ -447,10 +283,8 @@
   (delete 'company-dabbrev company-backends))
 
 (use-package flymake
-  :general
-  (general-def :keymaps 'flymake-mode-map
-    "M-p" 'flymake-goto-prev-error
-    "M-n" 'flymake-goto-next-error))
+  :bind (("M-p" . flymake-goto-prev-error)
+         ("M-n" . flymake-goto-next-error)))
 
 ;;;; Formatting
 (defun panda-generic-format-buffer ()
@@ -525,56 +359,26 @@ a variable for the formatter program's arguments."
 (use-package eglot)
 
 ;;;; Lisp
-(use-package lispyville
+(use-package lispy
   :config
-  (lispyville-set-key-theme '(operators))
-  (eval-after-load 'evil-goggles
-    (progn (dolist (operators '((evil-yank . lispyville-yank)
-                                (evil-delete . lispyville-delete)
-                                (evil-change . lispyville-change)
-                                (evil-yank-line . lispyville-yank-line)
-                                (evil-delete-line . lispyville-delete-line)
-                                (evil-change-line . lispyville-change-line)
-                                (evil-delete-char . lispyville-delete-char-or-splice)
-                                (evil-delete-backward-char . lispyville-delete-char-or-splice-backwards)
-                                (evil-substitute . lispyville-substitute)
-                                (evil-change-whole-line . lispyville-change-whole-line)
-                                (evil-join . lispyville-join)))
-             (destructuring-bind (evil-operator . lispyville-operator) operators
-               (panda-evil-goggles-add lispyville-operator evil-operator))))))
+  (lispy-set-key-theme '(lispy special)))
 
 ;;;; Organization
-(use-package outshine
-  :general
-  (general-mmap :keymaps 'outshine-mode-map
-    "TAB" (lookup-key outshine-mode-map (kbd "TAB"))))
+(use-package outshine)
 
 ;;;; Snippets
 (use-package yasnippet
-  :general
-  (general-def :keymaps 'yas-minor-mode-map
-    "<tab>" nil
-    "TAB" nil
-    "<backtab>" 'yas-expand)
   :init
   (setq yas-triggers-in-field nil
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t)
   :config
-  (yas-reload-all)
-  (eval-after-load 'company
-    (progn
-      (defun panda-company-yas-tab-advice (old-func &rest args)
-        (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
-          (call-interactively old-func args)))
-      (let ((company-tab-func (lookup-key company-active-map (kbd "<backtab>"))))
-        (advice-add company-tab-func :around #'panda-company-yas-tab-advice)))))
+  (yas-reload-all))
 
 (use-package yasnippet-snippets)
 
 (use-package ivy-yasnippet
-  :general
-  (panda-leader-def "y" 'ivy-yasnippet))
+  :bind (("C-c y" . ivy-yasnippet)))
 
 ;;; Language Modes
 ;;;; Assembly
@@ -635,10 +439,9 @@ a variable for the formatter program's arguments."
 ;;;; Emacs Lisp
 (defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
-  (lispyville-mode 1)
+  (lispy-mode 1)
   (panda-generic-format-on-save)
-  (yas-minor-mode 1)
-  (setq-local evil-args-delimiters '(" ")))
+  (yas-minor-mode 1))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
 
@@ -755,12 +558,6 @@ a variable for the formatter program's arguments."
         org-src-tab-acts-natively t)
   :config
   (add-hook 'org-mode-hook #'panda-setup-org-mode))
-
-(use-package evil-org
-  :config
-  (add-hook 'org-mode-hook #'evil-org-mode)
-  (add-hook 'evil-org-mode-hook
-            (lambda () (evil-org-set-key-theme))))
 
 ;;;; Python
 (defun panda-setup-python-mode ()
