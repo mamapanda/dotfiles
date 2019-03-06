@@ -7,12 +7,10 @@
 
 (setq-default package-archives
               '(("gnu" . "https://elpa.gnu.org/packages/")
-                ("melpa" . "https://melpa.org/packages/")
-                ("melpa-stable" . "https://stable.melpa.org/packages/"))
+                ("melpa" . "https://melpa.org/packages/"))
               package-archive-priorities
               '(("gnu" . 1)
-                ("melpa" . 10)
-                ("melpa-stable" . 0)))
+                ("melpa" . 10)))
 
 (setq package-enable-at-startup nil)
 (package-initialize)
@@ -121,6 +119,9 @@
 (defconst panda-light-blue "#67C8FF")
 (defconst panda-deep-saffron "#FF9933")
 
+;;;;; Keys
+(bind-key [remap zap-to-char] 'zap-up-to-char)
+
 ;;;;; Modifications
 (defun panda-end-isearch-forward ()
   (when (and isearch-forward isearch-other-end)
@@ -176,13 +177,33 @@
 
 ;;;; Editing
 (use-package expand-region
-  :bind (("C-'" . expand-region)))
+  :bind (("C-." . er/expand-region)))
 
-(use-package undo-tree
+(use-package smartparens
+  :bind (:map smartparens-mode-map
+              ;; movement
+              ("C-M-f" . sp-forward-sexp)
+              ("C-M-b" . sp-backward-sexp)
+              ("C-M-u" . sp-backward-up-sexp)
+              ("C-M-d" . sp-down-sexp)
+              ("C-M-a" . sp-backward-down-sexp)
+              ("C-M-e" . sp-up-sexp)
+              ;; sexp operations
+              ("C-M-k" . sp-kill-sexp)
+              ("C-M-w" . sp-copy-sexp)
+              ("C-M-t" . sp-transpose-sexp)
+              ;; other
+              ("M-<backspace>" . sp-change-enclosing)
+              ("C-M-<backspace>" . sp-unwrap-sexp)
+              ("C-M-S-<backspace>" . sp-rewrap-sexp))
   :init
-  (setq undo-tree-enable-undo-in-region nil)
+  (setq-default sp-escape-quotes-after-insert nil)
   :config
-  (global-undo-tree-mode))
+  (require 'smartparens-config)
+  (smartparens-global-mode 1))
+
+(use-package undo-propose
+  :bind (("C-c ?" . undo-propose)))
 
 ;;;; Git
 (use-package magit
@@ -194,6 +215,12 @@
   :bind (("C-c t" . git-timemachine)))
 
 ;;;; Navigation
+(use-package ace-window
+  :bind (("C-x o" . ace-window))
+  :config
+  (set-face-attribute 'aw-leading-char-face nil
+                      :foreground panda-neon-green))
+
 (use-package avy
   :bind (("C-;" . avy-goto-char-timer))
   :init
@@ -232,6 +259,12 @@
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
+  (defun panda-eyebrowse-create-window-config ()
+    (interactive)
+    (let ((tag (read-string "Window Config Tag: ")))
+      (eyebrowse-create-window-config)
+      (let ((created-config (eyebrowse--get 'current-slot)))
+        (eyebrowse-rename-window-config created-config tag))))
   (eyebrowse-mode 1))
 
 (use-package winner
@@ -260,7 +293,7 @@
   ("0" eyebrowse-switch-to-window-config-0)
   ;; Manage Window Configs
   ("s" eyebrowse-switch-to-window-config)
-  ("c" eyebrowse-create-window-config)
+  ("c" panda-eyebrowse-create-window-config)
   ("t" eyebrowse-rename-window-config)
   ("k" eyebrowse-close-window-config)
   ;; Undo/Redo Window Changes
@@ -269,9 +302,10 @@
   ;; Quit
   ("q" nil :exit t))
 
-(bind-key "C-c w" #'panda-manage-windows/body)
+(bind-key "C-c w" 'panda-manage-windows/body)
 
 ;;; Per-Language Configuration
+
 ;;;; Completion / Linting
 (use-package company
   :init
@@ -358,11 +392,6 @@ a variable for the formatter program's arguments."
 ;;;; Language Server
 (use-package eglot)
 
-;;;; Lisp
-(use-package lispy
-  :config
-  (lispy-set-key-theme '(lispy special)))
-
 ;;;; Organization
 (use-package outshine)
 
@@ -419,10 +448,15 @@ a variable for the formatter program's arguments."
 
 (use-package slime
   :init
-  (setq inferior-lisp-program "sbcl")
+  (setq inferior-lisp-program "sbcl"
+        slime-contribs '(slime-fancy))
   :config
   (add-hook 'slime-mode-hook #'panda-setup-common-lisp-mode)
-  (slime-setup '(slime-fancy)))
+  (slime-setup))
+
+(use-package slime-company
+  :config
+  (slime-company-init))
 
 ;;;; D
 (defun panda-setup-d-mode ()
@@ -439,8 +473,8 @@ a variable for the formatter program's arguments."
 ;;;; Emacs Lisp
 (defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
-  (lispy-mode 1)
   (panda-generic-format-on-save)
+  (smartparens-strict-mode 1)
   (yas-minor-mode 1))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
@@ -500,6 +534,8 @@ a variable for the formatter program's arguments."
   :config
   (add-hook 'web-mode-hook #'panda-setup-web-mode))
 
+(use-package emmet-mode)
+
 ;;;; Java
 (defun panda-setup-java-mode ()
   (clang-format-on-save-mode 1)
@@ -518,6 +554,8 @@ a variable for the formatter program's arguments."
   :mode (("\\.js\\'" . js2-mode))
   :config
   (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
+
+(use-package indium)
 
 ;;;; Latex
 (defun panda-setup-latex-mode ()
@@ -602,6 +640,13 @@ a variable for the formatter program's arguments."
 (use-package cargo
   :init
   (add-hook 'rust-mode-hook #'cargo-minor-mode))
+
+;;;; Shell Script
+(defun panda-setup-sh-mode ()
+  (panda-generic-format-on-save)
+  (yas-minor-mode 1))
+
+(add-hook 'sh-mode-hook #'panda-setup-sh-mode)
 
 ;;;; TypeScript
 (defun panda-setup-typescript-mode ()
