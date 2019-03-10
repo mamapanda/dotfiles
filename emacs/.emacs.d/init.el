@@ -333,14 +333,6 @@
 (defun panda-trim-whitespace-on-save ()
   (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
 
-(defun panda-default-clang-format-style ()
-  "Obtain the default clang-format style as a string."
-  (with-temp-buffer
-    (insert-file-contents (panda-etc-file "clang-format-defaults.json"))
-    (let ((inhibit-message t))
-      (replace-regexp "[\n\"]" ""))
-    (buffer-string)))
-
 (use-package reformatter
   :config
   (cl-defmacro panda-reformatter-define (name &rest key-pairs)
@@ -364,8 +356,7 @@ a variable for the formatter program's arguments."
   (panda-reformatter-define brittany
     :program "brittany")
   (panda-reformatter-define clang-format
-    :program "clang-format"
-    :args (list "-style" (panda-default-clang-format-style)))
+    :program "clang-format")
   (panda-reformatter-define dfmt
     :program "dfmt"
     :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
