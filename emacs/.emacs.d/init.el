@@ -20,8 +20,7 @@
   (package-install 'use-package))
 
 (require 'use-package)
-(setq use-package-always-ensure t
-      use-package-always-demand t)
+(setq use-package-always-ensure t)
 
 (use-package quelpa)
 (use-package quelpa-use-package)
@@ -40,9 +39,6 @@
 
 ;;; Libraries
 (require 'cl)
-(use-package dash)
-(use-package s)
-(use-package hydra)
 
 ;;; Appearance
 (setq default-frame-alist '((fullscreen . maximized)
@@ -54,29 +50,11 @@
       ring-bell-function 'ignore
       visible-bell nil)
 
-(use-package monokai-theme)
-(load-theme 'monokai t)
+(column-number-mode 1)
 
-(use-package display-line-numbers
-  :bind (("C-c l" . panda-toggle-line-number))
-  :init
-  (setq-default display-line-numbers-type 'relative)
+(use-package monokai-theme
   :config
-  (defun panda-display-line-numbers-in-frame (frame)
-    "Display line numbers in `frame'."
-    (with-selected-frame frame
-      (global-display-line-numbers-mode 1)))
-  (add-to-list 'after-make-frame-functions #'panda-display-line-numbers-in-frame)
-  (defun panda-toggle-line-numbers ()
-    "Toggle between relative and absolute line numbers in current buffer."
-    (interactive)
-    (setq-local display-line-numbers-type (case display-line-numbers-type
-                                            (relative t)
-                                            ((t) 'relative)
-                                            (otherwise 'relative)))
-    (display-line-numbers-mode 1))
-  (global-display-line-numbers-mode 1)
-  (column-number-mode 1))
+  (load-theme 'monokai t))
 
 (use-package doom-modeline
   :init
@@ -134,16 +112,15 @@
   :init
   (setq which-key-popup-type 'side-window
         which-key-side-window-location 'bottom
-        which-key-idle-delay 1.0)
-  :config
-  (which-key-mode 1))
+        which-key-idle-delay 1.0))
 
 ;;; Global Packages
 ;;;; Multi-Purpose
-(use-package flx)
-(use-package smex)
+(use-package flx :defer t)
+(use-package smex :defer t)
 
 (use-package ivy
+  :demand t
   :bind (:map ivy-minibuffer-map
               ("<return>" . ivy-alt-done))
   :init
@@ -164,6 +141,7 @@
                       :foreground panda-neon-green))
 
 (use-package counsel
+  :demand t
   :bind (("C-c r" . counsel-rg))
   :config
   (counsel-mode 1))
@@ -173,7 +151,8 @@
   :bind (("C-c q" . quickrun)
          ("C-c Q" . quickrun-shell)))
 
-(use-package realgud)
+(use-package realgud
+  :defer t)
 
 ;;;; Editing
 (use-package expand-region
@@ -192,10 +171,15 @@
               ("C-M-k" . sp-kill-sexp)
               ("C-M-w" . sp-copy-sexp)
               ("C-M-t" . sp-transpose-sexp)
+              ("C-M-;" . sp-slurp-hybrid-sexp)
+              ("C-M-," . sp-backward-slurp-sexp)
+              ("C-M-<" . sp-backward-barf-sexp)
+              ("C-M-." . sp-forward-slurp-sexp)
+              ("C-M->" . sp-forward-barf-sexp)
               ;; other
               ("M-<backspace>" . sp-change-enclosing)
-              ("C-M-<backspace>" . sp-unwrap-sexp)
-              ("C-M-S-<backspace>" . sp-rewrap-sexp))
+              ("M-S-<backspace>" . sp-unwrap-sexp)
+              ("C-M-<backspace>" . sp-rewrap-sexp))
   :init
   (setq-default sp-escape-quotes-after-insert nil)
   :config
@@ -203,7 +187,7 @@
   (smartparens-global-mode 1))
 
 (use-package undo-propose
-  :bind (("C-c ?" . undo-propose)))
+  :bind (("C-?" . undo-propose)))
 
 ;;;; Git
 (use-package magit
@@ -247,7 +231,7 @@
   (setq imenu-auto-rescan t))
 
 (use-package projectile
-  :bind (("C-c p" . projectile-command-map))
+  :bind-keymap (("C-c p" . projectile-command-map))
   :init
   (setq projectile-indexing-method 'alien
         projectile-completion-system 'ivy)
@@ -256,6 +240,10 @@
 
 ;;;; Windows
 (use-package eyebrowse
+  :bind (("C-c w s" . eyebrowse-switch-to-window-config)
+         ("C-c w c" . panda-eyebrowse-create-window-config)
+         ("C-c w t" . eyebrowse-rename-window-config)
+         ("C-c w k" . eyebrowse-close-window-config))
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
@@ -271,41 +259,7 @@
   :config
   (winner-mode 1))
 
-(defhydra panda-manage-windows (:hint nil :color blue)
-  "
- Window Configs^^^^                    Manage Window Configs^^    Undo/Redo Window Changes^^
----------------^^^^-----------------------------------------^^----------------------------^^-
- [_1_]: config 1    [_6_]: config 6    [_s_]: switch config       [_u_]: undo
- [_2_]: config 2    [_7_]: config 7    [_c_]: create config       [_r_]: redo
- [_3_]: config 3    [_8_]: config 8    [_t_]: tag config
- [_4_]: config 4    [_9_]: config 9    [_k_]: kill config
- [_5_]: config 5    [_0_]: config 0"
-  ;; Switch Window Configs
-  ("1" eyebrowse-switch-to-window-config-1)
-  ("2" eyebrowse-switch-to-window-config-2)
-  ("3" eyebrowse-switch-to-window-config-3)
-  ("4" eyebrowse-switch-to-window-config-4)
-  ("5" eyebrowse-switch-to-window-config-5)
-  ("6" eyebrowse-switch-to-window-config-6)
-  ("7" eyebrowse-switch-to-window-config-7)
-  ("8" eyebrowse-switch-to-window-config-8)
-  ("9" eyebrowse-switch-to-window-config-9)
-  ("0" eyebrowse-switch-to-window-config-0)
-  ;; Manage Window Configs
-  ("s" eyebrowse-switch-to-window-config)
-  ("c" panda-eyebrowse-create-window-config)
-  ("t" eyebrowse-rename-window-config)
-  ("k" eyebrowse-close-window-config)
-  ;; Undo/Redo Window Changes
-  ("u" winner-undo :color red)
-  ("r" winner-redo :color red)
-  ;; Quit
-  ("q" nil :exit t))
-
-(bind-key "C-c w" 'panda-manage-windows/body)
-
 ;;; Per-Language Configuration
-
 ;;;; Completion / Linting
 (use-package company
   :init
@@ -395,7 +349,8 @@ a variable for the formatter program's arguments."
   :config
   (yas-reload-all))
 
-(use-package yasnippet-snippets)
+(use-package yasnippet-snippets
+  :after yasnippet)
 
 (use-package ivy-yasnippet
   :bind (("C-c y" . ivy-yasnippet)))
@@ -409,6 +364,7 @@ a variable for the formatter program's arguments."
   (setq-local tab-always-indent (default-value 'tab-always-indent)))
 
 (use-package asm-mode
+  :defer t
   :init
   (setq asm-comment-char ?#)
   :config
@@ -431,6 +387,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package cmake-mode
+  :defer t
   :config
   (add-hook 'cmake-mode-hook #'panda-setup-cmake-mode))
 
@@ -438,6 +395,7 @@ a variable for the formatter program's arguments."
 (defalias 'panda-setup-common-lisp-mode 'panda-setup-emacs-lisp-mode)
 
 (use-package slime
+  :defer t
   :init
   (setq inferior-lisp-program "sbcl"
         slime-contribs '(slime-fancy))
@@ -446,6 +404,7 @@ a variable for the formatter program's arguments."
   (slime-setup))
 
 (use-package slime-company
+  :after slime
   :config
   (slime-company-init))
 
@@ -457,6 +416,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package d-mode
+  :defer t
   :config
   (add-to-list 'eglot-server-programs '(d-mode . ("dls")))
   (add-hook 'd-mode-hook #'panda-setup-d-mode))
@@ -476,14 +436,17 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package gitattributes-mode
+  :defer t
   :config
   (add-hook 'gitattributes-mode-hook #'panda-setup-gitfiles-mode))
 
 (use-package gitconfig-mode
+  :defer t
   :config
   (add-hook 'gitconfig-mode-hook #'panda-setup-gitfiles-mode))
 
 (use-package gitignore-mode
+  :defer t
   :config
   (add-hook 'gitignore-mode-hook #'panda-setup-gitfiles-mode))
 
@@ -496,6 +459,7 @@ a variable for the formatter program's arguments."
   (setq indent-tabs-mode t))
 
 (use-package go-mode
+  :defer t
   :config
   (add-hook 'go-mode-hook #'panda-setup-go-mode))
 
@@ -507,6 +471,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package haskell-mode
+  :defer t
   :config
   (add-hook 'haskell-mode-hook #'panda-setup-haskell-mode))
 
@@ -516,6 +481,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package web-mode
+  :defer t
   :mode (("\\.html?\\'" . web-mode))
   :init
   (setq web-mode-markup-indent-offset 2
@@ -525,7 +491,8 @@ a variable for the formatter program's arguments."
   :config
   (add-hook 'web-mode-hook #'panda-setup-web-mode))
 
-(use-package emmet-mode)
+(use-package emmet-mode
+  :hook (web-mode . emmet-mode))
 
 ;;;; Java
 (defun panda-setup-java-mode ()
@@ -542,11 +509,13 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package js2-mode
+  :defer t
   :mode (("\\.js\\'" . js2-mode))
   :config
   (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
 
-(use-package indium)
+(use-package indium
+  :defer t)
 
 ;;;; Latex
 (defun panda-setup-latex-mode ()
@@ -557,6 +526,7 @@ a variable for the formatter program's arguments."
 
 (use-package tex
   :ensure auctex
+  :defer t
   :init
   (setq TeX-auto-save t
         TeX-parse-self t))
@@ -574,6 +544,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package markdown-mode
+  :defer t
   :config
   (add-hook 'markdown-mode-hook #'panda-setup-markdown-mode))
 
@@ -582,6 +553,7 @@ a variable for the formatter program's arguments."
   (panda-generic-format-on-save))
 
 (use-package org
+  :defer t
   :init
   (setq org-src-fontify-natively t
         org-src-tab-acts-natively t)
@@ -598,6 +570,7 @@ a variable for the formatter program's arguments."
   (setq-local yas-also-auto-indent-first-line nil))
 
 (use-package python
+  :defer t
   :init
   (setq python-indent-offset 4)
   :config
@@ -611,6 +584,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package ess
+  :defer t
   :init
   (setq ess-ask-for-ess-directory nil
         ess-use-flymake nil)
@@ -625,12 +599,12 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package rust-mode
+  :defer t
   :config
   (add-hook 'rust-mode-hook #'panda-setup-rust-mode))
 
 (use-package cargo
-  :init
-  (add-hook 'rust-mode-hook #'cargo-minor-mode))
+  :hook (rust-mode . cargo-minor-mode))
 
 ;;;; Shell Script
 (defun panda-setup-sh-mode ()
@@ -647,6 +621,7 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package typescript-mode
+  :defer t
   :config
   (add-hook 'typescript-mode-hook #'panda-setup-typescript-mode))
 
