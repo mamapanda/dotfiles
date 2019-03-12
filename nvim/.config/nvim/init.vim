@@ -96,6 +96,7 @@ let g:ale_fixers = {
 \   'json':       ['prettier'],
 \   'markdown':   ['prettier'],
 \   'python':     ['black'],
+\   'r':          ['remove_trailing_lines', 'trim_whitespace'],
 \   'typescript': ['prettier']
 \}
 let g:ale_fix_on_save                 = 1

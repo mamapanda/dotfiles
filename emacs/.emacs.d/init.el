@@ -86,7 +86,6 @@
               truncate-lines t)
 
 (delete-selection-mode 1)
-(electric-pair-mode 1)
 (show-paren-mode 1)
 
 (global-auto-revert-mode t)
@@ -159,6 +158,7 @@
   :bind (("C-." . er/expand-region)))
 
 (use-package smartparens
+  :demand t
   :bind (:map smartparens-mode-map
               ;; movement
               ("C-M-f" . sp-forward-sexp)
@@ -183,8 +183,23 @@
   :init
   (setq-default sp-escape-quotes-after-insert nil)
   :config
+  (defun panda-map-sp-strict-keys ()
+    "Maps the keys in `smartparens-strict-mode-map' directly
+instead of through remaps. This allows them to apply to other
+modes such as `c-mode', which defines its own functions."
+    (catch 'break-loop
+      (dolist (sp-map-elem smartparens-strict-mode-map)
+        ;; find remap element
+        (when (and (listp sp-map-elem) (eq (car sp-map-elem) 'remap))
+          (dolist (remap-cons (nthcdr 2 sp-map-elem))
+            (destructuring-bind (original-func . new-func) remap-cons
+              (dolist (key (where-is-internal original-func))
+                (define-key smartparens-strict-mode-map key new-func))))
+          (throw 'break-loop t)))))
   (require 'smartparens-config)
-  (smartparens-global-mode 1))
+  (panda-map-sp-strict-keys)
+  (smartparens-global-mode 1)
+  (smartparens-global-strict-mode 1))
 
 (use-package undo-propose
   :bind (("C-?" . undo-propose)))
@@ -425,7 +440,6 @@ a variable for the formatter program's arguments."
 (defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
   (panda-generic-format-on-save)
-  (smartparens-strict-mode 1)
   (yas-minor-mode 1))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
