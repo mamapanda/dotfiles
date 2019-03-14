@@ -87,7 +87,6 @@
               truncate-lines t)
 
 (delete-selection-mode 1)
-(electric-pair-mode 1)
 (show-paren-mode 1)
 
 (global-auto-revert-mode t)
@@ -189,10 +188,6 @@ nil if no exchange is in process, and a list (region-start region-end) otherwise
   (counsel-mode 1))
 
 ;;;; Executing Code
-(use-package quickrun
-  :bind (("C-c q" . quickrun)
-         ("C-c Q" . quickrun-shell)))
-
 (use-package realgud
   :defer t)
 

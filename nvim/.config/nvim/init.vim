@@ -86,6 +86,8 @@ map F <Plug>Sneak_F
 map t <Plug>Sneak_t
 map T <Plug>Sneak_T
 
+autocmd FileType r setlocal commentstring=##\ %s
+
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gr <Plug>(coc-references)
 nmap <silent> K  :call CocAction('doHover')<CR>
@@ -120,8 +122,7 @@ let g:ale_fixers = {
 \}
 let g:ale_fix_on_save                 = 1
 let g:ale_python_black_options        = '--line-length 80'
-let g:ale_css_prettier_options        = '--tab-width 4'
-let g:ale_javascript_prettier_options = '--tab-width 4'
-let g:ale_typescript_prettier_options = '--tab-width 4'
+let g:ale_javascript_prettier_options = '--tab-width 4'  " css, js, ts
+autocmd FileType html let b:ale_javascript_prettier_options = '--tab-width 2'
 
 smapclear  " vim-snipmate uses select-mode
