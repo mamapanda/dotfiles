@@ -39,6 +39,7 @@
 
 ;;; Libraries
 (require 'cl)
+(use-package dash)
 
 ;;; Appearance
 (setq default-frame-alist '((fullscreen . maximized)
@@ -86,20 +87,62 @@
               truncate-lines t)
 
 (delete-selection-mode 1)
+(electric-pair-mode 1)
 (show-paren-mode 1)
 
 (global-auto-revert-mode t)
 
 ;;;; Definitions
-;;;;; Constants
 (defconst panda-neon-green "#39FF14")
 (defconst panda-light-blue "#67C8FF")
 (defconst panda-deep-saffron "#FF9933")
 
-;;;;; Keys
-(bind-key [remap zap-to-char] 'zap-up-to-char)
+(defvar panda-exchange-region nil
+  "First region to exchange via `panda-exchange-regions'.
+nil if no exchange is in process, and a list (region-start region-end) otherwise.")
 
-;;;;; Modifications
+(defun panda-exchange-regions (beg-1 end-1 beg-2 end-2 &optional arg)
+  "Exchanges two regions. Cancel a pending exchange if `arg' is provided."
+  (interactive
+   (cond
+    (current-prefix-arg (list nil nil nil nil current-prefix-arg))
+    ((region-active-p)
+     (let ((region-bounds (list (region-beginning) (region-end))))
+       (if panda-exchange-region
+           (append panda-exchange-region region-bounds (list current-prefix-arg))
+         (append region-bounds (list nil nil) (list current-prefix-arg)))))
+    (t (user-error "No active region"))))
+  (cond
+   ;; arg provided
+   (arg (if panda-exchange-region
+            (progn
+              (setq panda-exchange-region nil)
+              (message "Exchange aborted"))
+          (message "No exchange in process")))
+   ;; first call
+   ((eq beg-2 nil) (setq panda-exchange-region (list beg-1 end-1)))
+   ;; second call
+   (t (progn
+        (if (or (<= end-1 beg-2) (<= end-2 beg-1)) ; regions are valid
+            (destructuring-bind
+                (beg-1 end-1 beg-2 end-2)
+                (-sort #'< (list beg-1 end-1 beg-2 end-2))
+              (let ((first-region-contents (buffer-substring beg-1 end-1))
+                    (second-region-contents (buffer-substring beg-2 end-2)))
+                (save-excursion
+                  (goto-char beg-2)
+                  (delete-region beg-2 end-2)
+                  (insert first-region-contents)
+                  (goto-char beg-1)
+                  (delete-region beg-1 end-1)
+                  (insert second-region-contents))))
+          (message "Regions overlap"))
+        (setq panda-exchange-region nil))))
+  (deactivate-mark))
+
+(bind-key "C-c x" #'panda-exchange-regions)
+(bind-key [remap zap-to-char] #'zap-up-to-char)
+
 (defun panda-end-isearch-forward ()
   (when (and isearch-forward isearch-other-end)
     (goto-char isearch-other-end)))
@@ -177,7 +220,7 @@
               ("C-M-." . sp-forward-slurp-sexp)
               ("C-M->" . sp-forward-barf-sexp)
               ;; other
-              ("M-<backspace>" . sp-change-enclosing)
+              ("M-<backspace>" . sp-change-inner)
               ("M-S-<backspace>" . sp-unwrap-sexp)
               ("C-M-<backspace>" . sp-rewrap-sexp))
   :init

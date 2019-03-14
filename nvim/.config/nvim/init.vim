@@ -16,6 +16,7 @@ Plug 'luochen1990/rainbow'
 Plug 'machakann/vim-highlightedyank'
 " navigation
 Plug 'ctrlpvim/ctrlp.vim'
+Plug 'haya14busa/incsearch.vim'
 Plug 'vim-scripts/matchit.zip'
 Plug 'justinmk/vim-sneak'
 " editing
@@ -33,10 +34,16 @@ Plug 'sheerun/vim-polyglot'
 Plug 'jpalardy/vim-slime'
 Plug 'neoclide/coc.nvim', {'tag': '*', 'do': {-> coc#util#install()}}
 Plug 'w0rp/ale'
+Plug 'MarcWeber/vim-addon-mw-utils'  " vim-snipmate dependency
+Plug 'tomtom/tlib_vim'               " vim-snipmate dependency
+Plug 'garbas/vim-snipmate'
+Plug 'honza/vim-snippets'
 " git
 Plug 'tpope/vim-fugitive'
 call plug#end()
 
+
+colorscheme monokai
 
 set tabstop=4
 set softtabstop=4
@@ -44,7 +51,6 @@ set shiftwidth=4
 set expandtab
 
 set hidden
-set nohlsearch
 set ignorecase
 set smartcase
 set number
@@ -55,13 +61,26 @@ inoremap fd    <Esc>
 nnoremap Y     y$
 tnoremap <C-w> <C-\><C-n><C-w>
 
-colorscheme monokai
+highlight Search ctermfg=white ctermbg=magenta
+highlight Search guifg=white guibg=magenta
 
 let g:rainbow_active = 1
 let g:highlightedyank_highlight_duration = 200
 
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
+let g:ctrlp_user_command = 'rg %s --color=never --files --hidden --glob "!.git/"'
+let g:ctrlp_use_caching  = 0
 
+let g:incsearch#auto_nohlsearch = 1
+map /  <Plug>(incsearch-forward)
+map ?  <Plug>(incsearch-backward)
+map n  <Plug>(incsearch-nohl-n)
+map N  <Plug>(incsearch-nohl-N)
+map *  <Plug>(incsearch-nohl-*)
+map #  <Plug>(incsearch-nohl-#)
+map g* <Plug>(incsearch-nohl-g*)
+map g# <Plug>(incsearch-nohl-g#)
+
+let g:sneak#use_ic_scs = 1
 map f <Plug>Sneak_f
 map F <Plug>Sneak_F
 map t <Plug>Sneak_t
@@ -104,3 +123,5 @@ let g:ale_python_black_options        = '--line-length 80'
 let g:ale_css_prettier_options        = '--tab-width 4'
 let g:ale_javascript_prettier_options = '--tab-width 4'
 let g:ale_typescript_prettier_options = '--tab-width 4'
+
+smapclear  " vim-snipmate uses select-mode
