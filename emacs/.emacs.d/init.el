@@ -205,11 +205,15 @@ nil if no exchange is in process, and a list (region-start region-end) otherwise
               ("C-M-d" . sp-down-sexp)
               ("C-M-a" . sp-backward-down-sexp)
               ("C-M-e" . sp-up-sexp)
+              ("C-M-p" . sp-previous-sexp)
+              ("C-M-n" . sp-next-sexp)
+              ("C-M-;" . sp-beginning-of-sexp)
+              ("C-M-'" . sp-end-of-sexp)
               ;; sexp operations
               ("C-M-k" . sp-kill-sexp)
               ("C-M-w" . sp-copy-sexp)
               ("C-M-t" . sp-transpose-sexp)
-              ("C-M-;" . sp-slurp-hybrid-sexp)
+              ("C-M-/" . sp-slurp-hybrid-sexp)
               ("C-M-," . sp-backward-slurp-sexp)
               ("C-M-<" . sp-backward-barf-sexp)
               ("C-M-." . sp-forward-slurp-sexp)
@@ -217,10 +221,30 @@ nil if no exchange is in process, and a list (region-start region-end) otherwise
               ;; other
               ("M-<backspace>" . sp-change-inner)
               ("M-S-<backspace>" . sp-unwrap-sexp)
-              ("C-M-<backspace>" . sp-rewrap-sexp))
+              ("C-M-<backspace>" . panda-sp-rewrap-sexp)
+              ("C-M-SPC" . sp-mark-sexp))
   :init
   (setq-default sp-escape-quotes-after-insert nil)
   :config
+  (defvar panda-sp-open-newline-delimiters '("(" "{" "[")
+    "Delimiters to affect with `panda-sp-open-newline'.")
+
+  (defun panda-sp-open-newline (&rest ignored)
+    "Opens a newline between delimiters the way `electric-pair-mode' does.
+This function refers to `electric-pair-open-newline-between-pairs'."
+    (when electric-pair-open-newline-between-pairs
+      (newline)
+      (indent-according-to-mode)
+      (previous-line)
+      (indent-according-to-mode)))
+
+  (defun panda-sp-rewrap-sexp ()
+    "Rewraps the sexp following cursor."
+    (interactive)
+    (save-excursion
+      (sp-down-sexp)
+      (call-interactively #'sp-rewrap-sexp)))
+
   (defun panda-map-sp-strict-keys ()
     "Maps the keys in `smartparens-strict-mode-map' directly
 instead of through remaps. This allows them to apply to other
@@ -234,7 +258,10 @@ modes such as `c-mode', which defines its own functions."
               (dolist (key (where-is-internal original-func))
                 (define-key smartparens-strict-mode-map key new-func))))
           (throw 'break-loop t)))))
+
   (require 'smartparens-config)
+  (dolist (delimiter panda-sp-open-newline-delimiters)
+    (sp-pair delimiter nil :post-handlers '((panda-sp-open-newline "RET"))))
   (panda-map-sp-strict-keys)
   (smartparens-global-mode 1)
   (smartparens-global-strict-mode 1))
@@ -295,7 +322,7 @@ modes such as `c-mode', which defines its own functions."
 (use-package eyebrowse
   :bind (("C-c w s" . eyebrowse-switch-to-window-config)
          ("C-c w c" . panda-eyebrowse-create-window-config)
-         ("C-c w t" . eyebrowse-rename-window-config)
+         ("C-c w r" . eyebrowse-rename-window-config)
          ("C-c w k" . eyebrowse-close-window-config))
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
