@@ -9,14 +9,13 @@ endif
 
 call plug#begin('~/.config/nvim/plugged')
 " appearance
-Plug 'crusoexia/vim-monokai'
-Plug 'vim-airline/vim-airline'
+Plug 'sickill/vim-monokai'
+Plug 'itchyny/lightline.vim'
 " visual aids
 Plug 'luochen1990/rainbow'
 Plug 'machakann/vim-highlightedyank'
 " navigation
 Plug 'ctrlpvim/ctrlp.vim'
-Plug 'haya14busa/incsearch.vim'
 Plug 'vim-scripts/matchit.zip'
 Plug 'justinmk/vim-sneak'
 " editing
@@ -56,6 +55,7 @@ set smartcase
 set number
 set relativenumber
 set clipboard+=unnamedplus
+set termguicolors
 
 inoremap fd    <Esc>
 nnoremap Y     y$
@@ -64,21 +64,18 @@ tnoremap <C-w> <C-\><C-n><C-w>
 highlight Search ctermfg=white ctermbg=magenta
 highlight Search guifg=white guibg=magenta
 
+autocmd CmdlineEnter /,\? :set hlsearch
+autocmd CmdlineLeave /,\? :set nohlsearch
+
+let g:lightline = {
+\   'colorscheme' : 'molokai'
+\}
+
 let g:rainbow_active = 1
 let g:highlightedyank_highlight_duration = 200
 
 let g:ctrlp_user_command = 'rg %s --color=never --files --hidden --glob "!.git/"'
 let g:ctrlp_use_caching  = 0
-
-let g:incsearch#auto_nohlsearch = 1
-map /  <Plug>(incsearch-forward)
-map ?  <Plug>(incsearch-backward)
-map n  <Plug>(incsearch-nohl-n)
-map N  <Plug>(incsearch-nohl-N)
-map *  <Plug>(incsearch-nohl-*)
-map #  <Plug>(incsearch-nohl-#)
-map g* <Plug>(incsearch-nohl-g*)
-map g# <Plug>(incsearch-nohl-g#)
 
 let g:sneak#use_ic_scs = 1
 map f <Plug>Sneak_f
@@ -117,8 +114,8 @@ let g:ale_fixers = {
 \   'json':       ['prettier'],
 \   'markdown':   ['prettier'],
 \   'python':     ['black'],
-\   'r':          ['remove_trailing_lines', 'trim_whitespace'],
-\   'typescript': ['prettier']
+\   'typescript': ['prettier'],
+\   '*':          ['remove_trailing_lines', 'trim_whitespace']
 \}
 let g:ale_fix_on_save                 = 1
 let g:ale_python_black_options        = '--line-length 80'
