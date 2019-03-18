@@ -86,9 +86,7 @@
               tab-width 4
               truncate-lines t)
 
-(delete-selection-mode 1)
 (show-paren-mode 1)
-
 (global-auto-revert-mode t)
 
 ;;;; Definitions

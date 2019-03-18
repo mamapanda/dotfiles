@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-stowdirs=("bash" "emacs" "lang" "nvim")
+stowdirs=("alacritty" "bash" "emacs" "lang" "nvim")
 
 for stowdir in ${stowdirs[*]}; do
     stow $stowdir
