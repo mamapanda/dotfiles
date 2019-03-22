@@ -20,7 +20,8 @@
   (package-install 'use-package))
 
 (require 'use-package)
-(setq use-package-always-ensure t)
+(setq use-package-always-ensure t
+      use-package-always-demand t)
 
 (use-package quelpa)
 (use-package quelpa-use-package)
@@ -41,34 +42,56 @@
 (require 'cl)
 (use-package dash)
 
-;;; Appearance
-(setq default-frame-alist '((fullscreen . maximized)
-                            (font . "Consolas-11")
-                            (menu-bar-lines . 0)
-                            (tool-bar-lines . 0)
-                            (vertical-scroll-bars . nil))
-      inhibit-startup-screen t
-      ring-bell-function 'ignore
-      visible-bell nil)
-
-(column-number-mode 1)
-
-(use-package monokai-theme
+;;; Evil
+(use-package general
   :config
-  (load-theme 'monokai t))
+  (general-override-mode)
+  (general-evil-setup)
+  (general-create-definer panda-override-evil
+    :states '(normal operator motion visual)
+    :keymaps 'override)
+  (panda-override-evil
+    :prefix "SPC"
+    :prefix-map 'panda-leader-map)
+  (general-create-definer panda-leader-def
+    :keymaps 'panda-leader-map))
 
-(use-package doom-modeline
+(use-package evil
+  :general
+  (general-nmap
+    "R" 'query-replace
+    "U" 'read-only-mode
+    "Q" 'occur)
+  (general-nmap :keymaps 'occur-mode-map
+    "U" 'occur-edit-mode)
+  (general-nmap :keymaps 'occur-edit-mode-map
+    "U" 'occur-cease-edit)
+  (panda-leader-def
+    "f" 'find-file
+    "b" 'switch-to-buffer)
   :init
-  (setq doom-modeline-buffer-file-name-style 'relative-from-project
-        doom-modeline-icon nil)
+  (setq evil-toggle-key "C-s-+"
+        evil-want-C-d-scroll t
+        evil-want-C-u-scroll t
+        evil-want-keybinding nil
+        evil-want-Y-yank-to-eol t)
   :config
-  (doom-modeline-init))
+  (add-hook 'prog-mode-hook #'hs-minor-mode)
+  (evil-mode 1))
 
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+(use-package evil-collection
+  :config
+  (evil-collection-init))
 
-;;; Basic Configuration
-;;;; Defaults
+(use-package evil-escape
+  :init
+  (setq evil-escape-key-sequence "fd"
+        evil-escape-delay 0.1)
+  :config
+  (evil-escape-mode 1))
+
+;;; Built-Ins Configuration
+;;;; Behavior
 (setq auto-save-default nil
       c-default-style '((java-mode . "java")
                         (awk-mode . "awk")
@@ -86,82 +109,71 @@
               tab-width 4
               truncate-lines t)
 
+(delete-selection-mode 1)
+(electric-pair-mode 1)
 (show-paren-mode 1)
+
 (global-auto-revert-mode t)
 
-;;;; Definitions
-(defconst panda-neon-green "#39FF14")
-(defconst panda-light-blue "#67C8FF")
-(defconst panda-deep-saffron "#FF9933")
-
-(defvar panda-exchange-region nil
-  "First region to exchange via `panda-exchange-regions'.
-nil if no exchange is in process, and a list (region-start region-end) otherwise.")
-
-(defun panda-exchange-regions (beg-1 end-1 beg-2 end-2 &optional arg)
-  "Exchanges two regions. Cancel a pending exchange if `arg' is provided."
-  (interactive
-   (cond
-    (current-prefix-arg (list nil nil nil nil current-prefix-arg))
-    ((region-active-p)
-     (let ((region-bounds (list (region-beginning) (region-end))))
-       (if panda-exchange-region
-           (append panda-exchange-region region-bounds (list current-prefix-arg))
-         (append region-bounds (list nil nil) (list current-prefix-arg)))))
-    (t (user-error "No active region"))))
-  (cond
-   ;; arg provided
-   (arg (if panda-exchange-region
-            (progn
-              (setq panda-exchange-region nil)
-              (message "Exchange aborted"))
-          (message "No exchange in process")))
-   ;; first call
-   ((eq beg-2 nil) (setq panda-exchange-region (list beg-1 end-1)))
-   ;; second call
-   (t (progn
-        (if (or (<= end-1 beg-2) (<= end-2 beg-1)) ; regions are valid
-            (destructuring-bind
-                (beg-1 end-1 beg-2 end-2)
-                (-sort #'< (list beg-1 end-1 beg-2 end-2))
-              (let ((first-region-contents (buffer-substring beg-1 end-1))
-                    (second-region-contents (buffer-substring beg-2 end-2)))
-                (save-excursion
-                  (goto-char beg-2)
-                  (delete-region beg-2 end-2)
-                  (insert first-region-contents)
-                  (goto-char beg-1)
-                  (delete-region beg-1 end-1)
-                  (insert second-region-contents))))
-          (message "Regions overlap"))
-        (setq panda-exchange-region nil))))
-  (deactivate-mark))
-
-(bind-key "C-c x" #'panda-exchange-regions)
-(bind-key [remap zap-to-char] #'zap-up-to-char)
-
-(defun panda-end-isearch-forward ()
-  (when (and isearch-forward isearch-other-end)
-    (goto-char isearch-other-end)))
-
-(add-to-list 'isearch-mode-end-hook #'panda-end-isearch-forward)
-
-;;;;; Help
-(use-package which-key
-  :init
-  (setq which-key-popup-type 'side-window
-        which-key-side-window-location 'bottom
-        which-key-idle-delay 1.0))
+;;;; Appearance
+(setq default-frame-alist '((fullscreen . maximized)
+                            (font . "Consolas-11")
+                            (menu-bar-lines . 0)
+                            (tool-bar-lines . 0)
+                            (vertical-scroll-bars . nil))
+      inhibit-startup-screen t
+      ring-bell-function 'ignore
+      visible-bell nil)
 
 ;;; Global Packages
+;;;; Appearance
+(use-package monokai-theme
+  :config
+  (defconst panda-neon-green "#39FF14")
+  (defconst panda-light-blue "#67C8FF")
+  (defconst panda-deep-saffron "#FF9933")
+  (load-theme 'monokai t))
+
+(use-package display-line-numbers
+  :general
+  (panda-leader-def "l" 'panda-toggle-line-numbers)
+  :init
+  (setq-default display-line-numbers-type 'relative)
+  :config
+  (defun panda-display-line-numbers-in-frame (frame)
+    "Display line numbers in `frame'."
+    (with-selected-frame frame
+      (global-display-line-numbers-mode 1)))
+  (add-to-list 'after-make-frame-functions #'panda-display-line-numbers-in-frame)
+  (defun panda-toggle-line-numbers ()
+    "Toggle between relative and absolute line numbers in current buffer."
+    (interactive)
+    (setq-local display-line-numbers-type (case display-line-numbers-type
+                                            (relative t)
+                                            ((t) 'relative)
+                                            (otherwise 'relative)))
+    (display-line-numbers-mode 1))
+  (global-display-line-numbers-mode 1)
+  (column-number-mode 1))
+
+(use-package doom-modeline
+  :init
+  (setq doom-modeline-buffer-file-name-style 'relative-from-project
+        doom-modeline-icon nil)
+  :config
+  (doom-modeline-init))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
 ;;;; Multi-Purpose
-(use-package flx :defer t)
-(use-package smex :defer t)
+(use-package flx)
+(use-package smex)
 
 (use-package ivy
-  :demand t
-  :bind (:map ivy-minibuffer-map
-              ("<return>" . ivy-alt-done))
+  :general
+  (general-def :keymaps 'ivy-minibuffer-map
+    "<return>" 'ivy-alt-done)
   :init
   (setq ivy-wrap t
         ivy-re-builders-alist '((swiper . ivy--regex-plus)
@@ -180,136 +192,126 @@ nil if no exchange is in process, and a list (region-start region-end) otherwise
                       :foreground panda-neon-green))
 
 (use-package counsel
-  :demand t
-  :bind (("C-c r" . counsel-rg))
+  :general
+  (panda-leader-def
+    "SPC" 'counsel-M-x
+    "r" 'counsel-rg)
   :config
   (counsel-mode 1))
 
-;;;; Executing Code
-(use-package realgud
-  :defer t)
+;;;; Help
+(use-package which-key
+  :init
+  (setq which-key-popup-type 'side-window
+        which-key-side-window-location 'bottom
+        which-key-idle-delay 1.0)
+  :config
+  (which-key-mode 1))
 
 ;;;; Editing
-(use-package expand-region
-  :bind (("C-." . er/expand-region)))
+(use-package evil-args
+  :general
+  (general-def :keymaps 'evil-inner-text-objects-map
+    "a" 'evil-inner-arg)
+  (general-def :keymaps 'evil-outer-text-objects-map
+    "a" 'evil-outer-arg))
 
-(use-package smartparens
-  :demand t
-  :bind (:map smartparens-mode-map
-              ;; movement
-              ("C-M-f" . sp-forward-sexp)
-              ("C-M-b" . sp-backward-sexp)
-              ("C-M-u" . sp-backward-up-sexp)
-              ("C-M-d" . sp-down-sexp)
-              ("C-M-a" . sp-backward-down-sexp)
-              ("C-M-e" . sp-up-sexp)
-              ("C-M-p" . sp-previous-sexp)
-              ("C-M-n" . sp-next-sexp)
-              ("C-M-;" . sp-beginning-of-sexp)
-              ("C-M-'" . sp-end-of-sexp)
-              ;; sexp operations
-              ("C-M-k" . sp-kill-sexp)
-              ("C-M-w" . sp-copy-sexp)
-              ("C-M-t" . sp-transpose-sexp)
-              ("C-M-/" . sp-slurp-hybrid-sexp)
-              ("C-M-," . sp-backward-slurp-sexp)
-              ("C-M-<" . sp-backward-barf-sexp)
-              ("C-M-." . sp-forward-slurp-sexp)
-              ("C-M->" . sp-forward-barf-sexp)
-              ;; other
-              ("M-<backspace>" . sp-change-inner)
-              ("M-S-<backspace>" . sp-unwrap-sexp)
-              ("C-M-<backspace>" . panda-sp-rewrap-sexp)
-              ("C-M-SPC" . sp-mark-sexp))
-  :init
-  (setq-default sp-escape-quotes-after-insert nil)
+(use-package evil-commentary
   :config
-  (defvar panda-sp-open-newline-delimiters '("(" "{" "[")
-    "Delimiters to affect with `panda-sp-open-newline'.")
+  (evil-commentary-mode 1))
 
-  (defun panda-sp-open-newline (&rest ignored)
-    "Opens a newline between delimiters the way `electric-pair-mode' does.
-This function refers to `electric-pair-open-newline-between-pairs'."
-    (when electric-pair-open-newline-between-pairs
-      (newline)
-      (indent-according-to-mode)
-      (previous-line)
-      (indent-according-to-mode)))
+(use-package evil-exchange
+  :config
+  (evil-exchange-install))
 
-  (defun panda-sp-rewrap-sexp ()
-    "Rewraps the sexp following cursor."
-    (interactive)
-    (save-excursion
-      (sp-down-sexp)
-      (call-interactively #'sp-rewrap-sexp)))
+(use-package evil-indent-plus
+  :config
+  (evil-indent-plus-default-bindings))
 
-  (defun panda-map-sp-strict-keys ()
-    "Maps the keys in `smartparens-strict-mode-map' directly
-instead of through remaps. This allows them to apply to other
-modes such as `c-mode', which defines its own functions."
+(use-package evil-goggles
+  :config
+  (defun panda-evil-goggles-add (command based-on-command)
     (catch 'break-loop
-      (dolist (sp-map-elem smartparens-strict-mode-map)
-        ;; find remap element
-        (when (and (listp sp-map-elem) (eq (car sp-map-elem) 'remap))
-          (dolist (remap-cons (nthcdr 2 sp-map-elem))
-            (destructuring-bind (original-func . new-func) remap-cons
-              (dolist (key (where-is-internal original-func))
-                (define-key smartparens-strict-mode-map key new-func))))
+      (dolist (cmd-config evil-goggles--commands)
+        (when (eq (car cmd-config) based-on-command)
+          (add-to-list 'evil-goggles--commands (cons command (cdr cmd-config)))
+          (when (bound-and-true-p evil-goggles-mode)
+            (evil-goggles-mode 1))
           (throw 'break-loop t)))))
+  (evil-goggles-use-diff-refine-faces)
+  (evil-goggles-mode 1))
 
-  (require 'smartparens-config)
-  (dolist (delimiter panda-sp-open-newline-delimiters)
-    (sp-pair delimiter nil :post-handlers '((panda-sp-open-newline "RET"))))
-  (panda-map-sp-strict-keys)
-  (smartparens-global-mode 1)
-  (smartparens-global-strict-mode 1))
+(use-package evil-lion
+  :config
+  (evil-lion-mode 1))
 
-(use-package undo-propose
-  :bind (("C-?" . undo-propose)))
+(use-package evil-surround
+  :config
+  (global-evil-surround-mode 1))
+
+(use-package expand-region
+  :general
+  (general-vmap "v" 'er/expand-region))
+
+(use-package targets
+  :quelpa (targets :fetcher github :repo "noctuid/targets.el")
+  :config
+  (targets-setup t))
+
+(use-package undo-tree
+  :general
+  (panda-leader-def "u" 'undo-tree-visualize)
+  :init
+  (setq undo-tree-enable-undo-in-region nil)
+  :config
+  (global-undo-tree-mode))
 
 ;;;; Git
 (use-package magit
-  :bind (("C-c g" . magit-status))
+  :general
+  (panda-leader-def "g" 'magit-status)
   :init
   (setq magit-auto-revert-mode nil))
 
+(use-package evil-magit)
+
 (use-package git-timemachine
-  :bind (("C-c t" . git-timemachine)))
+  :general
+  (panda-leader-def "G" 'git-timemachine))
 
 ;;;; Navigation
-(use-package ace-window
-  :bind (("C-x o" . ace-window))
-  :config
-  (set-face-attribute 'aw-leading-char-face nil
-                      :foreground panda-neon-green))
-
-(use-package avy
-  :bind (("C-;" . avy-goto-char-timer))
-  :init
-  (setq avy-background t)
-  :config
-  (set-face-attribute 'avy-lead-face nil
-                      :foreground panda-neon-green
-                      :background (face-attribute 'default :background))
-  (set-face-attribute 'avy-lead-face-0 nil
-                      :foreground panda-light-blue
-                      :background (face-attribute 'default :background))
-  (set-face-attribute 'avy-lead-face-2 nil
-                      :foreground panda-deep-saffron
-                      :background (face-attribute 'default :background)))
-
 (use-package dired-sidebar
-  :bind (("C-c d" . dired-sidebar-toggle-sidebar))
+  :general
+  (panda-leader-def
+    "d" 'dired-sidebar-toggle-sidebar
+    "D" 'dired)
   :init
   (setq dired-sidebar-theme 'none))
 
+(use-package evil-matchit
+  :config
+  (global-evil-matchit-mode 1))
+
+(use-package evil-snipe
+  :init
+  (setq evil-snipe-smart-case t
+        evil-snipe-scope 'visible
+        evil-snipe-repeat-scope 'visible)
+  :config
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
+
 (use-package imenu
-  :bind (("C-c i" . imenu))
+  :general
+  (panda-leader-def "i" 'imenu)
   :init
   (setq imenu-auto-rescan t))
 
 (use-package projectile
-  :bind-keymap (("C-c p" . projectile-command-map))
+  :general
+  (panda-leader-def
+    :prefix "p"
+    :prefix-command 'projectile-command-map)
   :init
   (setq projectile-indexing-method 'alien
         projectile-completion-system 'ivy)
@@ -318,10 +320,12 @@ modes such as `c-mode', which defines its own functions."
 
 ;;;; Windows
 (use-package eyebrowse
-  :bind (("C-c w s" . eyebrowse-switch-to-window-config)
-         ("C-c w c" . panda-eyebrowse-create-window-config)
-         ("C-c w r" . eyebrowse-rename-window-config)
-         ("C-c w k" . eyebrowse-close-window-config))
+  :general
+  (panda-leader-def
+    "w" 'eyebrowse-switch-to-window-config
+    "W" 'eyebrowse-close-window-config
+    "e" 'panda-eyebrowse-create-window-config
+    "E" 'eyebrowse-rename-window-config)
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
@@ -334,12 +338,56 @@ modes such as `c-mode', which defines its own functions."
   (eyebrowse-mode 1))
 
 (use-package winner
+  :general
+  (panda-leader-def
+    "q" 'winner-undo
+    "Q" 'winner-redo)
   :config
   (winner-mode 1))
 
 ;;; Per-Language Configuration
+;;;; Macros
+;;;;; Repl Setup
+(let ((no-repl-found-message
+       (lambda (send-type)
+         `(lambda ()
+            (interactive)
+            (user-error "No REPL send %s command found for %s"
+                        ,send-type major-mode)))))
+  (general-nmap
+    :prefix "SPC"
+    "Z" (funcall no-repl-found-message "paragraph")
+    "z" (funcall no-repl-found-message "line/expression")
+    "X" (funcall no-repl-found-message "buffer")
+    "x" (funcall no-repl-found-message "function"))
+  (general-vmap
+    :prefix "SPC"
+    "z" (funcall no-repl-found-message "region")))
+
+(cl-defmacro panda-setup-repl (map
+                               &key
+                               eval-region
+                               eval-line-or-expression
+                               eval-paragraph
+                               eval-function
+                               eval-buffer)
+  (declare (indent defun))
+  `(progn
+     (general-nmap :keymaps ,map
+       :prefix "SPC"
+       "Z" ,eval-paragraph
+       "z" ,eval-line-or-expression
+       "X" ,eval-buffer
+       "x" ,eval-function)
+     (general-vmap :keymaps ,map
+       :prefix "SPC"
+       "z" ,eval-region)))
+
 ;;;; Completion / Linting
 (use-package company
+  :general
+  (general-def :keymaps 'company-active-map
+    "<return>" 'company-complete-selection)
   :init
   (setq company-dabbrev-code-modes nil
         company-idle-delay 0.1
@@ -349,8 +397,10 @@ modes such as `c-mode', which defines its own functions."
   (delete 'company-dabbrev company-backends))
 
 (use-package flymake
-  :bind (("M-p" . flymake-goto-prev-error)
-         ("M-n" . flymake-goto-next-error)))
+  :general
+  (panda-leader-def
+    "k" 'flymake-goto-prev-error
+    "j" 'flymake-goto-next-error))
 
 ;;;; Formatting
 (defun panda-generic-format-buffer ()
@@ -415,23 +465,54 @@ a variable for the formatter program's arguments."
 ;;;; Language Server
 (use-package eglot)
 
+;;;; Lisp
+(use-package lispyville
+  :config
+  (lispyville-set-key-theme '(operators))
+  (eval-after-load 'evil-goggles
+    (progn (dolist (operators '((evil-yank . lispyville-yank)
+                                (evil-delete . lispyville-delete)
+                                (evil-change . lispyville-change)
+                                (evil-yank-line . lispyville-yank-line)
+                                (evil-delete-line . lispyville-delete-line)
+                                (evil-change-line . lispyville-change-line)
+                                (evil-delete-char . lispyville-delete-char-or-splice)
+                                (evil-delete-backward-char . lispyville-delete-char-or-splice-backwards)
+                                (evil-substitute . lispyville-substitute)
+                                (evil-change-whole-line . lispyville-change-whole-line)
+                                (evil-join . lispyville-join)))
+             (destructuring-bind (evil-operator . lispyville-operator) operators
+               (panda-evil-goggles-add lispyville-operator evil-operator))))))
+
 ;;;; Organization
 (use-package outshine)
 
 ;;;; Snippets
 (use-package yasnippet
+  :general
+  (general-def :keymaps 'yas-minor-mode-map
+    "<tab>" nil
+    "TAB" nil
+    "<backtab>" 'yas-expand)
   :init
   (setq yas-triggers-in-field nil
         yas-indent-line 'auto
         yas-also-auto-indent-first-line t)
   :config
-  (yas-reload-all))
+  (yas-reload-all)
+  (eval-after-load 'company
+    (progn
+      (defun panda-company-yas-tab-advice (old-func &rest args)
+        (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
+          (call-interactively old-func args)))
+      (let ((company-tab-func (lookup-key company-active-map (kbd "<backtab>"))))
+        (advice-add company-tab-func :around #'panda-company-yas-tab-advice)))))
 
-(use-package yasnippet-snippets
-  :after yasnippet)
+(use-package yasnippet-snippets)
 
 (use-package ivy-yasnippet
-  :bind (("C-c y" . ivy-yasnippet)))
+  :general
+  (panda-leader-def "y" 'ivy-yasnippet))
 
 ;;; Language Modes
 ;;;; Assembly
@@ -442,7 +523,6 @@ a variable for the formatter program's arguments."
   (setq-local tab-always-indent (default-value 'tab-always-indent)))
 
 (use-package asm-mode
-  :defer t
   :init
   (setq asm-comment-char ?#)
   :config
@@ -465,7 +545,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package cmake-mode
-  :defer t
   :config
   (add-hook 'cmake-mode-hook #'panda-setup-cmake-mode))
 
@@ -473,16 +552,20 @@ a variable for the formatter program's arguments."
 (defalias 'panda-setup-common-lisp-mode 'panda-setup-emacs-lisp-mode)
 
 (use-package slime
-  :defer t
   :init
   (setq inferior-lisp-program "sbcl"
         slime-contribs '(slime-fancy))
   :config
   (add-hook 'slime-mode-hook #'panda-setup-common-lisp-mode)
-  (slime-setup))
+  (slime-setup)
+  (panda-setup-repl 'slime-mode-map
+    :eval-line-or-expression 'slime-eval-last-expression
+    :eval-region 'slime-eval-region
+    :eval-paragraph nil
+    :eval-function 'slime-eval-defun
+    :eval-buffer 'slime-eval-buffer))
 
 (use-package slime-company
-  :after slime
   :config
   (slime-company-init))
 
@@ -494,7 +577,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package d-mode
-  :defer t
   :config
   (add-to-list 'eglot-server-programs '(d-mode . ("dls")))
   (add-hook 'd-mode-hook #'panda-setup-d-mode))
@@ -502,8 +584,18 @@ a variable for the formatter program's arguments."
 ;;;; Emacs Lisp
 (defun panda-setup-emacs-lisp-mode ()
   (company-mode 1)
+  (lispyville-mode 1)
   (panda-generic-format-on-save)
-  (yas-minor-mode 1))
+  (yas-minor-mode 1)
+  (setq-local evil-args-delimiters '(" ")))
+
+(dolist (map '(emacs-lisp-mode-map lisp-interaction-mode-map))
+  (panda-setup-repl map
+    :eval-line-or-expression 'eval-last-sexp
+    :eval-region 'eval-region
+    :eval-paragraph nil
+    :eval-function 'eval-defun
+    :eval-buffer 'eval-buffer))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
 
@@ -513,17 +605,14 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package gitattributes-mode
-  :defer t
   :config
   (add-hook 'gitattributes-mode-hook #'panda-setup-gitfiles-mode))
 
 (use-package gitconfig-mode
-  :defer t
   :config
   (add-hook 'gitconfig-mode-hook #'panda-setup-gitfiles-mode))
 
 (use-package gitignore-mode
-  :defer t
   :config
   (add-hook 'gitignore-mode-hook #'panda-setup-gitfiles-mode))
 
@@ -536,7 +625,6 @@ a variable for the formatter program's arguments."
   (setq indent-tabs-mode t))
 
 (use-package go-mode
-  :defer t
   :config
   (add-hook 'go-mode-hook #'panda-setup-go-mode))
 
@@ -548,7 +636,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package haskell-mode
-  :defer t
   :config
   (add-hook 'haskell-mode-hook #'panda-setup-haskell-mode))
 
@@ -558,7 +645,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package web-mode
-  :defer t
   :mode (("\\.html?\\'" . web-mode))
   :init
   (setq web-mode-markup-indent-offset 2
@@ -586,13 +672,18 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package js2-mode
-  :defer t
   :mode (("\\.js\\'" . js2-mode))
   :config
   (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
 
 (use-package indium
-  :defer t)
+  :config
+  (panda-setup-repl 'indium-interaction-mode-map
+    :eval-line-or-expression 'indium-eval-last-node
+    :eval-region 'indium-eval-region
+    :eval-paragraph nil
+    :eval-function 'indium-eval-defun
+    :eval-buffer 'indium-eval-buffer))
 
 ;;;; Latex
 (defun panda-setup-latex-mode ()
@@ -603,7 +694,6 @@ a variable for the formatter program's arguments."
 
 (use-package tex
   :ensure auctex
-  :defer t
   :init
   (setq TeX-auto-save t
         TeX-parse-self t))
@@ -621,7 +711,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package markdown-mode
-  :defer t
   :config
   (add-hook 'markdown-mode-hook #'panda-setup-markdown-mode))
 
@@ -630,12 +719,17 @@ a variable for the formatter program's arguments."
   (panda-generic-format-on-save))
 
 (use-package org
-  :defer t
   :init
   (setq org-src-fontify-natively t
         org-src-tab-acts-natively t)
   :config
   (add-hook 'org-mode-hook #'panda-setup-org-mode))
+
+(use-package evil-org
+  :config
+  (add-hook 'org-mode-hook #'evil-org-mode)
+  (add-hook 'evil-org-mode-hook
+            (lambda () (evil-org-set-key-theme))))
 
 ;;;; Python
 (defun panda-setup-python-mode ()
@@ -647,11 +741,16 @@ a variable for the formatter program's arguments."
   (setq-local yas-also-auto-indent-first-line nil))
 
 (use-package python
-  :defer t
   :init
   (setq python-indent-offset 4)
   :config
-  (add-hook 'python-mode-hook #'panda-setup-python-mode))
+  (add-hook 'python-mode-hook #'panda-setup-python-mode)
+  (panda-setup-repl 'python-mode-map
+    :eval-line-or-expression nil
+    :eval-region 'python-shell-send-region
+    :eval-paragraph nil
+    :eval-function 'python-shell-send-defun
+    :eval-buffer 'python-shell-send-buffer))
 
 ;;;; R
 (defun panda-setup-r-mode ()
@@ -661,12 +760,17 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package ess
-  :defer t
   :init
   (setq ess-ask-for-ess-directory nil
         ess-use-flymake nil)
   :config
-  (add-hook 'ess-r-mode-hook #'panda-setup-r-mode))
+  (add-hook 'ess-r-mode-hook #'panda-setup-r-mode)
+  (panda-setup-repl 'ess-r-mode-map
+    :eval-line-or-expression 'ess-eval-line
+    :eval-region 'ess-eval-region
+    :eval-paragraph 'ess-eval-paragraph
+    :eval-function 'ess-eval-function
+    :eval-buffer 'ess-eval-buffer))
 
 ;;;; Rust
 (defun panda-setup-rust-mode ()
@@ -676,12 +780,12 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package rust-mode
-  :defer t
   :config
   (add-hook 'rust-mode-hook #'panda-setup-rust-mode))
 
 (use-package cargo
-  :hook (rust-mode . cargo-minor-mode))
+  :init
+  (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
 ;;;; Shell Script
 (defun panda-setup-sh-mode ()
@@ -698,7 +802,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (use-package typescript-mode
-  :defer t
   :config
   (add-hook 'typescript-mode-hook #'panda-setup-typescript-mode))
 
