@@ -47,3 +47,14 @@ shopt -s histappend
 
 alias ls='ls -F --group-directories-first'
 alias start='xdg-open &> /dev/null'
+
+alias em='emacsclient --quiet'
+
+if [ "$(emacsclient -e '(daemonp)' 2> /dev/null)" != 't' ]; then
+    (emacs --daemon &> /dev/null &)
+fi
+
+emacsreload() {
+    emacsclient -e '(kill-emacs)'
+    (emacs --daemon &> /dev/null &)
+}
