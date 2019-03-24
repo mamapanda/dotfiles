@@ -272,7 +272,7 @@ bindsym $mod+9 exec --no-startup-id blurlock
 
 # Autostart applications
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec --no-startup-id dropbox start
+exec --no-startup-id sleep 5; dropbox start
 exec --no-startup-id fcitx -d -r
 # mute on startup
 exec --no-startup-id amixer -q set Master mute
