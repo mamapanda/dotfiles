@@ -18,7 +18,7 @@ XTerm*selectToClipboard: true
 *foreground:                      #F8F8F2
 *fading:                          8
 *fadeColor:                       black
-*cursorColor:                     #000000
+*cursorColor:                     #F8F8F2
 *pointerColorBackground:          #2B2C2B
 *pointerColorForeground:          #16A085
 
@@ -54,10 +54,10 @@ XTerm*selectToClipboard: true
 *color7:                          #F8F8F2
 *color15:                         #F9F8F5
 
-Xcursor.theme: xcursor-breeze
+Xcursor.theme:                    xcursor-breeze
 Xcursor.size:                     0
 
-URxvt.font:                       9x15,xft:TerminessTTFNerdFontMono
+URxvt.font:                       xft:Consolas:pixelsize=15
 
 ! alternative font settings with 'terminus':
 ! URxvt.font:      -xos4-terminus-medium-r-normal--16-160-72-72-c-80-iso10646-1
@@ -65,7 +65,7 @@ URxvt.font:                       9x15,xft:TerminessTTFNerdFontMono
 !! terminus names see end of file!
 
 URxvt.depth:                      32
-URxvt.background:                 [100]#222D31
+URxvt.background:                 [100]#272822
 URxvt*scrollBar:                  false
 URxvt*mouseWheelScrollPage:       false
 URxvt*cursorBlink:                true

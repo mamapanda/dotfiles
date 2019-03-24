@@ -56,11 +56,10 @@ bindsym $mod+Ctrl+m exec terminal -e 'alsamixer'
 
 # Start Applications
 bindsym $mod+Ctrl+b exec terminal -e 'bmenu'
-bindsym $mod+F1 exec emacs
-bindsym $mod+F2 exec firefox
-bindsym $mod+F3 exec pcmanfm
+bindsym $mod+comma exec firefox
+bindsym $mod+period exec emacs
+bindsym $mod+slash exec thunar
 # bindsym $mod+F3 exec ranger
-bindsym $mod+Shift+F3 exec gksu pcmanfm
 bindsym $mod+F5 exec terminal -e 'mocp'
 bindsym $mod+t exec --no-startup-id pkill compton
 bindsym $mod+Ctrl+t exec --no-startup-id compton -b
@@ -272,9 +271,9 @@ mode "resize" {
 bindsym $mod+9 exec --no-startup-id blurlock
 
 # Autostart applications
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id dropbox start
 exec --no-startup-id fcitx -d -r
-exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # mute on startup
 exec --no-startup-id amixer -q set Master mute
 # wallpaper
