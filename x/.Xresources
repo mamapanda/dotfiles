@@ -6,53 +6,43 @@ Xft.autohint:  false
 Xft.hintstyle: hintslight
 Xft.lcdfilter: lcddefault
 
-XTerm*background:        #272822
-XTerm*foreground:        #F8F8F2
-XTerm*pointerColor:      #1ABB9B
-XTerm*faceName:          Fixed
-XTerm*faceSize:          11
-XTerm*reverseVideo:      on
-XTerm*selectToClipboard: true
-
-*background:                      #272822
-*foreground:                      #F8F8F2
+*background:                      #1B2B34
+*foreground:                      #D8DEE9
 *fading:                          8
 *fadeColor:                       black
-*cursorColor:                     #F8F8F2
-*pointerColorBackground:          #2B2C2B
-*pointerColorForeground:          #16A085
+*cursorColor:                     #D8DEE9
 
 !! black dark/light
-*color0:                          #272822
-*color8:                          #75715E
+*color0:                          #343D46
+*color8:                          #343D46
 
 !! red dark/light
-*color1:                          #F92672
-*color9:                          #F92672
+*color1:                          #EC5F67
+*color9:                          #EC5F67
 
 !! green dark/light
-*color2:                          #A6E22E
-*color10:                         #A6E22E
+*color2:                          #99C794
+*color10:                         #99C794
 
 !! yellow dark/light
-*color3:                          #F4BF75
-*color11:                         #F4BF75
+*color3:                          #FAC863
+*color11:                         #FAC863
 
 !! blue dark/light
-*color4:                          #66D9EF
-*color12:                         #66D9EF
+*color4:                          #6699CC
+*color12:                         #6699CC
 
 !! magenta dark/light
-*color5:                          #AE81FF
-*color13:                         #AE81FF
+*color5:                          #C594C5
+*color13:                         #C594C5
 
 !! cyan dark/light
-*color6:                          #A1EFE4
-*color14:                         #A1EFE4
+*color6:                          #5FB3B3
+*color14:                         #5FB3B3
 
 !! white dark/light
-*color7:                          #F8F8F2
-*color15:                         #F9F8F5
+*color7:                          #D8DEE9
+*color15:                         #D8DEE9
 
 Xcursor.theme:                    xcursor-breeze
 Xcursor.size:                     0

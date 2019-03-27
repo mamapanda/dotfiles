@@ -127,12 +127,15 @@
 
 ;;; Global Packages
 ;;;; Appearance
-(use-package monokai-theme
+(use-package base16-theme
+  :init
+  (setq base16-distinct-fringe-background nil)
   :config
-  (defconst panda-neon-green "#39FF14")
-  (defconst panda-light-blue "#67C8FF")
-  (defconst panda-deep-saffron "#FF9933")
-  (load-theme 'monokai t))
+  (load-theme 'base16-oceanicnext t)
+  ;; what??????
+  (set-face-attribute 'line-number-current-line nil
+                      :foreground (face-attribute 'line-number :background)
+                      :background (face-attribute 'line-number :foreground)))
 
 (use-package display-line-numbers
   :general
@@ -161,6 +164,10 @@
   (setq doom-modeline-buffer-file-name-style 'relative-from-project
         doom-modeline-icon nil)
   :config
+  (set-face-attribute 'doom-modeline-bar nil
+                      :background (face-attribute 'mode-line :background))
+  (set-face-attribute 'doom-modeline-inactive-bar nil
+                      :background (face-attribute 'mode-line-inactive :background))
   (doom-modeline-init))
 
 (use-package rainbow-delimiters
@@ -181,15 +188,7 @@
         confirm-nonexistent-file-or-buffer t
         ivy-count-format "(%d/%d) ")
   :config
-  (ivy-mode 1)
-  (set-face-attribute 'ivy-minibuffer-match-face-2 nil
-                      :foreground panda-neon-green)
-  (set-face-attribute 'ivy-minibuffer-match-face-3 nil
-                      :foreground panda-light-blue)
-  (set-face-attribute 'ivy-minibuffer-match-face-4 nil
-                      :foreground panda-deep-saffron)
-  (set-face-attribute 'ivy-confirm-face nil
-                      :foreground panda-neon-green))
+  (ivy-mode 1))
 
 (use-package counsel
   :general
