@@ -1,0 +1,60 @@
+# i3status configuration file.
+# see "man i3status" for documentation.
+
+# It is important that this file is edited as UTF-8.
+# The following line should contain a sharp s:
+# ß
+# If the above line is not correctly displayed, fix your editor first!
+
+general {
+    colors = true
+    interval = 5
+    color_good = "#D8DEE9"
+    color_bad = "#586E75"
+    color_degraded = "#EC5F67"
+}
+
+order += "cpu_usage"
+order += "wireless _first_"
+order += "ethernet _first_"
+order += "battery all"
+order += "tztime local"
+
+cpu_usage {
+    format = " cpu %usage "
+}
+
+wireless _first_ {
+    # %quality already contains a leading space
+    format_up = " W%quality (%essid) "
+    format_down = " W down "
+}
+
+ethernet _first_ {
+    # if you use %speed, i3status requires root privileges
+    format_up = " lan %speed "
+    format_down = " no lan "
+}
+
+battery all {
+    format = " %status %percentage "
+    format_down = " No battery "
+    last_full_capacity = true
+    integer_battery_capacity = true
+    # status_chr = ""
+    status_chr = "⚡"
+    # status_bat = "bat"
+    # status_bat = "☉"
+    status_bat = ""
+    status_unk = "?"
+    # status_unk = ""
+    # status_full = ""
+    status_full = ""
+    # status_full = "☻"
+    low_threshold = 10
+    threshold_type = percentage
+}
+
+tztime local {
+    format = " %m/%d %H:%M "
+}
