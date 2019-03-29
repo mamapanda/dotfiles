@@ -9,8 +9,7 @@ endif
 
 call plug#begin('~/.config/nvim/plugged')
 " appearance
-Plug 'sickill/vim-monokai'
-Plug 'itchyny/lightline.vim'
+Plug 'mhartington/oceanic-next'
 " visual aids
 Plug 'luochen1990/rainbow'
 Plug 'machakann/vim-highlightedyank'
@@ -42,7 +41,7 @@ Plug 'tpope/vim-fugitive'
 call plug#end()
 
 
-colorscheme monokai
+colorscheme OceanicNext
 
 set tabstop=4
 set softtabstop=4
@@ -66,10 +65,6 @@ highlight Search guifg=white guibg=magenta
 
 autocmd CmdlineEnter /,\? :set hlsearch
 autocmd CmdlineLeave /,\? :set nohlsearch
-
-let g:lightline = {
-\   'colorscheme' : 'molokai'
-\}
 
 let g:rainbow_active = 1
 let g:highlightedyank_highlight_duration = 200
