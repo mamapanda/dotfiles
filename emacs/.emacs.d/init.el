@@ -57,18 +57,6 @@
     :keymaps 'panda-leader-map))
 
 (use-package evil
-  :general
-  (general-nmap
-    "R" 'query-replace
-    "U" 'read-only-mode
-    "Q" 'occur)
-  (general-nmap :keymaps 'occur-mode-map
-    "U" 'occur-edit-mode)
-  (general-nmap :keymaps 'occur-edit-mode-map
-    "U" 'occur-cease-edit)
-  (panda-leader-def
-    "f" 'find-file
-    "b" 'switch-to-buffer)
   :init
   (setq evil-toggle-key "C-s-+"
         evil-want-C-d-scroll t
@@ -81,6 +69,7 @@
 
 (use-package evil-collection
   :config
+  (delete 'company evil-collection-mode-list)
   (evil-collection-init))
 
 (use-package evil-escape
@@ -91,6 +80,16 @@
   (evil-escape-mode 1))
 
 ;;; Built-Ins Configuration
+;;;; Appearance
+(setq default-frame-alist '((fullscreen . maximized)
+                            (font . "Consolas-11")
+                            (menu-bar-lines . 0)
+                            (tool-bar-lines . 0)
+                            (vertical-scroll-bars . nil))
+      inhibit-startup-screen t
+      ring-bell-function 'ignore
+      visible-bell nil)
+
 ;;;; Behavior
 (setq auto-save-default nil
       c-default-style '((java-mode . "java")
@@ -115,15 +114,24 @@
 
 (global-auto-revert-mode t)
 
-;;;; Appearance
-(setq default-frame-alist '((fullscreen . maximized)
-                            (font . "Consolas-11")
-                            (menu-bar-lines . 0)
-                            (tool-bar-lines . 0)
-                            (vertical-scroll-bars . nil))
-      inhibit-startup-screen t
-      ring-bell-function 'ignore
-      visible-bell nil)
+;;;; Keybindings
+(panda-leader-def
+  "b"        'switch-to-buffer
+  "B"        'kill-buffer
+  "f"        'find-file
+  "r"        'query-replace
+  "o"        'occur
+  "<return>" 'eshell)
+
+(general-nmap
+  "Q" 'save-buffer
+  "U" 'read-only-mode)
+
+(general-nmap :keymaps 'occur-mode-map
+  "U" 'occur-edit-mode)
+
+(general-nmap :keymaps 'occur-edit-mode-map
+  "U" 'occur-cease-edit)
 
 ;;; Global Packages
 ;;;; Appearance
@@ -194,7 +202,7 @@
   :general
   (panda-leader-def
     "SPC" 'counsel-M-x
-    "r" 'counsel-rg)
+    "s" 'counsel-rg)
   :config
   (counsel-mode 1))
 
@@ -328,12 +336,11 @@
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
-  (defun panda-eyebrowse-create-window-config ()
-    (interactive)
-    (let ((tag (read-string "Window Config Tag: ")))
-      (eyebrowse-create-window-config)
-      (let ((created-config (eyebrowse--get 'current-slot)))
-        (eyebrowse-rename-window-config created-config tag))))
+  (defun panda-eyebrowse-create-window-config (tag)
+    (interactive "sWindow Config Tag: ")
+    (eyebrowse-create-window-config)
+    (let ((created-config (eyebrowse--get 'current-slot)))
+      (eyebrowse-rename-window-config created-config tag)))
   (eyebrowse-mode 1))
 
 (use-package winner
@@ -386,12 +393,17 @@
 (use-package company
   :general
   (general-def :keymaps 'company-active-map
+    "C-p"      'company-select-previous
+    "C-n"      'company-select-next
+    "C-b"      'company-previous-page
+    "C-f"      'company-next-page
     "<return>" 'company-complete-selection)
   :init
   (setq company-dabbrev-code-modes nil
         company-idle-delay 0.1
         company-minimum-prefix-length 2
         company-tooltip-align-annotations t)
+  (defvar company-active-map (make-sparse-keymap))
   :config
   (delete 'company-dabbrev company-backends))
 
@@ -400,6 +412,9 @@
   (panda-leader-def
     "k" 'flymake-goto-prev-error
     "j" 'flymake-goto-next-error))
+
+;;;; Debugging
+(use-package realgud)
 
 ;;;; Formatting
 (defun panda-generic-format-buffer ()
@@ -488,11 +503,6 @@ a variable for the formatter program's arguments."
 
 ;;;; Snippets
 (use-package yasnippet
-  :general
-  (general-def :keymaps 'yas-minor-mode-map
-    "<tab>" nil
-    "TAB" nil
-    "<backtab>" 'yas-expand)
   :init
   (setq yas-triggers-in-field nil
         yas-indent-line 'auto
@@ -504,7 +514,7 @@ a variable for the formatter program's arguments."
       (defun panda-company-yas-tab-advice (old-func &rest args)
         (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
           (call-interactively old-func args)))
-      (let ((company-tab-func (lookup-key company-active-map (kbd "<backtab>"))))
+      (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
         (advice-add company-tab-func :around #'panda-company-yas-tab-advice)))))
 
 (use-package yasnippet-snippets)
@@ -568,6 +578,12 @@ a variable for the formatter program's arguments."
   :config
   (slime-company-init))
 
+;;;; CSS
+(defun panda-setup-css-mode ()
+  (prettier-css-on-save-mode 1))
+
+(add-hook 'css-mode-hook #'panda-setup-css-mode)
+
 ;;;; D
 (defun panda-setup-d-mode ()
   (company-mode 1)
@@ -597,6 +613,15 @@ a variable for the formatter program's arguments."
     :eval-buffer 'eval-buffer))
 
 (add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
+
+;;;; Fish
+(defun panda-setup-fish-mode ()
+  (panda-trim-whitespace-on-save)
+  (yas-minor-mode 1))
+
+(use-package fish-mode
+  :config
+  (add-hook 'fish-mode-hook #'panda-setup-fish-mode))
 
 ;;;; Git Files
 (defun panda-setup-gitfiles-mode ()
@@ -640,8 +665,7 @@ a variable for the formatter program's arguments."
 
 ;;;; HTML
 (defun panda-setup-web-mode ()
-  (prettier-html-on-save-mode 1)
-  (yas-minor-mode 1))
+  (prettier-html-on-save-mode 1))
 
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode))
@@ -654,7 +678,7 @@ a variable for the formatter program's arguments."
   (add-hook 'web-mode-hook #'panda-setup-web-mode))
 
 (use-package emmet-mode
-  :hook (web-mode . emmet-mode))
+  :hook ((web-mode css-mode) . emmet-mode))
 
 ;;;; Java
 (defun panda-setup-java-mode ()
@@ -718,17 +742,21 @@ a variable for the formatter program's arguments."
   (panda-generic-format-on-save))
 
 (use-package org
+  :general
+  (panda-leader-def "a" 'org-agenda)
   :init
-  (setq org-src-fontify-natively t
+  (setq org-agenda-files '("~/code/org/agenda.org")
+        org-src-fontify-natively t
         org-src-tab-acts-natively t)
   :config
   (add-hook 'org-mode-hook #'panda-setup-org-mode))
 
 (use-package evil-org
+  :hook (org-mode . evil-org-mode)
   :config
-  (add-hook 'org-mode-hook #'evil-org-mode)
-  (add-hook 'evil-org-mode-hook
-            (lambda () (evil-org-set-key-theme))))
+  (evil-org-set-key-theme)
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
 
 ;;;; Python
 (defun panda-setup-python-mode ()
@@ -803,6 +831,15 @@ a variable for the formatter program's arguments."
 (use-package typescript-mode
   :config
   (add-hook 'typescript-mode-hook #'panda-setup-typescript-mode))
+
+;;;; YAML
+(defun panda-setup-yaml-mode ()
+  (panda-trim-whitespace-on-save)
+  (yas-minor-mode 1))
+
+(use-package yaml-mode
+  :config
+  (add-hook 'yaml-mode-hook #'panda-setup-yaml-mode))
 
 ;;; End Init
 (provide 'init)
