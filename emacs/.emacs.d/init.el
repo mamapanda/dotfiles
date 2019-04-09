@@ -280,6 +280,12 @@
   :init
   (setq magit-auto-revert-mode nil))
 
+(use-package magit-todos
+  :init
+  (setq magit-todos-rg-extra-args '("--hidden" "--glob" "!.git/"))
+  :config
+  (magit-todos-mode))
+
 (use-package evil-magit)
 
 (use-package git-timemachine
@@ -409,6 +415,8 @@
 
 (use-package flymake
   :general
+  (general-nmap
+    "\\" 'flymake-show-diagnostics-buffer)
   (panda-leader-def
     "k" 'flymake-goto-prev-error
     "j" 'flymake-goto-next-error))
@@ -466,13 +474,10 @@ a variable for the formatter program's arguments."
     :args '("--stdin" "--parser" "css" "--tab-width" "4"))
   (panda-reformatter-define prettier-javascript
     :program "prettier"
-    :args '("--stdin" "--parser" "javascript" "--tab-width" "4"))
+    :args '("--stdin" "--parser" "typescript" "--tab-width" "4"))
   (panda-reformatter-define prettier-markdown
     :program "prettier"
     :args '("--stdin" "--parser" "markdown"))
-  (panda-reformatter-define prettier-typescript
-    :program "prettier"
-    :args '("--stdin" "--parser" "typescript" "--tab-width" "4"))
   (panda-reformatter-define rustfmt
     :program "rustfmt"))
 
@@ -687,17 +692,19 @@ a variable for the formatter program's arguments."
 
 (add-hook 'java-mode-hook #'panda-setup-java-mode)
 
-;;;; JavaScript
+;;;; JavaScript / TypeScript
 (defun panda-setup-javascript-mode ()
   (company-mode 1)
   (eglot-ensure)
   (prettier-javascript-on-save-mode 1)
   (yas-minor-mode 1))
 
-(use-package js2-mode
-  :mode (("\\.js\\'" . js2-mode))
-  :config
-  (add-hook 'js2-mode-hook #'panda-setup-javascript-mode))
+(use-package typescript-mode)
+(add-to-list 'eglot-server-programs
+             '((js-mode typescript-mode) . ("typescript-language-server" "--stdio")))
+
+(add-hook 'js-mode-hook #'panda-setup-javascript-mode)
+(add-hook 'typescript-mode-hook #'panda-setup-javascript-mode)
 
 (use-package indium
   :config
@@ -820,17 +827,6 @@ a variable for the formatter program's arguments."
   (yas-minor-mode 1))
 
 (add-hook 'sh-mode-hook #'panda-setup-sh-mode)
-
-;;;; TypeScript
-(defun panda-setup-typescript-mode ()
-  (company-mode 1)
-  (eglot-ensure)
-  (prettier-typescript-on-save-mode 1)
-  (yas-minor-mode 1))
-
-(use-package typescript-mode
-  :config
-  (add-hook 'typescript-mode-hook #'panda-setup-typescript-mode))
 
 ;;;; YAML
 (defun panda-setup-yaml-mode ()

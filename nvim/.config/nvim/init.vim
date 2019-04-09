@@ -58,6 +58,7 @@ set termguicolors
 
 inoremap fd    <Esc>
 nnoremap Y     y$
+nnoremap Q     :w<CR>
 tnoremap <C-w> <C-\><C-n><C-w>
 
 highlight Search ctermfg=white ctermbg=magenta
