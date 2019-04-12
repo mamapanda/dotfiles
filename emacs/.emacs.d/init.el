@@ -358,43 +358,6 @@
   (winner-mode 1))
 
 ;;; Per-Language Configuration
-;;;; Macros
-;;;;; Repl Setup
-(let ((no-repl-found-message
-       (lambda (send-type)
-         `(lambda ()
-            (interactive)
-            (user-error "No REPL send %s command found for %s"
-                        ,send-type major-mode)))))
-  (general-nmap
-    :prefix "SPC"
-    "Z" (funcall no-repl-found-message "paragraph")
-    "z" (funcall no-repl-found-message "line/expression")
-    "X" (funcall no-repl-found-message "buffer")
-    "x" (funcall no-repl-found-message "function"))
-  (general-vmap
-    :prefix "SPC"
-    "z" (funcall no-repl-found-message "region")))
-
-(cl-defmacro panda-setup-repl (map
-                               &key
-                               eval-region
-                               eval-line-or-expression
-                               eval-paragraph
-                               eval-function
-                               eval-buffer)
-  (declare (indent defun))
-  `(progn
-     (general-nmap :keymaps ,map
-       :prefix "SPC"
-       "Z" ,eval-paragraph
-       "z" ,eval-line-or-expression
-       "X" ,eval-buffer
-       "x" ,eval-function)
-     (general-vmap :keymaps ,map
-       :prefix "SPC"
-       "z" ,eval-region)))
-
 ;;;; Completion / Linting
 (use-package company
   :general
@@ -431,55 +394,7 @@
     (indent-region (point-min) (point-max))
     (delete-trailing-whitespace)))
 
-(defun panda-generic-format-on-save ()
-  (add-hook 'before-save-hook #'panda-generic-format-buffer nil t))
-
-(defun panda-trim-whitespace-on-save ()
-  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
-
-(use-package reformatter
-  :config
-  (cl-defmacro panda-reformatter-define (name &rest key-pairs)
-    "A wrapper around `reformatter-define' that also creates
-a variable for the formatter program's arguments."
-    (declare (indent defun))
-    (assert (symbolp name))
-    (let* ((args-symbol (intern (format "%s-args" name)))
-           (args (plist-get key-pairs :args)))
-      (plist-put key-pairs :args args-symbol)
-      `(progn
-         (defvar ,args-symbol ,args
-           "Arguments for the formatter program.")
-         (reformatter-define ,name
-           ,@key-pairs))))
-  (panda-reformatter-define asmfmt
-    :program "asmfmt")
-  (panda-reformatter-define black
-    :program "black"
-    :args '("-" "--quiet" "--line-length" "80"))
-  (panda-reformatter-define brittany
-    :program "brittany")
-  (panda-reformatter-define clang-format
-    :program "clang-format")
-  (panda-reformatter-define dfmt
-    :program "dfmt"
-    :args '("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80"))
-  (panda-reformatter-define gofmt
-    :program "gofmt")
-  (panda-reformatter-define prettier-html
-    :program "prettier"
-    :args '("--stdin" "--parser" "html"))
-  (panda-reformatter-define prettier-css
-    :program "prettier"
-    :args '("--stdin" "--parser" "css" "--tab-width" "4"))
-  (panda-reformatter-define prettier-javascript
-    :program "prettier"
-    :args '("--stdin" "--parser" "typescript" "--tab-width" "4"))
-  (panda-reformatter-define prettier-markdown
-    :program "prettier"
-    :args '("--stdin" "--parser" "markdown"))
-  (panda-reformatter-define rustfmt
-    :program "rustfmt"))
+(use-package reformatter)
 
 ;;;; Language Server
 (use-package eglot)
@@ -528,49 +443,288 @@ a variable for the formatter program's arguments."
   :general
   (panda-leader-def "y" 'ivy-yasnippet))
 
+;;;; Macros
+;;;;; Language Setup
+(defvar panda-language-features '((completion . (company-mode 1))
+                                  (formatting . (add-hook
+                                                 'before-save-hook
+                                                 #'panda-generic-format-buffer
+                                                 nil
+                                                 t))
+                                  (lsp . (progn
+                                           (company-mode 1)
+                                           (eglot-ensure)))
+                                  (snippets . (yas-minor-mode 1))
+                                  (trim-whitespace . (add-hook
+                                                      'before-save-hook
+                                                      #'delete-trailing-whitespace
+                                                      nil
+                                                      t)))
+  "Maps a language feature symbol to its corresponding setup code.")
+
+(defun panda-translate-language-feature (feature)
+  "Converts a language feature symbol to its corresponding setup code."
+  (let ((setup-code (alist-get feature panda-language-features)))
+    (if setup-code
+        setup-code
+      (error "Language feature %s not defined" feature))))
+
+(cl-defmacro panda-setup-language (mode
+                                   &key
+                                   features
+                                   defaults
+                                   locals
+                                   lsp-server
+                                   extra-code)
+  "A macro to set up variables and hook functions for programming languages.
+
+For each specified major mode, this macro:
+- tries to install a package with the same name as MODE if MODE is not found
+- sets default values for variables according to DEFAULTS
+- creates a setup function based on FEATURES, LOCALS, and EXTRA-CODE
+- adds the setup function to the major mode's hook
+- registers a user-defined lsp server if one is provided
+
+MODE is the name of the major mode of the programming language,
+or a list of names if there is more than one.
+
+FEATURES is a list of features defined in `panda-language-features'.
+These features will be enabled for the specified major modes.
+
+DEFAULTS is a list of items (symbol value) to be set as defaults.
+This parameter is only here for organization.
+
+LOCALS is a list of items (symbol value) to be set locally in MODE.
+
+LSP-SERVER describes a user-defined lsp server in the form
+(\"server-name\" \"--arg-1\" \"--arg-2\").
+
+EXTRA-CODE is an extra statement to run at the end of the setup function."
+  (declare (indent defun))
+  (assert (or (symbolp mode) (listp mode)))
+  (let ((mode-list (if (listp mode) mode (list mode))))
+    `(progn
+       ,@(mapcar (lambda (mode)
+                   (unless (fboundp mode)
+                     `(use-package ,mode)))
+                 mode-list)
+       ,(when lsp-server
+          `(add-to-list 'eglot-server-programs '(,mode-list . ,lsp-server)))
+       ,@(mapcar (lambda (default)
+                   (push 'setq-default default))
+                 defaults)
+       ,@(mapcar (lambda (mode)
+                   (let ((fn-name (intern (format "panda-setup-%s" mode)))
+                         (mode-hook (intern (format "%s-hook" mode))))
+                     `(progn
+                        (defun ,fn-name ()
+                          ,@(mapcar #'panda-translate-language-feature features)
+                          ,@(mapcar (lambda (local) (push 'setq-local local)) locals)
+                          ,extra-code)
+                        (add-hook ',mode-hook #',fn-name))))
+                 mode-list))))
+
+;;;;; Code Formatters
+(cl-defmacro panda-formatter-def (name
+                                  &key
+                                  mode
+                                  program
+                                  required-args
+                                  extra-args
+                                  config-file)
+  "Defines a formatter based on NAME, PROGRAM, REQUIRED-ARGS, and
+EXTRA-ARGS and enables it to run on save in MODE. MODE may be a
+single mode or a list of modes. Additionally, if CONFIG-FILE is found
+in the current directory or one of its parents, then the formatter
+program's arguments are locally set to REQUIRED-ARGS only."
+  (declare (indent defun))
+  (assert (symbolp name))
+  (assert program)
+  (let ((mode-list (if (listp mode) mode (list mode)))
+        (args-name (intern (format "%s-args" name)))
+        (setup-fn-name (intern (format "%s-setup" name)))
+        (format-on-save-name (intern (format "%s-on-save-mode" name))))
+    `(progn
+       (defvar ,args-name
+         ,(when-let (program-args (append required-args extra-args))
+            `(quote ,program-args)))
+       (reformatter-define ,name
+         :program ,program
+         :args ,args-name)
+       (defun ,setup-fn-name ()
+         (,format-on-save-name 1)
+         ,(when config-file
+            `(when (locate-dominating-file default-directory ,config-file)
+               (setq-local ,args-name (quote ,required-args)))))
+       ,@(mapcar (lambda (mode)
+                   (let ((mode-hook (intern (format "%s-hook" mode))))
+                     `(add-hook ',mode-hook #',setup-fn-name)))
+                 mode-list))))
+
+;;;;; Repl Setup
+(let ((no-repl-found-message
+       (lambda (send-type)
+         `(lambda ()
+            (interactive)
+            (user-error "No REPL send %s command found for %s"
+                        ,send-type major-mode)))))
+  (general-nmap
+    :prefix "SPC"
+    "Z" (funcall no-repl-found-message "paragraph")
+    "z" (funcall no-repl-found-message "line/expression")
+    "X" (funcall no-repl-found-message "buffer")
+    "x" (funcall no-repl-found-message "function"))
+  (general-vmap
+    :prefix "SPC"
+    "z" (funcall no-repl-found-message "region")))
+
+(cl-defmacro panda-setup-repl (map
+                               &key
+                               eval-region
+                               eval-line-or-expression
+                               eval-paragraph
+                               eval-function
+                               eval-buffer)
+  (declare (indent defun))
+  `(progn
+     (general-nmap :keymaps ,map
+       :prefix "SPC"
+       "Z" ,eval-paragraph
+       "z" ,eval-line-or-expression
+       "X" ,eval-buffer
+       "x" ,eval-function)
+     (general-vmap :keymaps ,map
+       :prefix "SPC"
+       "z" ,eval-region)))
+
 ;;; Language Modes
 ;;;; Assembly
-(defun panda-setup-asm-mode ()
-  (asmfmt-on-save-mode 1)
-  (yas-minor-mode 1)
-  (setq indent-tabs-mode t)
-  (setq-local tab-always-indent (default-value 'tab-always-indent)))
+(panda-setup-language asm-mode
+  :features (snippets)
+  :defaults ((asm-comment-char ?#))
+  :locals ((indent-tabs-mode t)
+           (tab-always-indent (default-value 'tab-always-indent))))
 
-(use-package asm-mode
-  :init
-  (setq asm-comment-char ?#)
-  :config
-  (add-hook 'asm-mode-hook #'panda-setup-asm-mode))
+(panda-formatter-def asmfmt
+  :mode asm-mode
+  :program "asmfmt")
 
 ;;;; C / C++
-(defun panda-setup-c-mode ()
-  (company-mode 1)
-  (clang-format-on-save-mode 1)
-  (eglot-ensure)
-  (yas-minor-mode 1)
-  (c-set-offset 'innamespace 0))
+(panda-setup-language (c-mode c++-mode)
+  :features (lsp snippets)
+  :extra-code (c-set-offset 'innamespace 0))
 
-(add-hook 'c-mode-hook #'panda-setup-c-mode)
-(add-hook 'c++-mode-hook #'panda-setup-c-mode)
+(panda-formatter-def clang-format
+  :mode (c-mode c++-mode)
+  :program "clang-format")
 
 ;;;; CMake
-(defun panda-setup-cmake-mode ()
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
+(panda-setup-language cmake-mode
+  :features (formatting snippets))
 
-(use-package cmake-mode
+;;;; D
+(panda-setup-language d-mode
+  :features (lsp snippets)
+  :lsp-server ("dls"))
+
+(panda-formatter-def dfmt
+  :mode d-mode
+  :program "dfmt"
+  :extra-args ("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80")
+  :config-file ".editorconfig")
+
+;;;; Fish
+(panda-setup-language fish-mode
+  :features (snippets trim-whitespace))
+
+;;;; Git Files
+(panda-setup-language (gitattributes-mode gitconfig-mode gitignore-mode)
+  :features (formatting snippets))
+
+;;;; Go
+(panda-setup-language go-mode
+  :features (lsp snippets)
+  :locals ((indent-tabs-mode t)))
+
+(panda-formatter-def gofmt
+  :mode go-mode
+  :program "gofmt")
+
+;;;; HTML / CSS
+(use-package web-mode
+  :mode (("\\.html?\\'" . web-mode)))
+
+(panda-setup-language web-mode
+  :defaults ((web-mode-markup-indent-offset 2)
+             (web-mode-style-padding 4)
+             (web-mode-script-padding 4)
+             (web-mode-block-padding 4)))
+
+(panda-formatter-def prettier-html
+  :mode web-mode
+  :program "prettier"
+  :required-args ("--stdin" "--parser" "html")
+  :config-file ".prettierrc")
+
+(panda-formatter-def prettier-css
+  :mode css-mode
+  :program "prettier"
+  :required-args ("--stdin" "--parser" "css")
+  :extra-args ("--tab-width" "4")
+  :config-file ".prettierrc")
+
+(use-package emmet-mode
+  :hook ((web-mode css-mode) . emmet-mode))
+
+;;;; JavaScript / TypeScript
+(panda-setup-language (js-mode typescript-mode)
+  :features (lsp snippets)
+  :lsp-server ("typescript-language-server" "--stdio"))
+
+(panda-formatter-def prettier-js
+  :mode (js-mode typescript-mode)
+  :program "prettier"
+  :required-args ("--stdin" "--parser" "typescript")
+  :extra-args ("--tab-width" "4")
+  :config-file ".prettierrc")
+
+(use-package indium
   :config
-  (add-hook 'cmake-mode-hook #'panda-setup-cmake-mode))
+  (panda-setup-repl 'indium-interaction-mode-map
+    :eval-line-or-expression 'indium-eval-last-node
+    :eval-region 'indium-eval-region
+    :eval-paragraph nil
+    :eval-function 'indium-eval-defun
+    :eval-buffer 'indium-eval-buffer))
 
-;;;; Common Lisp
-(defalias 'panda-setup-common-lisp-mode 'panda-setup-emacs-lisp-mode)
+;;;; Latex
+(use-package tex
+  :ensure auctex)
+
+(panda-setup-language LaTeX-mode
+  :features (formatting snippets)
+  :defaults ((TeX-auto-save t)
+             (TeX-parse-self t)))
+
+;;;; Lisp
+(panda-setup-language (emacs-lisp-mode lisp-mode)
+  :features (completion formatting snippets)
+  :locals ((evil-args-delimiters '(" ")))
+  :extra-code (lispyville-mode 1))
+
+(dolist (map '(emacs-lisp-mode-map lisp-interaction-mode-map))
+  (panda-setup-repl map
+    :eval-line-or-expression 'eval-last-sexp
+    :eval-region 'eval-region
+    :eval-paragraph nil
+    :eval-function 'eval-defun
+    :eval-buffer 'eval-buffer))
 
 (use-package slime
   :init
   (setq inferior-lisp-program "sbcl"
         slime-contribs '(slime-fancy))
   :config
-  (add-hook 'slime-mode-hook #'panda-setup-common-lisp-mode)
   (slime-setup)
   (panda-setup-repl 'slime-mode-map
     :eval-line-or-expression 'slime-eval-last-expression
@@ -583,180 +737,28 @@ a variable for the formatter program's arguments."
   :config
   (slime-company-init))
 
-;;;; CSS
-(defun panda-setup-css-mode ()
-  (prettier-css-on-save-mode 1))
-
-(add-hook 'css-mode-hook #'panda-setup-css-mode)
-
-;;;; D
-(defun panda-setup-d-mode ()
-  (company-mode 1)
-  (dfmt-on-save-mode 1)
-  (eglot-ensure)
-  (yas-minor-mode 1))
-
-(use-package d-mode
-  :config
-  (add-to-list 'eglot-server-programs '(d-mode . ("dls")))
-  (add-hook 'd-mode-hook #'panda-setup-d-mode))
-
-;;;; Emacs Lisp
-(defun panda-setup-emacs-lisp-mode ()
-  (company-mode 1)
-  (lispyville-mode 1)
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1)
-  (setq-local evil-args-delimiters '(" ")))
-
-(dolist (map '(emacs-lisp-mode-map lisp-interaction-mode-map))
-  (panda-setup-repl map
-    :eval-line-or-expression 'eval-last-sexp
-    :eval-region 'eval-region
-    :eval-paragraph nil
-    :eval-function 'eval-defun
-    :eval-buffer 'eval-buffer))
-
-(add-hook 'emacs-lisp-mode-hook #'panda-setup-emacs-lisp-mode)
-
-;;;; Fish
-(defun panda-setup-fish-mode ()
-  (panda-trim-whitespace-on-save)
-  (yas-minor-mode 1))
-
-(use-package fish-mode
-  :config
-  (add-hook 'fish-mode-hook #'panda-setup-fish-mode))
-
-;;;; Git Files
-(defun panda-setup-gitfiles-mode ()
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
-
-(use-package gitattributes-mode
-  :config
-  (add-hook 'gitattributes-mode-hook #'panda-setup-gitfiles-mode))
-
-(use-package gitconfig-mode
-  :config
-  (add-hook 'gitconfig-mode-hook #'panda-setup-gitfiles-mode))
-
-(use-package gitignore-mode
-  :config
-  (add-hook 'gitignore-mode-hook #'panda-setup-gitfiles-mode))
-
-;;;; Go
-(defun panda-setup-go-mode ()
-  (company-mode 1)
-  (eglot-ensure)
-  (gofmt-on-save-mode 1)
-  (yas-minor-mode 1)
-  (setq indent-tabs-mode t))
-
-(use-package go-mode
-  :config
-  (add-hook 'go-mode-hook #'panda-setup-go-mode))
-
-;;;; Haskell
-(defun panda-setup-haskell-mode ()
-  (brittany-on-save-mode 1)
-  (company-mode 1)
-  (eglot-ensure)
-  (yas-minor-mode 1))
-
-(use-package haskell-mode
-  :config
-  (add-hook 'haskell-mode-hook #'panda-setup-haskell-mode))
-
-;;;; HTML
-(defun panda-setup-web-mode ()
-  (prettier-html-on-save-mode 1))
-
-(use-package web-mode
-  :mode (("\\.html?\\'" . web-mode))
-  :init
-  (setq web-mode-markup-indent-offset 2
-        web-mode-style-padding 4
-        web-mode-script-padding 4
-        web-mode-block-padding 4)
-  :config
-  (add-hook 'web-mode-hook #'panda-setup-web-mode))
-
-(use-package emmet-mode
-  :hook ((web-mode css-mode) . emmet-mode))
-
-;;;; Java
-(defun panda-setup-java-mode ()
-  (clang-format-on-save-mode 1)
-  (yas-minor-mode 1))
-
-(add-hook 'java-mode-hook #'panda-setup-java-mode)
-
-;;;; JavaScript / TypeScript
-(defun panda-setup-javascript-mode ()
-  (company-mode 1)
-  (eglot-ensure)
-  (prettier-javascript-on-save-mode 1)
-  (yas-minor-mode 1))
-
-(use-package typescript-mode)
-(add-to-list 'eglot-server-programs
-             '((js-mode typescript-mode) . ("typescript-language-server" "--stdio")))
-
-(add-hook 'js-mode-hook #'panda-setup-javascript-mode)
-(add-hook 'typescript-mode-hook #'panda-setup-javascript-mode)
-
-(use-package indium
-  :config
-  (panda-setup-repl 'indium-interaction-mode-map
-    :eval-line-or-expression 'indium-eval-last-node
-    :eval-region 'indium-eval-region
-    :eval-paragraph nil
-    :eval-function 'indium-eval-defun
-    :eval-buffer 'indium-eval-buffer))
-
-;;;; Latex
-(defun panda-setup-latex-mode ()
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
-
-(add-hook 'LaTeX-mode-hook #'panda-setup-latex-mode)
-
-(use-package tex
-  :ensure auctex
-  :init
-  (setq TeX-auto-save t
-        TeX-parse-self t))
-
 ;;;; Makefile
-(defun panda-setup-makefile-mode ()
-  (panda-trim-whitespace-on-save)
-  (yas-minor-mode 1))
-
-(add-hook 'makefile-mode-hook #'panda-setup-makefile-mode)
+(panda-setup-language makefile-mode
+  :features (snippets trim-whitespace))
 
 ;;;; Markdown
-(defun panda-setup-markdown-mode ()
-  (prettier-markdown-on-save-mode 1)
-  (yas-minor-mode 1))
+(panda-setup-language markdown-mode
+  :features (snippets))
 
-(use-package markdown-mode
-  :config
-  (add-hook 'markdown-mode-hook #'panda-setup-markdown-mode))
+(panda-formatter-def prettier-markdown
+  :mode markdown-mode
+  :program "prettier"
+  :required-args ("--stdin" "--parser" "markdown")
+  :config-file ".prettierrc")
 
 ;;;; Org
-(defun panda-setup-org-mode ()
-  (panda-generic-format-on-save))
-
 (use-package org
   :general
   (panda-leader-def "a" 'org-agenda)
   :init
   (setq org-agenda-files '("~/code/org/agenda.org")
         org-src-fontify-natively t
-        org-src-tab-acts-natively t)
-  :config
-  (add-hook 'org-mode-hook #'panda-setup-org-mode))
+        org-src-tab-acts-natively t))
 
 (use-package evil-org
   :hook (org-mode . evil-org-mode)
@@ -766,39 +768,32 @@ a variable for the formatter program's arguments."
   (evil-org-agenda-set-keys))
 
 ;;;; Python
-(defun panda-setup-python-mode ()
-  (black-on-save-mode 1)
-  (company-mode 1)
-  (eglot-ensure)
-  (yas-minor-mode 1)
-  (setq-local yas-indent-line 'fixed)
-  (setq-local yas-also-auto-indent-first-line nil))
+(panda-setup-language python-mode
+  :features (lsp snippets)
+  :defaults ((python-indent-offset 4))
+  :locals ((yas-indent-line 'fixed)
+           (yas-also-auto-indent-first-line nil)))
 
-(use-package python
-  :init
-  (setq python-indent-offset 4)
-  :config
-  (add-hook 'python-mode-hook #'panda-setup-python-mode)
-  (panda-setup-repl 'python-mode-map
-    :eval-line-or-expression nil
-    :eval-region 'python-shell-send-region
-    :eval-paragraph nil
-    :eval-function 'python-shell-send-defun
-    :eval-buffer 'python-shell-send-buffer))
+(panda-setup-repl 'python-mode-map
+  :eval-line-or-expression nil
+  :eval-region 'python-shell-send-region
+  :eval-paragraph nil
+  :eval-function 'python-shell-send-defun
+  :eval-buffer 'python-shell-send-buffer)
+
+(panda-formatter-def black
+  :mode python-mode
+  :program "black"
+  :required-args ("-" "--quiet")
+  :extra-args ("--line-length" "80")
+  :config-file "pyproject.toml")
 
 ;;;; R
-(defun panda-setup-r-mode ()
-  (company-mode 1)
-  (eglot-ensure)
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
-
 (use-package ess
   :init
   (setq ess-ask-for-ess-directory nil
         ess-use-flymake nil)
   :config
-  (add-hook 'ess-r-mode-hook #'panda-setup-r-mode)
   (panda-setup-repl 'ess-r-mode-map
     :eval-line-or-expression 'ess-eval-line
     :eval-region 'ess-eval-region
@@ -806,36 +801,27 @@ a variable for the formatter program's arguments."
     :eval-function 'ess-eval-function
     :eval-buffer 'ess-eval-buffer))
 
-;;;; Rust
-(defun panda-setup-rust-mode ()
-  (company-mode 1)
-  (eglot-ensure)
-  (rustfmt-on-save-mode 1)
-  (yas-minor-mode 1))
+(panda-setup-language ess-r-mode
+  :features (formatting lsp snippets))
 
-(use-package rust-mode
-  :config
-  (add-hook 'rust-mode-hook #'panda-setup-rust-mode))
+;;;; Rust
+(panda-setup-language rust-mode
+  :features (lsp snippets))
+
+(panda-formatter-def rustfmt
+  :mode rust-mode
+  :program "rustfmt")
 
 (use-package cargo
-  :init
-  (add-hook 'rust-mode-hook #'cargo-minor-mode))
+  :hook (rust-mode . cargo-minor-mode))
 
 ;;;; Shell Script
-(defun panda-setup-sh-mode ()
-  (panda-generic-format-on-save)
-  (yas-minor-mode 1))
-
-(add-hook 'sh-mode-hook #'panda-setup-sh-mode)
+(panda-setup-language sh-mode
+  :features (formatting snippets))
 
 ;;;; YAML
-(defun panda-setup-yaml-mode ()
-  (panda-trim-whitespace-on-save)
-  (yas-minor-mode 1))
-
-(use-package yaml-mode
-  :config
-  (add-hook 'yaml-mode-hook #'panda-setup-yaml-mode))
+(panda-setup-language yaml-mode
+  :features (snippets trim-whitespace))
 
 ;;; End Init
 (provide 'init)
