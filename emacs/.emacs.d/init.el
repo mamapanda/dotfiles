@@ -366,7 +366,9 @@
     "C-n"      'company-select-next
     "C-b"      'company-previous-page
     "C-f"      'company-next-page
-    "<return>" 'company-complete-selection)
+    "<return>" 'company-complete-selection
+    "C-g"      'company-abort
+    "<escape>" 'company-abort)
   :init
   (setq company-dabbrev-code-modes nil
         company-idle-delay 0.1
@@ -376,16 +378,11 @@
   :config
   (delete 'company-dabbrev company-backends))
 
-(use-package flymake
+(use-package flycheck
   :general
-  (general-nmap
-    "\\" 'flymake-show-diagnostics-buffer)
   (panda-leader-def
-    "k" 'flymake-goto-prev-error
-    "j" 'flymake-goto-next-error))
-
-;;;; Debugging
-(use-package realgud)
+    "j" 'flycheck-next-error
+    "k" 'flycheck-previous-error))
 
 ;;;; Formatting
 (defun panda-generic-format-buffer ()
@@ -397,7 +394,26 @@
 (use-package reformatter)
 
 ;;;; Language Server
-(use-package eglot)
+(use-package lsp-mode
+  :init
+  (setq lsp-enable-indentation nil
+        lsp-enable-on-type-formatting nil
+        lsp-prefer-flymake nil))
+
+(use-package company-lsp)
+(use-package lsp-ui)
+
+(use-package dap-mode
+  :init
+  (setq dap-utils-extension-path (panda-var-file "dap")
+        dap--breakpoints-file (panda-var-file "dap/breakpoints"))
+  :config
+  (require 'dap-firefox)
+  (require 'dap-gdb-lldb)
+  (require 'dap-go)
+  (require 'dap-python)
+  (dap-mode 1)
+  (dap-ui-mode 1))
 
 ;;;; Lisp
 (use-package lispyville
@@ -451,9 +467,7 @@
                                                  #'panda-generic-format-buffer
                                                  nil
                                                  t))
-                                  (lsp . (progn
-                                           (company-mode 1)
-                                           (eglot-ensure)))
+                                  (lsp . (lsp))
                                   (snippets . (yas-minor-mode 1))
                                   (trim-whitespace . (add-hook
                                                       'before-save-hook
@@ -509,7 +523,10 @@ EXTRA-CODE is an extra statement to run at the end of the setup function."
                      `(use-package ,mode)))
                  mode-list)
        ,(when lsp-server
-          `(add-to-list 'eglot-server-programs '(,mode-list . ,lsp-server)))
+          `(lsp-register-client
+            (make-lsp-client :new-connection (lsp-stdio-connection ',lsp-server)
+                             :major-modes ',mode-list
+                             :server-id ',(intern (car lsp-server)))))
        ,@(mapcar (lambda (default)
                    (push 'setq-default default))
                  defaults)
@@ -618,6 +635,8 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :mode (c-mode c++-mode)
   :program "clang-format")
 
+(use-package ccls)
+
 ;;;; CMake
 (panda-setup-language cmake-mode
   :features (formatting snippets))
@@ -654,6 +673,9 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode)))
 
+(use-package emmet-mode
+  :hook ((web-mode css-mode) . emmet-mode))
+
 (panda-setup-language web-mode
   :defaults ((web-mode-markup-indent-offset 2)
              (web-mode-style-padding 4)
@@ -673,13 +695,9 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :extra-args ("--tab-width" "4")
   :config-file ".prettierrc")
 
-(use-package emmet-mode
-  :hook ((web-mode css-mode) . emmet-mode))
-
 ;;;; JavaScript / TypeScript
 (panda-setup-language (js-mode typescript-mode)
-  :features (lsp snippets)
-  :lsp-server ("typescript-language-server" "--stdio"))
+  :features (lsp snippets))
 
 (panda-formatter-def prettier-js
   :mode (js-mode typescript-mode)
@@ -687,15 +705,6 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :required-args ("--stdin" "--parser" "typescript")
   :extra-args ("--tab-width" "4")
   :config-file ".prettierrc")
-
-(use-package indium
-  :config
-  (panda-setup-repl 'indium-interaction-mode-map
-    :eval-line-or-expression 'indium-eval-last-node
-    :eval-region 'indium-eval-region
-    :eval-paragraph nil
-    :eval-function 'indium-eval-defun
-    :eval-buffer 'indium-eval-buffer))
 
 ;;;; Latex
 (use-package tex
@@ -792,17 +801,18 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (use-package ess
   :init
   (setq ess-ask-for-ess-directory nil
-        ess-use-flymake nil)
-  :config
-  (panda-setup-repl 'ess-r-mode-map
-    :eval-line-or-expression 'ess-eval-line
-    :eval-region 'ess-eval-region
-    :eval-paragraph 'ess-eval-paragraph
-    :eval-function 'ess-eval-function
-    :eval-buffer 'ess-eval-buffer))
+        ess-use-flymake nil))
 
 (panda-setup-language ess-r-mode
-  :features (formatting lsp snippets))
+  :features (formatting lsp snippets)
+  :lsp-server ("R" "--slave" "-e" "languageserver::run()"))
+
+(panda-setup-repl 'ess-r-mode-map
+  :eval-line-or-expression 'ess-eval-line
+  :eval-region 'ess-eval-region
+  :eval-paragraph 'ess-eval-paragraph
+  :eval-function 'ess-eval-function
+  :eval-buffer 'ess-eval-buffer)
 
 ;;;; Rust
 (panda-setup-language rust-mode
