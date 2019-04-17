@@ -357,10 +357,10 @@ bindsym $mod+m bar mode toggle
 
 # Theme colors
 # class                   border           backgr.          text             indic.           child_border
-  client.focused          $term_color2     $term_color0     $term_color2     $term_color2     $term_color2
+  client.focused          $term_color0     $term_color0     $term_color2     $term_color2     $term_color0
   client.focused_inactive $term_color0     $term_color0     $term_color4     $term_color0     $term_color0
   client.unfocused        $term_color0     $term_color0     $term_color4     $term_color0     $term_color0
-  client.urgent           $term_color1     $term_foreground $term_color1     $term_color1     $term_color1
+  client.urgent           $term_foreground $term_foreground $term_color1     $term_color1     $term_foreground
   client.placeholder      $term_background $term_background $term_foreground $term_background $term_background
   client.background       $term_background
 
