@@ -1,0 +1,11 @@
+rofi.modi:                           window,run,combi,drun
+rofi.font:                           Droid Sans 12
+rofi.show-icons:                     true
+rofi.terminal:                       kitty
+rofi.hide-scrollbar:                 true
+rofi.disable-history:                false
+
+!                                    bg       border   separator
+rofi.color-window:                   #1B2B34, #99C794, #99C794
+!                                    bg       fg       alt-bg   hl-bg    hl-fg
+rofi.color-normal:                   #1B2B34, #D8DEE9, #1B2B34, #99C794, #1B2B34

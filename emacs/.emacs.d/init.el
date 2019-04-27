@@ -735,6 +735,16 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :extra-args ("--tab-width" "4")
   :config-file ".prettierrc")
 
+;;;; JSON
+(use-package json-mode
+  :config
+  (panda-formatter-def prettier-json
+    :mode json-mode
+    :program "prettier"
+    :required-args ("--stdin" "--parser" "json")
+    :extra-args ("--tab-width" "4")
+    :config-file ".prettierrc"))
+
 ;;;; Latex
 (use-package tex
   :ensure auctex
