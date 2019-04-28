@@ -32,8 +32,9 @@ bindsym $mod+Return exec kitty
 # kill focused window
 bindsym $mod+Shift+q kill
 
-# start program launcher
+# start rofi
 bindsym $mod+d exec --no-startup-id rofi -show drun
+bindsym $mod+c exec --no-startup-id rofi -show window
 
 # launch categorized menu
 bindsym $mod+z exec --no-startup-id morc_menu
@@ -57,7 +58,8 @@ bindsym $mod+Ctrl+m exec terminal -e 'alsamixer'
 # Start Applications
 bindsym $mod+Ctrl+b exec terminal -e 'bmenu'
 bindsym $mod+comma exec firefox
-bindsym $mod+period exec emacs
+bindsym $mod+Shift+period exec emacs
+bindsym $mod+period exec emacsclient -a "" -c
 bindsym $mod+slash exec thunar
 # bindsym $mod+F3 exec ranger
 bindsym $mod+F5 exec terminal -e 'mocp'
@@ -348,7 +350,7 @@ bar {
         active_workspace   $term_background $term_background $term_foreground
         inactive_workspace $term_background $term_background $term_foreground
         binding_mode       $term_color2     $term_background $term_foreground
-        urgent_workspace   $term_foreground $term_foreground $term_color1
+        urgent_workspace   $term_color1     $term_background $term_foreground
     }
 }
 

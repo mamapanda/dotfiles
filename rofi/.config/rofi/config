@@ -8,4 +8,6 @@ rofi.disable-history:                false
 !                                    bg       border   separator
 rofi.color-window:                   #1B2B34, #99C794, #99C794
 !                                    bg       fg       alt-bg   hl-bg    hl-fg
+rofi.color-active:                   #1B2B34, #FAC863, #1B2B34, #FAC863, #1B2B34
 rofi.color-normal:                   #1B2B34, #D8DEE9, #1B2B34, #99C794, #1B2B34
+rofi.color-urgent:                   #1B2B34, #EC5F67, #1B2B34, #EC5F67, #1B2B34
