@@ -1,0 +1,50 @@
+#+TITLE: Emacs Notes
+#+AUTHOR: Daniel Phan
+* ~use-package~ Keyword Order
+~use-package~'s keywords should be specified in the following
+order. Some will come from other packages.
+| Type              | Keyword        |
+|-------------------+----------------|
+| Enable            | ~:disabled~    |
+|                   | ~:if~          |
+|                   | ~:when~        |
+| Install           | ~:ensure~      |
+|                   | ~:quelpa~      |
+| Load Order        | ~:defer~       |
+|                   | ~:demand~      |
+|                   | ~:after~       |
+| Association       | ~:mode~        |
+|                   | ~:interpreter~ |
+| Explicit Autoload | ~:commands~    |
+| Hook              | ~:hook~        |
+|                   | ~:ghook~       |
+|                   | ~:gfhook~      |
+| Keybinding        | ~:bind~        |
+|                   | ~:general~     |
+| Configuration     | ~:init~        |
+|                   | ~:config~      |
+
+* Mode-specific Mapping Conventions
+Unmentioned keys are free to be bound to anything.
+
+#+CAPTION: Mode-Specific Prefix: Single Keys
+| Key | Action         |
+|-----+----------------|
+| ~\~ | restart server |
+
+#+CAPTION: Mode-Specific Prefix: Prefix Keys
+| Prefix | Description | Key | Action                      |
+|--------+-------------+-----+-----------------------------|
+| ~d~    | debug       | ~d~ | start debugger              |
+| ~e~    | error       | ~l~ | list errors                 |
+|        |             | ~n~ | next error                  |
+|        |             | ~p~ | previous error              |
+| ~f~    | find        | ~r~ | find references             |
+| ~r~    | refactor    | ~s~ | rename symbol               |
+| ~x~    | repl        | ~b~ | evaluate buffer             |
+|        |             | ~d~ | evaluate function           |
+|        |             | ~e~ | evaluate expression or line |
+|        |             | ~f~ | evaluate file               |
+|        |             | ~p~ | evaluate paragraph          |
+|        |             | ~r~ | evaluate region             |
+|        |             | ~x~ | start repl                  |

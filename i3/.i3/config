@@ -394,8 +394,7 @@ bindsym $mod+Return exec kitty
 bindsym $mod+comma exec firefox
 
 # editor
-bindsym $mod+Shift+period exec emacs
-bindsym $mod+period exec emacsclient -a "" -c
+bindsym $mod+period exec emacs
 
 # file manager
 bindsym $mod+slash exec thunar
