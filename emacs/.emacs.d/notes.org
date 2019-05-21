@@ -10,9 +10,9 @@ order. Some will come from other packages.
 |                   | ~:when~        |
 | Install           | ~:ensure~      |
 |                   | ~:quelpa~      |
-| Load Order        | ~:defer~       |
+| Load Order        | ~:after~       |
+|                   | ~:defer~       |
 |                   | ~:demand~      |
-|                   | ~:after~       |
 | Association       | ~:mode~        |
 |                   | ~:interpreter~ |
 | Explicit Autoload | ~:commands~    |
@@ -24,27 +24,24 @@ order. Some will come from other packages.
 | Configuration     | ~:init~        |
 |                   | ~:config~      |
 
-* Mode-specific Mapping Conventions
-Unmentioned keys are free to be bound to anything.
+* Code-Related Mapping Conventions
+The keys may be either single keys or prefixes, all bound behind a
+common prefix key (~<backspace>~ as of writing). Unmentioned keys are
+free to be bound to anything. Also, it's okay to ignore a mapping
+convention when it doesn't make sense (e.g. ~c~ as compile in
+~dired-mode~).
 
-#+CAPTION: Mode-Specific Prefix: Single Keys
-| Key | Action         |
-|-----+----------------|
-| ~\~ | restart server |
-
-#+CAPTION: Mode-Specific Prefix: Prefix Keys
-| Prefix | Description | Key | Action                      |
-|--------+-------------+-----+-----------------------------|
-| ~d~    | debug       | ~d~ | start debugger              |
-| ~e~    | error       | ~l~ | list errors                 |
-|        |             | ~n~ | next error                  |
-|        |             | ~p~ | previous error              |
-| ~f~    | find        | ~r~ | find references             |
-| ~r~    | refactor    | ~s~ | rename symbol               |
-| ~x~    | repl        | ~b~ | evaluate buffer             |
-|        |             | ~d~ | evaluate function           |
-|        |             | ~e~ | evaluate expression or line |
-|        |             | ~f~ | evaluate file               |
-|        |             | ~p~ | evaluate paragraph          |
-|        |             | ~r~ | evaluate region             |
-|        |             | ~x~ | start repl                  |
+| Key | Description     |
+|-----+-----------------|
+| ~c~ | compile         |
+| ~d~ | debug           |
+| ~e~ | list errors     |
+| ~i~ | imenu           |
+| ~j~ | next error      |
+| ~k~ | previous error  |
+| ~r~ | rename          |
+| ~R~ | refactor        |
+| ~t~ | test            |
+| ~x~ | find references |
+| ~,~ | repl            |
+| ~\~ | restart server  |

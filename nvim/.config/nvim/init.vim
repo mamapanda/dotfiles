@@ -57,6 +57,7 @@ set clipboard+=unnamedplus
 set termguicolors
 
 inoremap fd    <Esc>
+nnoremap U     <C-r>
 nnoremap Y     y$
 nnoremap Q     :w<CR>
 tnoremap <C-w> <C-\><C-n><C-w>

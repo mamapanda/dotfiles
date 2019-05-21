@@ -47,116 +47,82 @@ the original values of the variables in `after-init-hook'."
 (setq use-package-always-ensure t)
 
 (use-package quelpa
-  :commands quelpa
-  :init
+  :defer t
+  :config
   (setq quelpa-update-melpa-p nil))
 
 (use-package quelpa-use-package
-  :init
-  (setq quelpa-use-package-inhibit-loading-quelpa t)
   :config
+  (setq quelpa-use-package-inhibit-loading-quelpa t)
   (quelpa-use-package-activate-advice))
 
 ;;;; Libraries
-(use-package hydra)
+(use-package general
+  :config
+  (defalias 'gsetq 'general-setq)
+  (defalias 'gsetq-default 'general-setq-default)
+  (defalias 'gsetq-local 'general-setq-local))
+
+(use-package hydra :defer t)
 (use-package no-littering)
 
 ;;;; Custom File
-(setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+(gsetq custom-file (no-littering-expand-etc-file-name "custom.el"))
 (when (file-exists-p custom-file)
   (load custom-file))
+
+;;;; Private Data
+(defvar panda-private-file (no-littering-expand-etc-file-name "private.el")
+  "File for private/sensitive configuration values.
+It should contain an alist literal for `panda-get-private-data'.")
+
+(defun panda-get-private-data (key)
+  "Get the private configuration value corresponding to KEY."
+  (let ((data (with-temp-buffer
+                (insert-file-contents panda-private-file)
+                (read (buffer-string)))))
+    (alist-get key data)))
 
 ;;; Evil
 (use-package evil
   :init
-  (setq evil-move-beyond-eol    t
-        evil-symbol-word-search t
-        evil-toggle-key         "C-s-+"
-        evil-want-C-d-scroll    t
-        evil-want-C-u-scroll    t
-        evil-want-keybinding    nil
-        evil-want-Y-yank-to-eol t)
+  (gsetq evil-want-keybinding nil)
   :config
+  (gsetq evil-move-beyond-eol    t
+         evil-toggle-key         "C-s-+"
+         evil-want-C-d-scroll    t
+         evil-want-C-u-scroll    t
+         evil-want-Y-yank-to-eol t)
+  (gsetq-default evil-symbol-word-search t)
+  (progn
+    (general-evil-setup)
+    ;; for bindings that will stay constant
+    (general-create-definer panda-space
+      :states '(normal operator motion visual)
+      :keymaps 'override
+      :prefix "SPC"
+      :prefix-map 'panda-space-map)
+    ;; for bindings that may change depending on active minor modes
+    (general-create-definer panda-backspace
+      :states '(normal operator motion visual)
+      :prefix "<backspace>"))
   (add-hook 'prog-mode-hook #'hs-minor-mode)
   (evil-mode 1))
 
-(use-package general
-  :config
-  (general-override-mode)
-  (general-evil-setup)
-  (general-create-definer panda-space
-    :states '(normal operator motion visual)
-    :keymaps 'override
-    :prefix "SPC"
-    :prefix-map 'panda-space-map)
-  (general-create-definer panda-space-sc
-    :states '(normal operator motion visual)
-    :keymaps 'override
-    :prefix "SPC ;"
-    :prefix-map 'panda-space-sc-map))
-
 (use-package evil-collection
   :config
+  (gsetq evil-collection-key-blacklist '("SPC" "<backspace>"))
   (delete 'company evil-collection-mode-list)
   (evil-collection-init))
 
 (use-package evil-escape
-  :init
-  (setq evil-escape-key-sequence "fd"
-        evil-escape-delay 0.2)
   :config
+  (gsetq evil-escape-key-sequence "fd"
+         evil-escape-delay 0.2
+         evil-escape-inhibit-functions (list (lambda () (not (evil-insert-state-p)))))
   (evil-escape-mode 1))
 
 ;;; Basic Configuration
-;;;; Appearance
-(setq default-frame-alist '((fullscreen . maximized)
-                            (font . "Consolas-11")
-                            (menu-bar-lines . 0)
-                            (tool-bar-lines . 0)
-                            (vertical-scroll-bars . nil))
-      inhibit-startup-screen t
-      ring-bell-function 'ignore
-      visible-bell nil)
-
-(cl-defmacro panda-run-after-frame (&body body)
-  "If a daemon is running, then add BODY to `after-make-frame-functions'
-with a lambda wrapper. Else, simply evaluate BODY."
-  (declare (indent defun))
-  (if (daemonp)
-      `(add-to-list 'after-make-frame-functions
-                    (lambda (frame)
-                      (with-selected-frame frame
-                        ,@body)))
-    `(progn ,@body)))
-
-;;;; Behavior
-(setq auto-save-default nil
-      blink-cursor-blinks 0
-      c-default-style '((java-mode . "java")
-                        (awk-mode . "awk")
-                        (other . "stroustrup"))
-      delete-by-moving-to-trash t
-      disabled-command-function nil
-      inhibit-compacting-font-caches t
-      make-backup-files nil
-      recentf-max-saved-items 100
-      require-final-newline t
-      save-abbrevs nil
-      vc-follow-symlinks t)
-
-(setq-default buffer-file-coding-system 'utf-8
-              c-basic-offset 4
-              indent-tabs-mode nil
-              tab-width 4
-              truncate-lines t)
-
-(blink-cursor-mode 1)
-(delete-selection-mode 1)
-(electric-pair-mode 1)
-(global-auto-revert-mode t)
-(recentf-mode 1)
-(show-paren-mode 1)
-
 ;;;; Definitions
 ;;;;; Defuns
 (defun panda-find-init-file (&optional arg)
@@ -210,6 +176,20 @@ with a lambda wrapper. Else, simply evaluate BODY."
         (goto-char pos))
     (message "Buffer is not visiting a file")))
 
+(defun panda-bind-visual-line-motions (keymap)
+  "Bind visual line equivalents of evil motions in KEYMAP."
+  (general-mmap :keymaps keymap
+    "j"  'evil-next-visual-line
+    "k"  'evil-previous-visual-line
+    "0"  'evil-beginning-of-visual-line
+    "^"  'evil-first-non-blank-of-visual-line
+    "$"  'evil-end-of-visual-line
+    "gj" 'evil-next-line
+    "gk" 'evil-previous-line
+    "g0" 'evil-beginning-of-line
+    "g^" 'evil-first-non-blank
+    "g$" 'evil-end-of-line))
+
 ;;;;; Macros
 (defmacro panda-add-hook-once (hook fn &optional append local)
   "Same as `add-hook', but FN is immediately removed from HOOK after
@@ -220,6 +200,32 @@ it has been run once."
          (funcall ,fn)
          (remove-hook ,hook (quote ,hook-fn-name) ,local))
        (add-hook ,hook (quote ,hook-fn-name) ,append ,local))))
+
+(cl-defmacro panda-disable-repeat (command)
+  "Disable repeating COMMAND."
+  (cl-assert (commandp command))
+  (let ((advice-name (intern (format "panda--no-repeat-%s" command))))
+    `(progn
+       (defun ,advice-name (old-fn &rest args)
+         ,(format "Advice to disable repeating %s." command)
+         (when (or (not (eq last-command (function ,command)))
+                   (not (called-interactively-p))
+                   (evil-operator-state-p))
+           (apply old-fn args))
+         ;; hopefully this doesn't blow up
+         (setq this-command (function ,command)))
+       (advice-add (quote ,command) :around (function ,advice-name)))))
+
+(cl-defmacro panda-with-gui (&body body)
+  "If a daemon is running, then add BODY to `after-make-frame-functions'
+with a lambda wrapper. Else, simply evaluate BODY."
+  (declare (indent defun))
+  (if (daemonp)
+      `(add-to-list 'after-make-frame-functions
+                    (lambda (frame)
+                      (with-selected-frame frame
+                        ,@body)))
+    `(progn ,@body)))
 
 ;;;;; Minor Modes
 (define-minor-mode panda-format-on-save-mode
@@ -309,8 +315,8 @@ for MODE. MODE may be a symbol or a list of modes."
          (hook-names (mapcar (lambda (mode) (intern (format "%s-hook" mode))) mode-list)))
     `(general-add-hook (quote ,hook-names)
                        (lambda ()
-                         (setq-local panda-inner-defun-begin-regexp ,begin)
-                         (setq-local panda-inner-defun-end-regexp ,end)))))
+                         (gsetq-local panda-inner-defun-begin-regexp ,begin)
+                         (gsetq-local panda-inner-defun-end-regexp ,end)))))
 
 (panda-set-inner-defun-regexp (emacs-lisp-mode lisp-interaction-mode lisp-mode) "(" ")")
 (panda-set-inner-defun-regexp python-mode ":" "")
@@ -358,33 +364,74 @@ for MODE. MODE may be a symbol or a list of modes."
     (panda-forward-defun count)
     (panda-inner-defun)))
 
-;;;; Keybindings
-(defun panda-bind-swap-key (fn)
-  "Bind FN to backspace for temporary easy access."
-  (interactive "CCommand: ")
-  (general-nvmap "<backspace>" fn))
+;;;; Appearance
+(gsetq default-frame-alist '((fullscreen . maximized)
+                             (font . "Consolas-11")
+                             (menu-bar-lines . 0)
+                             (tool-bar-lines . 0)
+                             (vertical-scroll-bars . nil))
+       inhibit-startup-screen t
+       ring-bell-function 'ignore
+       visible-bell nil)
 
+;;;; Behavior
+(gsetq auto-save-default nil
+       blink-cursor-blinks 0
+       c-default-style '((java-mode . "java")
+                         (awk-mode . "awk")
+                         (other . "stroustrup"))
+       delete-by-moving-to-trash t
+       disabled-command-function nil
+       inhibit-compacting-font-caches t
+       make-backup-files nil
+       recentf-max-saved-items 100
+       require-final-newline t
+       save-abbrevs nil
+       tramp-default-method "ssh"
+       vc-follow-symlinks t)
+
+(gsetq-default bidi-display-reordering nil
+               buffer-file-coding-system 'utf-8
+               c-basic-offset 4
+               indent-tabs-mode nil
+               tab-width 4
+               truncate-lines t)
+
+(blink-cursor-mode 1)
+(delete-selection-mode 1)
+(electric-pair-mode 1)
+(global-auto-revert-mode t)
+(recentf-mode 1)
+(show-paren-mode 1)
+
+;;;; Keybindings
 (panda-space
-  "SPC"         'execute-extended-command
-  "b"           'switch-to-buffer
-  "B"           'kill-buffer
-  "d"           'dired
-  "f"           'find-file
-  "t"           'bookmark-jump
-  "T"           'bookmark-set
-  "k"           'previous-error
-  "j"           'next-error
-  "4"           (general-key "C-x 4")
-  "%"           (general-key "C-x C-q")
-  "<backspace>" 'panda-bind-swap-key)
+  "SPC" 'execute-extended-command
+  "b"   'switch-to-buffer
+  "B"   'kill-buffer
+  "d"   'dired
+  "f"   'find-file
+  "h"   'help-command
+  "t"   'bookmark-jump
+  "T"   'bookmark-set
+  "4"   (general-key "C-x 4")
+  "%"   (general-key "C-x C-q"))
+
+(panda-backspace
+  "c" 'compile
+  "k" 'previous-error
+  "j" 'next-error
+  "x" 'xref-find-references)
 
 (general-nmap :keymaps 'override
   "Q" 'save-buffer)
 
 (general-nmap
-  "_" 'eval-expression
-  "[ SPC" 'panda-insert-space-before
-  "] SPC" 'panda-insert-space-after
+  "C-r"        nil
+  "U"          'redo
+  "_"          'eval-expression
+  "[ SPC"      'panda-insert-space-before
+  "] SPC"      'panda-insert-space-after
   "[ <return>" 'panda-insert-newline-before
   "] <return>" 'panda-insert-newline-after)
 
@@ -409,10 +456,9 @@ for MODE. MODE may be a symbol or a list of modes."
 ;;; Global Packages
 ;;;; Appearance
 (use-package base16-theme
-  :init
-  (setq base16-distinct-fringe-background nil)
   :config
-  (panda-run-after-frame
+  (gsetq base16-distinct-fringe-background nil)
+  (panda-with-gui
     (load-theme 'base16-oceanicnext t)))
 
 (use-package default-text-scale
@@ -429,27 +475,25 @@ for MODE. MODE may be a symbol or a list of modes."
   :demand t
   :general
   (panda-space "l" 'panda-toggle-line-numbers)
-  :init
-  (setq-default display-line-numbers-type 'visual)
   :config
+  (gsetq-default display-line-numbers-type 'relative)
   (defun panda-toggle-line-numbers ()
     "Toggle between relative and absolute line numbers in current buffer."
     (interactive)
-    (setq-local display-line-numbers-type (cl-case display-line-numbers-type
-                                            (visual t)
-                                            ((t) 'visual)
-                                            (otherwise 'visual)))
+    (gsetq-local display-line-numbers-type (cl-case display-line-numbers-type
+                                             (relative t)
+                                             ((t) 'relative)
+                                             (otherwise 'relative)))
     (display-line-numbers-mode 1))
-  (panda-run-after-frame
+  (panda-with-gui
     (global-display-line-numbers-mode 1))
   (column-number-mode 1))
 
 (use-package doom-modeline
-  :init
-  (setq doom-modeline-buffer-file-name-style 'relative-from-project
-        doom-modeline-icon nil)
   :config
-  (panda-run-after-frame
+  (gsetq doom-modeline-buffer-file-name-style 'relative-from-project
+         doom-modeline-icon nil)
+  (panda-with-gui
     (set-face-attribute 'doom-modeline-bar nil
                         :background (face-attribute 'mode-line :background))
     (set-face-attribute 'doom-modeline-inactive-bar nil
@@ -483,6 +527,7 @@ for MODE. MODE may be a symbol or a list of modes."
 
 (use-package evil-goggles
   :config
+  (gsetq evil-goggles-pulse nil)
   (defun panda-evil-goggles-add (command based-on-command)
     (catch 'break-loop
       (dolist (cmd-config evil-goggles--commands)
@@ -506,45 +551,58 @@ for MODE. MODE may be a symbol or a list of modes."
   :general
   (general-vmap "v" 'er/expand-region))
 
+(use-package operate-on-number
+  :general
+  (panda-space "n" 'operate-on-number-at-point))
+
 (use-package replace
   :ensure nil
   :general
   (panda-space "o" 'occur)
-  (general-nmap :keymaps 'occur-mode-map
-    "C-k"        'panda-occur-prev
-    "C-j"        'panda-occur-next
+  (general-nmap occur-mode-map
     "C-<return>" 'occur-mode-display-occurrence)
   :config
-  (progn
-    (defun panda-occur-prev (&optional count)
-      "Execute `occur-prev', then call `occur-mode-display-occurrence'."
-      (interactive "p")
-      (occur-prev count)
-      (occur-mode-display-occurrence))
-    (defun panda-occur-next (&optional count)
-      "Execute `occur-next', then call `occur-mode-display-occurrence'."
-      (interactive "p")
-      (occur-next count)
-      (occur-mode-display-occurrence)))
-  (progn
-    (require 'hl-line)
-    (defvar panda--occur-overlay (let ((ov (make-overlay 0 0)))
-                                   (overlay-put ov 'face 'hl-line)
-                                   (delete-overlay ov)
-                                   ov)
-      "The overlay for the current occur match line.")
-    (defun panda--set-occur-overlay ()
-      "Move `panda--occur-overlay' to the current line and set it to
+  (when nil
+    ;; I don't think I actually need all of this (prefix arg good enough).
+    (progn
+      (defun panda-occur-prev (&optional count)
+        "Execute `occur-prev', then call `occur-mode-display-occurrence'."
+        (interactive "p")
+        (occur-prev count)
+        (occur-mode-display-occurrence))
+      (defun panda-occur-next (&optional count)
+        "Execute `occur-next', then call `occur-mode-display-occurrence'."
+        (interactive "p")
+        (let ((prev-point (point)))
+          ;; signals an error when no more matches
+          (occur-next count)
+          ;; If point is the same, we're stuck at the end of the line
+          ;; with `evil-move-beyond-eol' being nil.
+          (evil-adjust-cursor)
+          (when (= (point) prev-point)
+            (let ((evil-move-beyond-eol t))
+              (forward-char)
+              (occur-next count))))
+        (occur-mode-display-occurrence)))
+    (progn
+      (require 'hl-line)
+      (defvar panda--occur-overlay (let ((ov (make-overlay 0 0)))
+                                     (overlay-put ov 'face 'hl-line)
+                                     (delete-overlay ov)
+                                     ov)
+        "The overlay for the current occur match line.")
+      (defun panda--set-occur-overlay ()
+        "Move `panda--occur-overlay' to the current line and set it to
 be deleted on `post-command-hook'."
-      (move-overlay panda--occur-overlay
-                    (line-beginning-position)
-                    (1+ (line-end-position))
-                    (current-buffer))
-      (panda-add-hook-once 'post-command-hook
-                           (lambda () (delete-overlay panda--occur-overlay))
-                           nil t))
-    (add-hook 'occur-mode-find-occurrence-hook #'panda--set-occur-overlay)
-    (add-hook 'occur-mode-find-occurrence-hook #'recenter)))
+        (move-overlay panda--occur-overlay
+                      (line-beginning-position)
+                      (1+ (line-end-position))
+                      (current-buffer))
+        (panda-add-hook-once 'post-command-hook
+                             (lambda () (delete-overlay panda--occur-overlay))
+                             nil t))
+      (add-hook 'occur-mode-find-occurrence-hook #'panda--set-occur-overlay)
+      (add-hook 'occur-mode-find-occurrence-hook #'recenter))))
 
 (use-package targets
   :quelpa (targets :fetcher github :repo "noctuid/targets.el")
@@ -555,18 +613,16 @@ be deleted on `post-command-hook'."
   :demand t
   :general
   (panda-space "u" 'undo-tree-visualize)
-  :init
-  (setq undo-tree-enable-undo-in-region nil)
   :config
+  (gsetq undo-tree-enable-undo-in-region nil)
   (global-undo-tree-mode))
 
 ;;;; Help
 (use-package which-key
-  :init
-  (setq which-key-popup-type 'side-window
-        which-key-side-window-location 'bottom
-        which-key-idle-delay 1.0)
   :config
+  (gsetq which-key-popup-type 'side-window
+         which-key-side-window-location 'bottom
+         which-key-idle-delay 1.0)
   (which-key-mode 1))
 
 ;;;; Navigation
@@ -575,35 +631,32 @@ be deleted on `post-command-hook'."
   (global-evil-matchit-mode 1))
 
 (use-package evil-snipe
-  :init
-  (setq evil-snipe-repeat-keys  nil
-        evil-snipe-smart-case   t
-        evil-snipe-scope        'visible
-        evil-snipe-repeat-scope 'visible)
   :config
+  (gsetq evil-snipe-repeat-keys  nil
+         evil-snipe-smart-case   t
+         evil-snipe-scope        'visible
+         evil-snipe-repeat-scope 'visible)
   (evil-snipe-mode 1)
   (evil-snipe-override-mode 1))
 
 (use-package evil-visualstar
-  :init
-  (setq evil-visualstar/persistent t)
   :config
+  (gsetq evil-visualstar/persistent t)
   (global-evil-visualstar-mode 1))
 
 (use-package imenu
   :general
-  (panda-space "i" 'imenu)
-  :init
-  (setq imenu-auto-rescan t))
+  (panda-backspace "i" 'imenu)
+  :config
+  (gsetq imenu-auto-rescan t))
 
 (use-package projectile
   :defer t
   :general
   (panda-space "p" '(:keymap projectile-command-map))
-  :init
-  (setq projectile-indexing-method 'alien
-        projectile-completion-system 'ivy)
   :config
+  (gsetq projectile-indexing-method 'alien
+         projectile-completion-system 'ivy)
   (projectile-mode))
 
 ;;;; UI Completion
@@ -616,17 +669,15 @@ be deleted on `post-command-hook'."
   (general-def :keymaps 'ivy-minibuffer-map
     "<return>"   'ivy-alt-done
     "C-<return>" 'ivy-immediate-done)
-  :init
-  (setq ivy-wrap t
-        ivy-re-builders-alist '((swiper . ivy--regex-plus)
-                                (t . ivy--regex-fuzzy))
-        confirm-nonexistent-file-or-buffer t
-        ivy-count-format "(%d/%d) ")
   :config
+  (gsetq ivy-wrap t
+         ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                                 (t . ivy--regex-fuzzy))
+         confirm-nonexistent-file-or-buffer t
+         ivy-count-format "(%d/%d) ")
   (ivy-mode 1))
 
-(use-package ivy-hydra
-  :commands hydra-ivy/body)
+(use-package ivy-hydra :defer t)
 
 (use-package ivy-rich
   :after ivy
@@ -658,23 +709,22 @@ be deleted on `post-command-hook'."
   (general-def :keymaps 'helm-map
     "<escape>" 'helm-keyboard-quit)
   (panda-space "m" 'helm-mini)
-  :init
-  (setq helm-echo-input-in-header-line        t
-        helm-ff-fuzzy-matching                nil
-        helm-find-files-ignore-thing-at-point t
-        helm-split-window-inside-p            t
-        helm-mini-default-sources             '(helm-source-buffers-list
-                                                helm-source-recentf))
   :config
+  (gsetq helm-echo-input-in-header-line        t
+         helm-ff-fuzzy-matching                nil
+         helm-find-files-ignore-thing-at-point t
+         helm-split-window-inside-p            t
+         helm-mini-default-sources             '(helm-source-buffers-list
+                                                 helm-source-recentf))
   (with-eval-after-load 'helm-ls-git
-    (setq helm-mini-default-sources '(helm-source-buffers-list
-                                      helm-source-ls-git
-                                      helm-source-recentf))))
+    (gsetq helm-mini-default-sources '(helm-source-buffers-list
+                                       helm-source-ls-git
+                                       helm-source-recentf))))
 
 (use-package helm-ls-git
   :after helm
   :config
-  (setq helm-source-ls-git (helm-make-source "Git Files" 'helm-ls-git-source)))
+  (gsetq helm-source-ls-git (helm-make-source "Git Files" 'helm-ls-git-source)))
 
 ;;;; Windows
 (use-package eyebrowse
@@ -705,9 +755,8 @@ be deleted on `post-command-hook'."
   (winner-mode 1))
 
 ;;; Tools
-;;;; Dired
-(use-package dired-filter
-  :commands dired-filter-mode)
+;;;; File Manager
+(use-package dired-filter :defer t)
 
 (use-package dired-open
   :general
@@ -717,44 +766,47 @@ be deleted on `post-command-hook'."
 (use-package dired-sidebar
   :general
   (panda-space "D" 'dired-sidebar-toggle-sidebar)
-  :init
-  (setq dired-sidebar-theme 'none))
+  :config
+  (gsetq dired-sidebar-theme 'none))
 
 (use-package dired-subtree
   :general
-  (general-nmap :keymaps 'dired-mode-map
-    "<tab>" 'dired-subtree-cycle))
-
-;;;; File Viewers
-(use-package nov
-  :mode ("\\.epub$" . nov-mode)
-  :gfhook '(visual-line-mode)
-  :init
-  (setq nov-text-width most-positive-fixnum))
-
-(use-package pdf-tools
-  :mode ("\\.pdf$" . pdf-view-mode)
-  :gfhook ('pdf-view-mode-hook 'panda-set-pdf-locals)
-  :init
-  (setq-default pdf-view-display-size 'fit-page)
+  (general-nmap dired-mode-map
+    "zo"    'panda-dired-subtree-insert
+    "zc"    'panda-dired-subtree-remove
+    "za"    'dired-subtree-toggle
+    "<tab>" 'dired-subtree-cycle)
   :config
-  (defun panda-set-pdf-locals ()
-    (display-line-numbers-mode -1)
-    (setq-local evil-default-cursor (list nil)))
-  (pdf-tools-install))
+  (defun panda-dired-subtree-insert ()
+    "Like `dired-subtree-insert', but doesn't move point."
+    (interactive)
+    (save-excursion
+      (dired-subtree-insert)))
+  (defun panda-dired-subtree-remove ()
+    "Like `dired-subtree-remove', but removes the current node's children."
+    (interactive)
+    (when (dired-subtree--is-expanded-p)
+      (dired-next-line 1)
+      (dired-subtree-remove))))
+
+(use-package dired-ranger
+  :general
+  (panda-backspace dired-mode-map
+    "c" 'dired-ranger-copy
+    "m" 'dired-ranger-move
+    "p" 'dired-ranger-paste))
 
 ;;;; Git
 (use-package magit
   :general
   (panda-space "g" 'magit-status)
-  :init
-  (setq magit-auto-revert-mode nil))
+  :config
+  (gsetq magit-auto-revert-mode nil))
 
 (use-package magit-todos
   :after magit
-  :init
-  (setq magit-todos-rg-extra-args '("--hidden" "--glob" "!.git/"))
   :config
+  (gsetq magit-todos-rg-extra-args '("--hidden" "--glob" "!.git/"))
   (magit-todos-mode))
 
 (use-package evil-magit :after magit)
@@ -763,11 +815,45 @@ be deleted on `post-command-hook'."
   :general
   (panda-space "G" 'git-timemachine))
 
-;;;; Package Managers
-(use-package helm-system-packages
-  :commands helm-system-packages)
+;;;; Music
+(use-package emms
+  :ensure nil ; yay -S emms-git
+  :general
+  (panda-space "m" 'emms)
+  :config
+  (require 'emms-setup)
+  (require 'emms-info-libtag)
+  (gsetq emms-info-functions                      '(emms-info-libtag)
+         emms-player-list                         '(emms-player-vlc)
+         emms-repeat-playlist                     t
+         emms-source-file-default-directory       "~/Music"
+         emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find)
+  (emms-all))
 
-;;;; Shells
+;;;; Readers
+(use-package elfeed
+  :config
+  (gsetq elfeed-feeds (panda-get-private-data 'elfeed-feeds)
+         elfeed-search-title-max-width 100
+         elfeed-search-filter "@1-month-ago +unread"))
+
+(use-package nov
+  :mode ("\\.epub$" . nov-mode)
+  :gfhook '(visual-line-mode)
+  :config
+  (gsetq nov-text-width most-positive-fixnum))
+
+(use-package pdf-tools
+  :mode ("\\.pdf$" . pdf-view-mode)
+  :gfhook ('pdf-view-mode-hook 'panda-set-pdf-locals)
+  :config
+  (gsetq-default pdf-view-display-size 'fit-page)
+  (defun panda-set-pdf-locals ()
+    (display-line-numbers-mode -1)
+    (gsetq-local evil-default-cursor (list nil)))
+  (pdf-tools-install))
+
+;;;; Shell
 (use-package eshell
   :gfhook ('eshell-first-time-mode-hook 'panda--set-eshell-keys)
   :general
@@ -785,14 +871,18 @@ be deleted on `post-command-hook'."
   (panda-space
     "<return>"   'shell-pop
     "<S-return>" 'eshell)
-  :init
-  (setq shell-pop-full-span  t
-        shell-pop-shell-type '("eshell" "*eshell*" (lambda nil (eshell)))))
+  :config
+  (gsetq shell-pop-full-span  t
+         shell-pop-shell-type '("eshell" "*eshell*" (lambda nil (eshell)))))
 
-;;; Per-Language Configuration
+;;;; System
+(use-package disk-usage :defer t)
+(use-package helm-system-packages :defer t)
+
+;;; Mode-Specific Configuration
 ;;;; Completion / Linting
 (use-package company
-  :commands company-mode
+  :defer t
   :general
   (general-def :keymaps 'company-active-map
     "C-p"      'company-select-previous
@@ -803,124 +893,29 @@ be deleted on `post-command-hook'."
     "C-g"      'company-abort
     "<escape>" 'company-abort)
   :init
-  (setq company-dabbrev-code-modes nil
-        company-minimum-prefix-length 2
-        company-tooltip-align-annotations t)
   (defvar company-active-map (make-sparse-keymap))
   :config
+  (gsetq company-dabbrev-code-modes nil
+         company-minimum-prefix-length 2
+         company-tooltip-align-annotations t)
   (delete 'company-dabbrev company-backends))
 
 (use-package flycheck
-  :commands flycheck-mode
+  :defer t
   :general
-  (panda-space-sc :keymaps 'flycheck-mode-map
-    "el" 'flycheck-list-errors
-    "en" 'flycheck-next-error
-    "ep" 'flycheck-previous-error
-    "ev" 'flycheck-verify-setup)
-  :init
-  (setq flycheck-display-errors-delay 0.5))
+  (panda-backspace flycheck-mode-map
+    "e" 'flycheck-list-errors
+    "j" 'flycheck-next-error
+    "k" 'flycheck-previous-error)
+  :config
+  (gsetq flycheck-display-errors-delay 0.5))
 
 (use-package flycheck-posframe
   :hook (flycheck-mode . flycheck-posframe-mode)
   :config
   (flycheck-posframe-configure-pretty-defaults))
 
-;;;; Language Server
-(use-package lsp-mode
-  :commands lsp lsp-register-client
-  :general
-  (panda-space-sc :keymaps 'lsp-mode-map
-    "fr" 'lsp-find-references
-    "rs" 'lsp-rename
-    "\\" 'lsp-restart-workspace)
-  :init
-  (setq lsp-enable-indentation nil
-        lsp-enable-on-type-formatting nil
-        lsp-prefer-flymake nil))
-
-(use-package company-lsp :after company lsp)
-
-(use-package lsp-ui
-  :after lsp
-  :general
-  (panda-space-sc :keymaps 'lsp-ui-mode-map
-    "rc" 'lsp-ui-sideline-apply-code-actions)
-  :init
-  (setq lsp-ui-sideline-show-diagnostics nil))
-
-(use-package dap-mode
-  :general
-  (panda-space-sc :keymaps 'lsp-mode-map
-    "dd" 'dap-debug
-    "dh" 'dap-hydra)
-  :init
-  (setq dap-utils-extension-path (no-littering-expand-var-file-name "dap"))
-  :config
-  (require 'dap-chrome)
-  (require 'dap-firefox)
-  (require 'dap-gdb-lldb)
-  (require 'dap-go)
-  (require 'dap-python)
-  ;; workaround because `dap--breakpoints-file' is declared with `defconst'
-  (setq dap--breakpoints-file (no-littering-expand-var-file-name "dap/breakpoints"))
-  (dap-mode 1)
-  (dap-ui-mode 1))
-
-;;;; Lisp
-(use-package lispyville
-  :commands lispyville-mode
-  :config
-  (lispyville-set-key-theme '(commentary operators slurp/barf-cp))
-  (with-eval-after-load 'evil-goggles
-    (dolist (operators '((evil-yank . lispyville-yank)
-                         (evil-delete . lispyville-delete)
-                         (evil-change . lispyville-change)
-                         (evil-yank-line . lispyville-yank-line)
-                         (evil-delete-line . lispyville-delete-line)
-                         (evil-change-line . lispyville-change-line)
-                         (evil-delete-char . lispyville-delete-char-or-splice)
-                         (evil-delete-backward-char . lispyville-delete-char-or-splice-backwards)
-                         (evil-substitute . lispyville-substitute)
-                         (evil-change-whole-line . lispyville-change-whole-line)
-                         (evil-join . lispyville-join)))
-      (cl-destructuring-bind (evil-operator . lispyville-operator) operators
-        (panda-evil-goggles-add lispyville-operator evil-operator)))))
-
-;;;; Organization
-(use-package outshine
-  :commands outshine-mode
-  :init
-  (setq outshine-org-style-global-cycling-at-bob-p t)
-  :config
-  (general-nmap :keymaps 'outshine-mode-map
-    "<tab>"     (lookup-key outshine-mode-map (kbd "TAB"))
-    "<backtab>" 'outshine-cycle-buffer))
-
-;;;; Snippets
-(use-package yasnippet
-  :init
-  (setq yas-triggers-in-field nil
-        yas-indent-line 'auto
-        yas-also-auto-indent-first-line t)
-  :config
-  (yas-reload-all)
-  (with-eval-after-load 'company
-    (defun panda--company-yas-tab-advice (old-func &rest args)
-      (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
-        (call-interactively old-func args)))
-    (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
-      (advice-add company-tab-func :around #'panda--company-yas-tab-advice))))
-
-(use-package yasnippet-snippets :after yasnippet)
-
-(use-package ivy-yasnippet
-  :after ivy yasnippet
-  :general
-  (panda-space "y" 'ivy-yasnippet))
-
-;;;; Macros
-;;;;; Code Formatters
+;;;; Formatting
 (use-package reformatter)
 
 (cl-defmacro panda-formatter-def (name
@@ -953,23 +948,121 @@ program's arguments are locally set to REQUIRED-ARGS only."
          (,format-on-save-name 1)
          ,(when config-file
             `(when (locate-dominating-file default-directory ,config-file)
-               (setq-local ,args-name (quote ,required-args)))))
+               (gsetq-local ,args-name (quote ,required-args)))))
        ,@(mapcar (lambda (mode)
                    (let ((mode-hook (intern (format "%s-hook" mode))))
                      `(add-hook ',mode-hook #',setup-fn-name)))
                  mode-list))))
+
+;;;; Language Server
+(use-package lsp-mode
+  :commands lsp-register-client
+  :general
+  (panda-backspace lsp-mode-map
+    "r"  'lsp-rename
+    "x"  'lsp-find-references
+    "\\" 'lsp-restart-workspace)
+  :config
+  (gsetq lsp-enable-indentation nil
+         lsp-enable-on-type-formatting nil
+         lsp-prefer-flymake nil))
+
+(use-package company-lsp :after company lsp)
+
+(use-package lsp-ui
+  :after lsp
+  :general
+  (panda-backspace lsp-ui-mode-map
+    "i" 'lsp-ui-imenu
+    "R" 'lsp-ui-sideline-apply-code-actions)
+  :config
+  (gsetq lsp-ui-sideline-show-diagnostics nil))
+
+(use-package dap-mode
+  :general
+  (panda-backspace lsp-mode-map
+    "d" 'dap-debug
+    "D" 'dap-hydra)
+  :config
+  (require 'dap-chrome)
+  (require 'dap-firefox)
+  (require 'dap-gdb-lldb)
+  (require 'dap-go)
+  (require 'dap-python)
+  ;; `dap--breakpoints-file' is declared with `defconst'
+  (gsetq dap-utils-extension-path (no-littering-expand-var-file-name "dap")
+         dap--breakpoints-file) (no-littering-expand-var-file-name "dap/breakpoints")
+  (dap-mode 1)
+  (dap-ui-mode 1))
+
+;;;; Lisp
+(use-package lispyville
+  :defer t
+  :config
+  (lispyville-set-key-theme '(commentary operators slurp/barf-cp))
+  (with-eval-after-load 'evil-goggles
+    (dolist (operators '((evil-yank . lispyville-yank)
+                         (evil-delete . lispyville-delete)
+                         (evil-change . lispyville-change)
+                         (evil-yank-line . lispyville-yank-line)
+                         (evil-delete-line . lispyville-delete-line)
+                         (evil-change-line . lispyville-change-line)
+                         (evil-delete-char . lispyville-delete-char-or-splice)
+                         (evil-delete-backward-char . lispyville-delete-char-or-splice-backwards)
+                         (evil-substitute . lispyville-substitute)
+                         (evil-change-whole-line . lispyville-change-whole-line)
+                         (evil-join . lispyville-join)))
+      (cl-destructuring-bind (evil-operator . lispyville-operator) operators
+        (panda-evil-goggles-add lispyville-operator evil-operator)))))
+
+;;;; Snippets
+(use-package yasnippet
+  :config
+  (gsetq yas-triggers-in-field nil
+         yas-indent-line 'auto
+         yas-also-auto-indent-first-line t)
+  (yas-reload-all)
+  (with-eval-after-load 'company
+    (defun panda--company-yas-tab-advice (old-func &rest args)
+      (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
+        (call-interactively old-func args)))
+    (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
+      (advice-add company-tab-func :around #'panda--company-yas-tab-advice))))
+
+(use-package yasnippet-snippets :after yasnippet)
+
+(use-package ivy-yasnippet
+  :after ivy yasnippet
+  :general
+  (panda-space "y" 'ivy-yasnippet))
+
+;;;; View / Layout
+(use-package olivetti :defer t)
+
+(use-package outshine
+  :defer t
+  :general
+  (panda-backspace outshine-mode-map
+    "I" 'outshine-imenu)
+  :config
+  (gsetq outshine-org-style-global-cycling-at-bob-p t)
+  ;; this is down here because of the `lookup-key' call
+  (general-nmap :keymaps 'outshine-mode-map
+    "<tab>"     (lookup-key outshine-mode-map (kbd "TAB"))
+    "<backtab>" 'outshine-cycle-buffer)
+  ;; needed for `outshine-imenu', since outshine doesn't load imenu
+  (require 'imenu))
 
 ;;; Language Modes
 ;;;; Assembly
 (use-package asm-mode
   :defer t
   :gfhook '(panda-set-asm-locals yas-minor-mode)
-  :init
-  (setq asm-comment-char ?#)
   :config
+  (gsetq asm-comment-char ?#)
   (defun panda-set-asm-locals ()
-    (setq-local indent-tabs-mode t)
-    (setq-local tab-always-indent (default-value 'tab-always-indent)))
+    (gsetq-local indent-tabs-mode t)
+    (gsetq-local tab-always-indent (default-value 'tab-always-indent)))
   (panda-formatter-def asmfmt
     :mode asm-mode
     :program "asmfmt"))
@@ -977,7 +1070,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 ;;;; C / C++
 (use-package cc-mode
   :defer t
-  :gfhook ('(c-mode-hook c++-mode-hook) '(lsp panda-set-c-locals yas-minor-mode))
+  :gfhook ('(c-mode-hook c++-mode-hook) '(panda-set-c-locals yas-minor-mode))
   :config
   (defun panda-set-c-locals ()
     (c-set-offset 'innamespace 0))
@@ -1009,20 +1102,20 @@ program's arguments are locally set to REQUIRED-ARGS only."
             yas-minor-mode)
   :config
   (defun panda-set-lisp-locals ()
-    (setq-local evil-args-delimiters '(" "))))
+    (gsetq-local evil-args-delimiters '(" "))))
 
 (use-package slime
   :general
-  (panda-space-sc :keymaps 'slime-mode-map
-    "xb" 'slime-eval-buffer
-    "xd" 'slime-eval-defun
-    "xe" 'slime-eval-last-expression
-    "xr" 'slime-eval-region
-    "xx" 'slime)
-  :init
-  (setq inferior-lisp-program "sbcl"
-        slime-contribs '(slime-fancy))
+  (panda-backspace slime-mode-map
+    "m"  'macrostep-expand
+    ",b" 'slime-eval-buffer
+    ",d" 'slime-eval-defun
+    ",e" 'slime-eval-last-expression
+    ",r" 'slime-eval-region
+    ",," 'slime)
   :config
+  (gsetq inferior-lisp-program "sbcl"
+         slime-contribs '(slime-fancy))
   (slime-setup))
 
 (use-package slime-company
@@ -1060,16 +1153,20 @@ program's arguments are locally set to REQUIRED-ARGS only."
                                    panda-set-elisp-locals
                                    yas-minor-mode))
   :general
-  (panda-space-sc :keymaps '(emacs-lisp-mode-map lisp-interaction-mode-map)
-    "dm" 'pp-macroexpand-last-sexp
-    "xb" 'eval-buffer
-    "xd" 'eval-defun
-    "xe" 'eval-last-sexp
-    "xr" 'eval-region
-    "xx" 'ielm)
+  (panda-backspace '(emacs-lisp-mode-map lisp-interaction-mode-map)
+    ",b" 'eval-buffer
+    ",d" 'eval-defun
+    ",e" 'eval-last-sexp
+    ",r" 'eval-region
+    ",," 'ielm)
   :config
   (defun panda-set-elisp-locals ()
-    (setq-local evil-args-delimiters '(" "))))
+    (gsetq-local evil-args-delimiters '(" "))))
+
+(use-package macrostep
+  :general
+  (panda-backspace '(emacs-lisp-mode-map lisp-interaction-mode-map)
+    "m" 'macrostep-expand))
 
 ;;;; Fish
 (use-package fish-mode
@@ -1095,7 +1192,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :gfhook '(lsp panda-set-go-locals yas-minor-mode)
   :config
   (defun panda-set-go-locals ()
-    (setq-local indent-tabs-mode t))
+    (gsetq-local indent-tabs-mode t))
   (panda-formatter-def gofmt
     :mode go-mode
     :program "gofmt"))
@@ -1105,16 +1202,16 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :mode (("\\.html?\\'" . web-mode))
   :gfhook '(lsp)
   :init
-  (setq web-mode-enable-auto-closing t
-        web-mode-enable-auto-indentation t
-        web-mode-enable-auto-opening t
-        web-mode-enable-auto-pairing t
-        web-mode-enable-auto-quoting t
-        web-mode-enable-css-colorization t
-        web-mode-markup-indent-offset 2
-        web-mode-style-padding 4
-        web-mode-script-padding 4
-        web-mode-block-padding 4)
+  (gsetq web-mode-enable-auto-closing t
+         web-mode-enable-auto-indentation t
+         web-mode-enable-auto-opening t
+         web-mode-enable-auto-pairing t
+         web-mode-enable-auto-quoting t
+         web-mode-enable-css-colorization t
+         web-mode-markup-indent-offset 2
+         web-mode-style-padding 4
+         web-mode-script-padding 4
+         web-mode-block-padding 4)
   :config
   (panda-formatter-def prettier-html
     :mode web-mode
@@ -1154,12 +1251,21 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :extra-args ("--tab-width" "4")
   :config-file ".prettierrc")
 
+(use-package nodejs-repl
+  :general
+  (panda-backspace js-mode-map
+    ",b" 'nodejs-repl-send-buffer
+    ",e" 'nodejs-repl-send-line
+    ",f" 'nodejs-repl-load-file
+    ",r" 'nodejs-repl-send-region
+    ",," 'nodejs-repl))
+
 (use-package tide
   :disabled t
   :hook ((js-mode typescript-mode) . panda-enable-tide)
   :general
-  (panda-space-sc :keymaps 'tide-mode-map
-    "rs" 'tide-rename-symbol
+  (panda-backspace tide-mode-map
+    "r"  'tide-rename-symbol
     "\\" 'tide-restart-server)
   :config
   (defun panda-enable-tide ()
@@ -1189,9 +1295,9 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :ensure auctex
   :defer t
   :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode yas-minor-mode))
-  :init
-  (setq TeX-auto-save t
-        TeX-parse-self t))
+  :config
+  (gsetq TeX-auto-save t
+         TeX-parse-self t))
 
 ;;;; Makefile
 (use-package make-mode
@@ -1214,12 +1320,19 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :gfhook '(panda-trim-on-save-mode)
   :general
   (panda-space "a" 'org-agenda)
-  :init
-  (setq org-agenda-files '("~/code/org/agenda.org")
-        org-src-fontify-natively t
-        org-src-tab-acts-natively t))
+  :config
+  (gsetq org-agenda-files '("~/code/org/agenda.org")
+         org-src-fontify-natively t
+         org-src-tab-acts-natively t))
+
+(use-package toc-org
+  :hook (org-mode . toc-org-mode))
+
+(use-package helm-org-rifle :defer t)
 
 (use-package evil-org
+  :after org ; :after takes precedence over :demand
+  :demand t ; required for evil-org-agenda to work properly
   :hook (org-mode . evil-org-mode)
   :config
   (evil-org-set-key-theme '(additional calendar insert navigation))
@@ -1231,18 +1344,17 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :defer t
   :gfhook '(lsp panda-set-python-locals yas-minor-mode)
   :general
-  (panda-space-sc :keymaps 'python-mode-map
-    "xb" 'python-shell-send-buffer
-    "xd" 'python-shell-send-defun
-    "xf" 'python-shell-send-file
-    "xr" 'python-shell-send-region
-    "xx" 'run-python)
-  :init
-  (setq python-indent-offset 4)
+  (panda-backspace python-mode-map
+    ",b" 'python-shell-send-buffer
+    ",d" 'python-shell-send-defun
+    ",f" 'python-shell-send-file
+    ",r" 'python-shell-send-region
+    ",," 'run-python)
   :config
+  (gsetq python-indent-offset 4)
   (defun panda-set-python-locals ()
-    (setq-local yas-indent-line 'fixed)
-    (setq-local yas-also-auto-indent-first-line nil))
+    (gsetq-local yas-indent-line 'fixed)
+    (gsetq-local yas-also-auto-indent-first-line nil))
   (panda-formatter-def black
     :mode python-mode
     :program "black"
@@ -1255,18 +1367,17 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :defer t
   :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp yas-minor-mode))
   :general
-  (panda-space-sc :keymaps 'ess-r-mode-map
-    "xb" 'ess-eval-buffer
-    "xd" 'ess-eval-function
-    "xf" 'ess-load-file
-    "xe" 'ess-eval-line
-    "xp" 'ess-eval-paragraph
-    "xr" 'ess-eval-region
-    "xx" 'R)
-  :init
-  (setq ess-ask-for-ess-directory nil
-        ess-use-flymake nil)
+  (panda-backspace ess-r-mode-map
+    ",b" 'ess-eval-buffer
+    ",d" 'ess-eval-function
+    ",f" 'ess-load-file
+    ",e" 'ess-eval-line
+    ",p" 'ess-eval-paragraph
+    ",r" 'ess-eval-region
+    ",," 'R)
   :config
+  (gsetq ess-ask-for-ess-directory nil
+         ess-use-flymake nil)
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection
                                      '("R" "--slave" "-e" "languageserver::run()"))
@@ -1299,5 +1410,5 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (provide 'init)
 
 ;; Local Variables:
-;; eval: (when (fboundp 'outshine-mode) (outshine-mode 1) (outshine-cycle-buffer))
+;; eval: (when (fboundp 'outshine-mode) (outshine-mode 1))
 ;; End:
