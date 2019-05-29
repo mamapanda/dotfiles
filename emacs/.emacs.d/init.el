@@ -24,37 +24,26 @@ the original values of the variables in `after-init-hook'."
                  file-name-handler-alist nil)
 
 ;;;; Package Management
-;; added by package.el
-;; (package-initialize)
+(setq package-enable-at-startup nil
+      straight-check-for-modifications '(check-on-save find-when-checking))
 
-(require 'package)
+;; https://github.com/raxod502/straight.el#getting-started
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-(setq-default package-archives
-              '(("gnu" . "https://elpa.gnu.org/packages/")
-                ("melpa" . "https://melpa.org/packages/"))
-              package-archive-priorities
-              '(("gnu" . 1)
-                ("melpa" . 10)))
-
-(setq package-enable-at-startup nil)
-(package-initialize)
-
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
+(straight-use-package 'use-package)
 (require 'use-package)
-(setq use-package-always-ensure t)
-
-(use-package quelpa
-  :defer t
-  :config
-  (setq quelpa-update-melpa-p nil))
-
-(use-package quelpa-use-package
-  :config
-  (setq quelpa-use-package-inhibit-loading-quelpa t)
-  (quelpa-use-package-activate-advice))
+(setq straight-use-package-by-default t)
 
 ;;;; Libraries
 (use-package general
@@ -556,7 +545,7 @@ for MODE. MODE may be a symbol or a list of modes."
   (panda-space "n" 'operate-on-number-at-point))
 
 (use-package replace
-  :ensure nil
+  :straight nil
   :general
   (panda-space "o" 'occur)
   (general-nmap occur-mode-map
@@ -605,7 +594,7 @@ be deleted on `post-command-hook'."
       (add-hook 'occur-mode-find-occurrence-hook #'recenter))))
 
 (use-package targets
-  :quelpa (targets :fetcher github :repo "noctuid/targets.el")
+  :straight (:type git :host github :repo "noctuid/targets.el")
   :config
   (targets-setup t))
 
@@ -677,6 +666,16 @@ be deleted on `post-command-hook'."
          ivy-count-format "(%d/%d) ")
   (ivy-mode 1))
 
+(use-package counsel
+  :demand t
+  :general
+  (panda-space
+    "F" 'counsel-recentf
+    "s" 'counsel-git-grep
+    "S" 'counsel-rg)
+  :config
+  (counsel-mode 1))
+
 (use-package ivy-hydra :defer t)
 
 (use-package ivy-rich
@@ -688,16 +687,6 @@ be deleted on `post-command-hook'."
     (ivy-set-display-transformer 'counsel-projectile-switch-to-buffer
                                  'ivy-rich--ivy-switch-buffer-transformer))
   (ivy-rich-mode 1))
-
-(use-package counsel
-  :demand t
-  :general
-  (panda-space
-    "F" 'counsel-recentf
-    "s" 'counsel-git-grep
-    "S" 'counsel-rg)
-  :config
-  (counsel-mode 1))
 
 (use-package counsel-projectile
   :after counsel projectile
@@ -817,7 +806,7 @@ be deleted on `post-command-hook'."
 
 ;;;; Music
 (use-package emms
-  :ensure nil ; yay -S emms-git
+  :straight nil ; yay -S emms-git
   :general
   (panda-space "m" 'emms)
   :config
@@ -1093,7 +1082,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 ;;;; Common Lisp
 (use-package lisp-mode
-  :ensure nil
+  :straight nil
   :defer t
   :gfhook '(company-mode
             lispyville-mode
@@ -1145,7 +1134,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 ;;;; Emacs Lisp
 (use-package elisp-mode
-  :ensure nil
+  :straight nil
   :defer t
   :gfhook ('emacs-lisp-mode-hook '(company-mode
                                    lispyville-mode
@@ -1292,7 +1281,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 ;;;; Latex
 (use-package tex
-  :ensure auctex
+  :straight auctex
   :defer t
   :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode yas-minor-mode))
   :config
