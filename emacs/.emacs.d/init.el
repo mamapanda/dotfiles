@@ -745,7 +745,11 @@ be deleted on `post-command-hook'."
 
 ;;; Tools
 ;;;; File Manager
-(use-package dired-filter :defer t)
+(use-package dired-filter
+  :defer t
+  :general
+  (panda-backspace dired-mode-map
+    "f" '(:keymap dired-filter-map)))
 
 (use-package dired-open
   :general
@@ -812,12 +816,21 @@ be deleted on `post-command-hook'."
   :config
   (require 'emms-setup)
   (require 'emms-info-libtag)
+  (emms-all)
+  (defun panda-emms-track-description (track)
+    "Return a description of TRACK.
+This is adapted from `emms-info-track-description'."
+    (let ((artist (emms-track-get track 'info-artist))
+          (title  (emms-track-get track 'info-title)))
+      (cond ((and artist title) (concat title " - " artist))
+            (title title)
+            (t (emms-track-simple-description track)))))
   (gsetq emms-info-functions                      '(emms-info-libtag)
          emms-player-list                         '(emms-player-vlc)
          emms-repeat-playlist                     t
          emms-source-file-default-directory       "~/Music"
-         emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find)
-  (emms-all))
+         emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
+         emms-track-description-function          'panda-emms-track-description))
 
 ;;;; Readers
 (use-package elfeed
@@ -1394,6 +1407,9 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (use-package yaml-mode
   :defer t
   :gfhook '(panda-trim-on-save-mode yas-minor-mode))
+
+;;; Fun
+(use-package 2048-game :defer t)
 
 ;;; End Init
 (provide 'init)
