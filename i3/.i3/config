@@ -1,6 +1,6 @@
 # * Mod Key
 # Mod1=<Alt>, Mod4=<Super>
-set $mod Mod1
+set $mod Mod4
 
 # * i3 Management
 # ** Keybindings
@@ -382,9 +382,7 @@ exec --no-startup-id xautolock -time 10 -locker blurlock
 exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
 ## rebind keys
-exec --no-startup-id \
-     setxkbmap -option 'caps:backspace' -option 'ctrl:swap_lwin_lctl'; \
-     xmodmap -e 'clear Lock'
+exec --no-startup-id setxkbmap -option 'ctrl:swapcaps'; xcape -e 'Control_L=Escape'
 
 # ** Keybindings
 # terminal

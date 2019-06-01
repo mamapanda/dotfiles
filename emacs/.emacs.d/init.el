@@ -92,19 +92,20 @@ It should contain an alist literal for `panda-get-private-data'.")
       :prefix "SPC"
       :prefix-map 'panda-space-map)
     ;; for bindings that may change depending on active minor modes
-    (general-create-definer panda-backspace
+    (general-create-definer panda-space-sc
       :states '(normal operator motion visual)
-      :prefix "<backspace>"))
+      :prefix "SPC ;"))
   (add-hook 'prog-mode-hook #'hs-minor-mode)
   (evil-mode 1))
 
 (use-package evil-collection
   :config
-  (gsetq evil-collection-key-blacklist '("SPC" "<backspace>"))
+  (gsetq evil-collection-key-blacklist '("SPC"))
   (delete 'company evil-collection-mode-list)
   (evil-collection-init))
 
 (use-package evil-escape
+  :disabled t
   :config
   (gsetq evil-escape-key-sequence "fd"
          evil-escape-delay 0.2
@@ -394,24 +395,6 @@ for MODE. MODE may be a symbol or a list of modes."
 (show-paren-mode 1)
 
 ;;;; Keybindings
-(panda-space
-  "SPC" 'execute-extended-command
-  "b"   'switch-to-buffer
-  "B"   'kill-buffer
-  "d"   'dired
-  "f"   'find-file
-  "h"   'help-command
-  "t"   'bookmark-jump
-  "T"   'bookmark-set
-  "4"   (general-key "C-x 4")
-  "%"   (general-key "C-x C-q"))
-
-(panda-backspace
-  "c" 'compile
-  "k" 'previous-error
-  "j" 'next-error
-  "x" 'xref-find-references)
-
 (general-nmap :keymaps 'override
   "Q" 'save-buffer)
 
@@ -427,8 +410,9 @@ for MODE. MODE may be a symbol or a list of modes."
 (general-imap "<C-backspace>" 'evil-delete-backward-word)
 
 (general-mmap
-  "[d" 'panda-backward-defun
-  "]d" 'panda-forward-defun)
+  "SPC" nil
+  "[d"  'panda-backward-defun
+  "]d"  'panda-forward-defun)
 
 (general-otomap
   "e"  'panda-outer-buffer
@@ -441,6 +425,24 @@ for MODE. MODE may be a symbol or a list of modes."
   "d"  'panda-inner-defun
   "ld" 'panda-inner-last-defun
   "nd" 'panda-inner-next-defun)
+
+(panda-space
+  "SPC" 'execute-extended-command
+  "b"   'switch-to-buffer
+  "B"   'kill-buffer
+  "d"   'dired
+  "f"   'find-file
+  "h"   'help-command
+  "t"   'bookmark-jump
+  "T"   'bookmark-set
+  "4"   (general-key "C-x 4")
+  "%"   (general-key "C-x C-q"))
+
+(panda-space-sc
+  "c" 'compile
+  "k" 'previous-error
+  "j" 'next-error
+  "x" 'xref-find-references)
 
 ;;; Global Packages
 ;;;; Appearance
@@ -635,7 +637,7 @@ be deleted on `post-command-hook'."
 
 (use-package imenu
   :general
-  (panda-backspace "i" 'imenu)
+  (panda-space-sc "i" 'imenu)
   :config
   (gsetq imenu-auto-rescan t))
 
@@ -748,7 +750,7 @@ be deleted on `post-command-hook'."
 (use-package dired-filter
   :defer t
   :general
-  (panda-backspace dired-mode-map
+  (panda-space-sc dired-mode-map
     "f" '(:keymap dired-filter-map)))
 
 (use-package dired-open
@@ -784,7 +786,7 @@ be deleted on `post-command-hook'."
 
 (use-package dired-ranger
   :general
-  (panda-backspace dired-mode-map
+  (panda-space-sc dired-mode-map
     "c" 'dired-ranger-copy
     "m" 'dired-ranger-move
     "p" 'dired-ranger-paste))
@@ -857,7 +859,7 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Shell
 (use-package eshell
-  :gfhook ('eshell-first-time-mode-hook 'panda--set-eshell-keys)
+  ;; :gfhook ('eshell-first-time-mode-hook 'panda--set-eshell-keys)
   :general
   (panda-space "<return>" 'eshell)
   :config
@@ -905,7 +907,7 @@ This is adapted from `emms-info-track-description'."
 (use-package flycheck
   :defer t
   :general
-  (panda-backspace flycheck-mode-map
+  (panda-space-sc flycheck-mode-map
     "e" 'flycheck-list-errors
     "j" 'flycheck-next-error
     "k" 'flycheck-previous-error)
@@ -960,7 +962,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (use-package lsp-mode
   :commands lsp-register-client
   :general
-  (panda-backspace lsp-mode-map
+  (panda-space-sc lsp-mode-map
     "r"  'lsp-rename
     "x"  'lsp-find-references
     "\\" 'lsp-restart-workspace)
@@ -974,7 +976,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (use-package lsp-ui
   :after lsp
   :general
-  (panda-backspace lsp-ui-mode-map
+  (panda-space-sc lsp-ui-mode-map
     "i" 'lsp-ui-imenu
     "R" 'lsp-ui-sideline-apply-code-actions)
   :config
@@ -982,7 +984,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package dap-mode
   :general
-  (panda-backspace lsp-mode-map
+  (panda-space-sc lsp-mode-map
     "d" 'dap-debug
     "D" 'dap-hydra)
   :config
@@ -1044,7 +1046,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 (use-package outshine
   :defer t
   :general
-  (panda-backspace outshine-mode-map
+  (panda-space-sc outshine-mode-map
     "I" 'outshine-imenu)
   :config
   (gsetq outshine-org-style-global-cycling-at-bob-p t)
@@ -1108,7 +1110,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package slime
   :general
-  (panda-backspace slime-mode-map
+  (panda-space-sc slime-mode-map
     "m"  'macrostep-expand
     ",b" 'slime-eval-buffer
     ",d" 'slime-eval-defun
@@ -1155,7 +1157,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
                                    panda-set-elisp-locals
                                    yas-minor-mode))
   :general
-  (panda-backspace '(emacs-lisp-mode-map lisp-interaction-mode-map)
+  (panda-space-sc '(emacs-lisp-mode-map lisp-interaction-mode-map)
     ",b" 'eval-buffer
     ",d" 'eval-defun
     ",e" 'eval-last-sexp
@@ -1167,7 +1169,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package macrostep
   :general
-  (panda-backspace '(emacs-lisp-mode-map lisp-interaction-mode-map)
+  (panda-space-sc '(emacs-lisp-mode-map lisp-interaction-mode-map)
     "m" 'macrostep-expand))
 
 ;;;; Fish
@@ -1255,7 +1257,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package nodejs-repl
   :general
-  (panda-backspace js-mode-map
+  (panda-space-sc js-mode-map
     ",b" 'nodejs-repl-send-buffer
     ",e" 'nodejs-repl-send-line
     ",f" 'nodejs-repl-load-file
@@ -1266,7 +1268,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :disabled t
   :hook ((js-mode typescript-mode) . panda-enable-tide)
   :general
-  (panda-backspace tide-mode-map
+  (panda-space-sc tide-mode-map
     "r"  'tide-rename-symbol
     "\\" 'tide-restart-server)
   :config
@@ -1346,7 +1348,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :defer t
   :gfhook '(lsp panda-set-python-locals yas-minor-mode)
   :general
-  (panda-backspace python-mode-map
+  (panda-space-sc python-mode-map
     ",b" 'python-shell-send-buffer
     ",d" 'python-shell-send-defun
     ",f" 'python-shell-send-file
@@ -1369,7 +1371,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :defer t
   :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp yas-minor-mode))
   :general
-  (panda-backspace ess-r-mode-map
+  (panda-space-sc ess-r-mode-map
     ",b" 'ess-eval-buffer
     ",d" 'ess-eval-function
     ",f" 'ess-load-file
