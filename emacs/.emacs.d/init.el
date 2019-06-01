@@ -115,6 +115,20 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;;; Basic Configuration
 ;;;; Definitions
 ;;;;; Defuns
+(defun panda-bind-visual-line-motions (keymap)
+  "Bind visual line equivalents of evil motions in KEYMAP."
+  (general-mmap :keymaps keymap
+    "j"  'evil-next-visual-line
+    "k"  'evil-previous-visual-line
+    "0"  'evil-beginning-of-visual-line
+    "^"  'evil-first-non-blank-of-visual-line
+    "$"  'evil-end-of-visual-line
+    "gj" 'evil-next-line
+    "gk" 'evil-previous-line
+    "g0" 'evil-beginning-of-line
+    "g^" 'evil-first-non-blank
+    "g$" 'evil-end-of-line))
+
 (defun panda-find-init-file (&optional arg)
   "Open `user-init-file'. If ARG is non-nil, open it in another window."
   (interactive "P")
@@ -166,19 +180,14 @@ It should contain an alist literal for `panda-get-private-data'.")
         (goto-char pos))
     (message "Buffer is not visiting a file")))
 
-(defun panda-bind-visual-line-motions (keymap)
-  "Bind visual line equivalents of evil motions in KEYMAP."
-  (general-mmap :keymaps keymap
-    "j"  'evil-next-visual-line
-    "k"  'evil-previous-visual-line
-    "0"  'evil-beginning-of-visual-line
-    "^"  'evil-first-non-blank-of-visual-line
-    "$"  'evil-end-of-visual-line
-    "gj" 'evil-next-line
-    "gk" 'evil-previous-line
-    "g0" 'evil-beginning-of-line
-    "g^" 'evil-first-non-blank
-    "g$" 'evil-end-of-line))
+(defun panda-sudo-reload-file ()
+  "Reload the current file with root privileges, preserving point."
+  (interactive)
+  (if buffer-file-name
+      (let ((pos (point)))
+        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
+        (goto-char pos))
+    (message "Buffer is not visiting a file")))
 
 ;;;;; Macros
 (defmacro panda-add-hook-once (hook fn &optional append local)
@@ -394,6 +403,11 @@ for MODE. MODE may be a symbol or a list of modes."
 (recentf-mode 1)
 (show-paren-mode 1)
 
+(panda-disable-repeat evil-forward-char)
+(panda-disable-repeat evil-next-line)
+(panda-disable-repeat evil-previous-line)
+(panda-disable-repeat evil-backward-char)
+
 ;;;; Keybindings
 (general-nmap :keymaps 'override
   "Q" 'save-buffer)
@@ -435,7 +449,7 @@ for MODE. MODE may be a symbol or a list of modes."
   "h"   'help-command
   "t"   'bookmark-jump
   "T"   'bookmark-set
-  "4"   (general-key "C-x 4")
+  "4"   '(:keymap ctl-x-4-map)
   "%"   (general-key "C-x C-q"))
 
 (panda-space-sc
@@ -451,6 +465,8 @@ for MODE. MODE may be a symbol or a list of modes."
   (gsetq base16-distinct-fringe-background nil)
   (panda-with-gui
     (load-theme 'base16-oceanicnext t)))
+
+(use-package doom-themes :defer t)
 
 (use-package default-text-scale
   :commands panda-zoom/body
@@ -617,6 +633,15 @@ be deleted on `post-command-hook'."
   (which-key-mode 1))
 
 ;;;; Navigation
+(use-package avy
+  :general
+  (general-mmap "C-SPC" 'evil-avy-goto-char-timer)
+  :config
+  (gsetq avy-all-windows         nil
+         avy-all-windows-alt     t
+         avy-background          t
+         avy-indent-line-overlay t))
+
 (use-package evil-matchit
   :config
   (global-evil-matchit-mode 1))
@@ -862,15 +887,23 @@ This is adapted from `emms-info-track-description'."
   ;; :gfhook ('eshell-first-time-mode-hook 'panda--set-eshell-keys)
   :general
   (panda-space "<return>" 'eshell)
+  (general-def ctl-x-4-map "<return>" 'panda-eshell-other-window)
   :config
+  ;; TODO: maybe remove this
   (defun panda--set-eshell-keys ()
     "Set keys for `eshell-mode'."
     (general-imap :keymaps 'eshell-mode-map
       "C-r" 'eshell-previous-matching-input
       "C-p" 'eshell-previous-matching-input-from-input
-      "C-n" 'eshell-next-matching-input-from-input)))
+      "C-n" 'eshell-next-matching-input-from-input))
+  (defun panda-eshell-other-window (&optional arg)
+    "Open `eshell' in another window."
+    (interactive "P")
+    (switch-to-buffer-other-window
+     (save-window-excursion (eshell arg)))))
 
 (use-package shell-pop
+  :disabled t
   :general
   (panda-space
     "<return>"   'shell-pop
@@ -888,14 +921,13 @@ This is adapted from `emms-info-track-description'."
 (use-package company
   :defer t
   :general
-  (general-def :keymaps 'company-active-map
+  (general-def company-active-map
     "C-p"      'company-select-previous
     "C-n"      'company-select-next
     "C-b"      'company-previous-page
     "C-f"      'company-next-page
     "<return>" 'company-complete-selection
-    "C-g"      'company-abort
-    "<escape>" 'company-abort)
+    "C-g"      'company-abort)
   :init
   (defvar company-active-map (make-sparse-keymap))
   :config
@@ -1325,7 +1357,14 @@ program's arguments are locally set to REQUIRED-ARGS only."
   :general
   (panda-space "a" 'org-agenda)
   :config
-  (gsetq org-agenda-files '("~/code/org/agenda.org")
+  (gsetq org-agenda-files (directory-files-recursively "~/org/agenda" "\\.org$")
+         org-agenda-custom-commands
+         '(("n" "Agenda and unscheduled TODOs"
+            ((agenda "")
+             (alltodo ""
+                      ((org-agenda-overriding-header "Unscheduled TODOs:")
+                       (org-agenda-skip-function
+                        '(org-agenda-skip-entry-if 'timestamp)))))))
          org-src-fontify-natively t
          org-src-tab-acts-natively t))
 
