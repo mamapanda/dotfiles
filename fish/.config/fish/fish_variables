@@ -14,7 +14,7 @@ SETUVAR fish_color_cancel:red
 # command color (i.e. grep)
 SETUVAR fish_color_command:magenta
 # comment color
-SETUVAR fish_color_comment:4F5B66
+SETUVAR fish_color_comment:white
 # process separators like | and &
 SETUVAR fish_color_end:yellow
 # syntax errors

@@ -15,30 +15,17 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 
 # * Appearance
 # ** Settings
-# *** Colors
-# Color palette used for the terminal ( ~/.Xresources file )
-set_from_resource $term_background background
-set_from_resource $term_foreground foreground
-set_from_resource $term_color0     color0
-set_from_resource $term_color1     color1
-set_from_resource $term_color2     color2
-set_from_resource $term_color3     color3
-set_from_resource $term_color4     color4
-set_from_resource $term_color5     color5
-set_from_resource $term_color6     color6
-set_from_resource $term_color7     color7
-set_from_resource $term_color8     color8
-set_from_resource $term_color9     color9
-set_from_resource $term_color10    color10
-set_from_resource $term_color11    color11
-set_from_resource $term_color12    color12
-set_from_resource $term_color13    color13
-set_from_resource $term_color14    color14
-set_from_resource $term_color15    color15
+# *** Variables
+set_from_resource $font           i3wm.font
+set_from_resource $background     i3wm.background
+set_from_resource $foreground     i3wm.foreground
+set_from_resource $active_color   i3wm.activeColor
+set_from_resource $inactive_color i3wm.inactiveColor
+set_from_resource $urgent_color   i3wm.urgentColor
 
 # *** Font
 # Font for window titles. Also used for i3bar if it doesn't have one specified.
-font xft:DroidSans 11
+font xft:$font
 
 # *** i3-gaps
 # Set inner/outer gaps
@@ -63,13 +50,13 @@ new_float none
 hide_edge_borders none
 
 # Theme colors
-# class                   border           backgr.          text             indic.           child_border
-  client.focused          $term_color0     $term_color0     $term_color2     $term_color2     $term_color0
-  client.focused_inactive $term_color0     $term_color0     $term_color4     $term_color0     $term_color0
-  client.unfocused        $term_color0     $term_color0     $term_color4     $term_color0     $term_color0
-  client.urgent           $term_foreground $term_foreground $term_color1     $term_color1     $term_foreground
-  client.placeholder      $term_background $term_background $term_foreground $term_background $term_background
-  client.background       $term_background
+# class                   border      backgr.     text            indic.        child_border
+  client.focused          $background $background $active_color   $active_color $background
+  client.focused_inactive $background $background $inactive_color $background   $background
+  client.unfocused        $background $background $inactive_color $background   $background
+  client.urgent           $foreground $foreground $urgent_color   $urgent_color $foreground
+  client.placeholder      $background $background $foreground     $background   $background
+  client.background       $background
 
 # ** Keybindings
 # change borders
@@ -248,20 +235,19 @@ bar {
 
     bindsym button4 nop
     bindsym button5 nop
-    # font xft:DroidSans 11
     strip_workspace_numbers yes
 
     colors {
-        background $term_background
-        statusline $term_foreground
-        separator  $term_color2
+        background $background
+        statusline $foreground
+        separator  $active_color
 
-#                          border           backgr.          text
-        focused_workspace  $term_color2     $term_background $term_foreground
-        active_workspace   $term_background $term_background $term_foreground
-        inactive_workspace $term_background $term_background $term_foreground
-        binding_mode       $term_color2     $term_background $term_foreground
-        urgent_workspace   $term_color1     $term_background $term_foreground
+#                          border        backgr.     text
+        focused_workspace  $active_color $background $foreground
+        active_workspace   $background   $background $foreground
+        inactive_workspace $background   $background $foreground
+        binding_mode       $active_color $background $foreground
+        urgent_workspace   $urgent_color $background $foreground
     }
 }
 

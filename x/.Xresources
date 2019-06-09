@@ -6,43 +6,57 @@ Xft.autohint:  false
 Xft.hintstyle: hintslight
 Xft.lcdfilter: lcddefault
 
-*background:                      #1B2B34
-*foreground:                      #D8DEE9
-*fading:                          8
-*fadeColor:                       black
-*cursorColor:                     #D8DEE9
+Xcursor.theme: xcursor-breeze
+Xcursor.size:  0
 
+#include ".Xresources.d/base16-oceanicnext.h"
+
+*background:  BACKGROUND
+*foreground:  FOREGROUND
+*fading:      8
+*fadeColor:   black
+*cursorColor: CURSOR_COLOR
 !! black dark/light
-*color0:                          #343D46
-*color8:                          #343D46
-
+*color0:      BLACK
+*color8:      BLACK
 !! red dark/light
-*color1:                          #EC5F67
-*color9:                          #EC5F67
-
+*color1:      RED
+*color9:      RED
 !! green dark/light
-*color2:                          #99C794
-*color10:                         #99C794
-
+*color2:      GREEN
+*color10:     GREEN
 !! yellow dark/light
-*color3:                          #FAC863
-*color11:                         #FAC863
-
+*color3:      YELLOW
+*color11:     YELLOW
 !! blue dark/light
-*color4:                          #6699CC
-*color12:                         #6699CC
-
+*color4:      BLUE
+*color12:     BLUE
 !! magenta dark/light
-*color5:                          #C594C5
-*color13:                         #C594C5
-
+*color5:      MAGENTA
+*color13:     MAGENTA
 !! cyan dark/light
-*color6:                          #5FB3B3
-*color14:                         #5FB3B3
-
+*color6:      CYAN
+*color14:     CYAN
 !! white dark/light
-*color7:                          #D8DEE9
-*color15:                         #D8DEE9
+*color7:      WHITE
+*color15:     WHITE
 
-Xcursor.theme:                    xcursor-breeze
-Xcursor.size:                     0
+i3wm.font:          Droid Sans 11
+i3wm.background:    i3_BACKGROUND
+i3wm.foreground:    i3_FOREGROUND
+i3wm.activeColor:   i3_ACTIVE_COLOR
+i3wm.inactiveColor: i3_INACTIVE_COLOR
+i3wm.urgentColor:   i3_URGENT_COLOR
+
+rofi.modi:            window,run,combi,drun
+rofi.font:            Droid Sans 12
+rofi.show-icons:      true
+rofi.terminal:        kitty
+rofi.hide-scrollbar:  true
+rofi.disable-history: false
+!                     bg               border             separator
+rofi.color-window:    ROFI_BACKGROUND, ROFI_BORDER_COLOR, ROFI_SEPARATOR_COLOR
+!                     bg               fg                 alt-bg           hl-bg              hl-fg
+rofi.color-active:    ROFI_BACKGROUND, ROFI_ACTIVE_HL_BG, ROFI_BACKGROUND, ROFI_ACTIVE_HL_BG, ROFI_ACTIVE_HL_FG
+rofi.color-normal:    ROFI_BACKGROUND, ROFI_FOREGROUND,   ROFI_BACKGROUND, ROFI_SELECT_HL_BG, ROFI_SELECT_HL_FG
+rofi.color-urgent:    ROFI_BACKGROUND, ROFI_URGENT_HL_BG, ROFI_BACKGROUND, ROFI_URGENT_HL_BG, ROFI_URGENT_HL_FG

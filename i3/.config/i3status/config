@@ -7,11 +7,11 @@
 # If the above line is not correctly displayed, fix your editor first!
 
 general {
-    colors = true
+    colors = false
     interval = 5
-    color_good = "#D8DEE9"
-    color_bad = "#586E75"
-    color_degraded = "#EC5F67"
+    # color_good = "#D8DEE9"
+    # color_bad = "#586E75"
+    # color_degraded = "#EC5F67"
 }
 
 order += "cpu_usage"
@@ -30,11 +30,11 @@ wireless _first_ {
     format_down = " W down "
 }
 
-ethernet _first_ {
-    # if you use %speed, i3status requires root privileges
-    format_up = " lan %speed "
-    format_down = " no lan "
-}
+# ethernet _first_ {
+#     # if you use %speed, i3status requires root privileges
+#     format_up = " lan %speed "
+#     format_down = " no lan "
+# }
 
 battery all {
     format = " %status %percentage "
