@@ -43,19 +43,19 @@ smart_borders on
 
 # *** Windows
 # Configure border style <normal|1pixel|pixel xx|none|pixel>
-new_window none
-new_float none
+new_window pixel 1
+new_float pixel 1
 
 # Hide borders
 hide_edge_borders none
 
 # Theme colors
-# class                   border      backgr.     text            indic.        child_border
-  client.focused          $background $background $active_color   $active_color $background
-  client.focused_inactive $background $background $inactive_color $background   $background
-  client.unfocused        $background $background $inactive_color $background   $background
-  client.urgent           $foreground $foreground $urgent_color   $urgent_color $foreground
-  client.placeholder      $background $background $foreground     $background   $background
+# class                   border        backgr.     text            indic.        child_border
+  client.focused          $active_color $background $active_color   $active_color $active_color
+  client.focused_inactive $background   $background $inactive_color $background   $background
+  client.unfocused        $background   $background $inactive_color $background   $background
+  client.urgent           $urgent_color $background $urgent_color   $urgent_color $urgent_color
+  client.placeholder      $background   $background $foreground     $background   $background
   client.background       $background
 
 # ** Keybindings
