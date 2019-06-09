@@ -461,12 +461,15 @@ for MODE. MODE may be a symbol or a list of modes."
 ;;; Global Packages
 ;;;; Appearance
 (use-package base16-theme
+  :defer t
   :config
   (gsetq base16-distinct-fringe-background nil)
   (panda-with-gui
     (load-theme 'base16-oceanicnext t)))
 
-(use-package doom-themes :defer t)
+(use-package doom-themes
+  :config
+  (panda-with-gui (load-theme 'doom-vibrant t)))
 
 (use-package default-text-scale
   :commands panda-zoom/body

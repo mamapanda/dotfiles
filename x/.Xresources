@@ -9,7 +9,7 @@ Xft.lcdfilter: lcddefault
 Xcursor.theme: xcursor-breeze
 Xcursor.size:  0
 
-#include ".Xresources.d/base16-oceanicnext.h"
+#include ".Xresources.d/flat-remix-green.h"
 
 *background:  BACKGROUND
 *foreground:  FOREGROUND
