@@ -52,7 +52,6 @@ the original values of the variables in `after-init-hook'."
   (defalias 'gsetq-default 'general-setq-default)
   (defalias 'gsetq-local 'general-setq-local))
 
-(use-package hydra :defer t)
 (use-package no-littering)
 
 ;;;; Custom File
@@ -103,14 +102,6 @@ It should contain an alist literal for `panda-get-private-data'.")
   (gsetq evil-collection-key-blacklist '("SPC"))
   (delete 'company evil-collection-mode-list)
   (evil-collection-init))
-
-(use-package evil-escape
-  :disabled t
-  :config
-  (gsetq evil-escape-key-sequence "fd"
-         evil-escape-delay 0.2
-         evil-escape-inhibit-functions (list (lambda () (not (evil-insert-state-p)))))
-  (evil-escape-mode 1))
 
 ;;; Basic Configuration
 ;;;; Definitions
@@ -471,16 +462,6 @@ for MODE. MODE may be a symbol or a list of modes."
   :config
   (panda-with-gui (load-theme 'doom-vibrant t)))
 
-(use-package default-text-scale
-  :commands panda-zoom/body
-  :config
-  (defhydra panda-zoom (:hint nil)
-    "zoom"
-    ("+" default-text-scale-increase "in"   :color red)
-    ("-" default-text-scale-decrease "out"  :color red)
-    ("0" default-text-scale-reset    "reset":color blue))
-  (default-text-scale-mode 1))
-
 (use-package display-line-numbers
   :demand t
   :general
@@ -561,58 +542,12 @@ for MODE. MODE may be a symbol or a list of modes."
   :general
   (general-vmap "v" 'er/expand-region))
 
-(use-package operate-on-number
-  :general
-  (panda-space "n" 'operate-on-number-at-point))
-
 (use-package replace
   :straight nil
   :general
   (panda-space "o" 'occur)
   (general-nmap occur-mode-map
-    "C-<return>" 'occur-mode-display-occurrence)
-  :config
-  (when nil
-    ;; I don't think I actually need all of this (prefix arg good enough).
-    (progn
-      (defun panda-occur-prev (&optional count)
-        "Execute `occur-prev', then call `occur-mode-display-occurrence'."
-        (interactive "p")
-        (occur-prev count)
-        (occur-mode-display-occurrence))
-      (defun panda-occur-next (&optional count)
-        "Execute `occur-next', then call `occur-mode-display-occurrence'."
-        (interactive "p")
-        (let ((prev-point (point)))
-          ;; signals an error when no more matches
-          (occur-next count)
-          ;; If point is the same, we're stuck at the end of the line
-          ;; with `evil-move-beyond-eol' being nil.
-          (evil-adjust-cursor)
-          (when (= (point) prev-point)
-            (let ((evil-move-beyond-eol t))
-              (forward-char)
-              (occur-next count))))
-        (occur-mode-display-occurrence)))
-    (progn
-      (require 'hl-line)
-      (defvar panda--occur-overlay (let ((ov (make-overlay 0 0)))
-                                     (overlay-put ov 'face 'hl-line)
-                                     (delete-overlay ov)
-                                     ov)
-        "The overlay for the current occur match line.")
-      (defun panda--set-occur-overlay ()
-        "Move `panda--occur-overlay' to the current line and set it to
-be deleted on `post-command-hook'."
-        (move-overlay panda--occur-overlay
-                      (line-beginning-position)
-                      (1+ (line-end-position))
-                      (current-buffer))
-        (panda-add-hook-once 'post-command-hook
-                             (lambda () (delete-overlay panda--occur-overlay))
-                             nil t))
-      (add-hook 'occur-mode-find-occurrence-hook #'panda--set-occur-overlay)
-      (add-hook 'occur-mode-find-occurrence-hook #'recenter))))
+    "C-<return>" 'occur-mode-display-occurrence))
 
 (use-package targets
   :straight (:type git :host github :repo "noctuid/targets.el")
@@ -620,12 +555,9 @@ be deleted on `post-command-hook'."
   (targets-setup t))
 
 (use-package undo-tree
-  :demand t
-  :general
-  (panda-space "u" 'undo-tree-visualize)
+  :defer t
   :config
-  (gsetq undo-tree-enable-undo-in-region nil)
-  (global-undo-tree-mode))
+  (gsetq undo-tree-enable-undo-in-region nil))
 
 ;;;; Help
 (use-package which-key
@@ -727,23 +659,13 @@ be deleted on `post-command-hook'."
   :general
   (general-def :keymaps 'helm-map
     "<escape>" 'helm-keyboard-quit)
-  (panda-space "m" 'helm-mini)
   :config
   (gsetq helm-echo-input-in-header-line        t
          helm-ff-fuzzy-matching                nil
          helm-find-files-ignore-thing-at-point t
          helm-split-window-inside-p            t
          helm-mini-default-sources             '(helm-source-buffers-list
-                                                 helm-source-recentf))
-  (with-eval-after-load 'helm-ls-git
-    (gsetq helm-mini-default-sources '(helm-source-buffers-list
-                                       helm-source-ls-git
-                                       helm-source-recentf))))
-
-(use-package helm-ls-git
-  :after helm
-  :config
-  (gsetq helm-source-ls-git (helm-make-source "Git Files" 'helm-ls-git-source)))
+                                                 helm-source-recentf)))
 
 ;;;; Windows
 (use-package eyebrowse
@@ -785,12 +707,6 @@ be deleted on `post-command-hook'."
   :general
   (general-nmap :keymaps 'dired-mode-map
     "<C-return>" 'dired-open-xdg))
-
-(use-package dired-sidebar
-  :general
-  (panda-space "D" 'dired-sidebar-toggle-sidebar)
-  :config
-  (gsetq dired-sidebar-theme 'none))
 
 (use-package dired-subtree
   :general
@@ -887,33 +803,15 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Shell
 (use-package eshell
-  ;; :gfhook ('eshell-first-time-mode-hook 'panda--set-eshell-keys)
   :general
   (panda-space "<return>" 'eshell)
   (general-def ctl-x-4-map "<return>" 'panda-eshell-other-window)
   :config
-  ;; TODO: maybe remove this
-  (defun panda--set-eshell-keys ()
-    "Set keys for `eshell-mode'."
-    (general-imap :keymaps 'eshell-mode-map
-      "C-r" 'eshell-previous-matching-input
-      "C-p" 'eshell-previous-matching-input-from-input
-      "C-n" 'eshell-next-matching-input-from-input))
   (defun panda-eshell-other-window (&optional arg)
     "Open `eshell' in another window."
     (interactive "P")
     (switch-to-buffer-other-window
      (save-window-excursion (eshell arg)))))
-
-(use-package shell-pop
-  :disabled t
-  :general
-  (panda-space
-    "<return>"   'shell-pop
-    "<S-return>" 'eshell)
-  :config
-  (gsetq shell-pop-full-span  t
-         shell-pop-shell-type '("eshell" "*eshell*" (lambda nil (eshell)))))
 
 ;;;; System
 (use-package disk-usage :defer t)

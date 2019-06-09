@@ -2,5 +2,7 @@
 /etc/custom.el
 /etc/private.el
 /quelpa/
-/straight/
+/straight/build/
+/straight/repos/
+/straight/build-cache.el
 /var/
