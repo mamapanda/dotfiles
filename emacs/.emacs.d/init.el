@@ -436,6 +436,7 @@ for MODE. MODE may be a symbol or a list of modes."
   "b"   'switch-to-buffer
   "B"   'kill-buffer
   "d"   'dired
+  "D"   'image-dired
   "f"   'find-file
   "h"   'help-command
   "t"   'bookmark-jump
@@ -467,18 +468,30 @@ for MODE. MODE may be a symbol or a list of modes."
   :general
   (panda-space "l" 'panda-toggle-line-numbers)
   :config
-  (gsetq-default display-line-numbers-type 'relative)
-  (defun panda-toggle-line-numbers ()
-    "Toggle between relative and absolute line numbers in current buffer."
-    (interactive)
-    (gsetq-local display-line-numbers-type (cl-case display-line-numbers-type
-                                             (relative t)
-                                             ((t) 'relative)
-                                             (otherwise 'relative)))
-    (display-line-numbers-mode 1))
-  (panda-with-gui
-    (global-display-line-numbers-mode 1))
-  (column-number-mode 1))
+  (progn
+    (gsetq display-line-numbers-type 'visual)
+    (defun panda-toggle-line-numbers ()
+      "Toggle between `display-line-numbers-type' and absolute line
+numbers in the current buffer."
+      (interactive)
+      (gsetq display-line-numbers
+             (if (eq display-line-numbers display-line-numbers-type)
+                 t
+               display-line-numbers-type))))
+  (progn
+    (defun panda--evil-ex-relative-lines (old-fn &optional initial-input)
+      "Enable relative line numbers for `evil-ex'."
+      (let ((current-display-line-numbers display-line-numbers))
+        (unwind-protect
+            (progn
+              (gsetq display-line-numbers 'relative)
+              (funcall old-fn initial-input))
+          (gsetq display-line-numbers current-display-line-numbers))))
+    (advice-add 'evil-ex :around #'panda--evil-ex-relative-lines))
+  (progn
+    (panda-with-gui
+      (global-display-line-numbers-mode 1))
+    (column-number-mode 1)))
 
 (use-package doom-modeline
   :config
@@ -533,6 +546,12 @@ for MODE. MODE may be a symbol or a list of modes."
 (use-package evil-lion
   :config
   (evil-lion-mode 1))
+
+(use-package evil-numbers
+  :general
+  (general-nmap
+    "C-a" 'evil-numbers/inc-at-pt
+    "C-s" 'evil-numbers/dec-at-pt))
 
 (use-package evil-surround
   :config
