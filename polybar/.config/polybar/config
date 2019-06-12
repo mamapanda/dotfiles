@@ -1,0 +1,233 @@
+[colors]
+background = ${xrdb:polybar.background}
+background-alt = ${xrdb:polybar.backgroundAlt}
+foreground = ${xrdb:polybar.foreground}
+primary = ${xrdb:polybar.primaryColor}
+alert = ${xrdb:polybar.alertColor}
+
+[bar/main]
+; bottom = true
+width = 100%
+height = 27
+radius = 0
+
+fixed-center = true
+
+line-size = 4
+; line-color = #f00
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+; font-0 = Iosevka:style=regular:pixelsize=11
+font-0 = Droid Sans Mono:style=regular:pixelsize=11
+font-1 = Droid Sans Fallback:style=regular:pixelsize=11
+font-2 = Iosevka Nerd Font:style=regular:antialias=true
+
+padding-left = 2
+padding-right = 2
+
+module-margin-left = 1
+module-margin-right = 1
+
+modules-left = wireless-network xbacklight alsa
+modules-center = i3
+modules-right = memory cpu battery date
+
+[module/i3]
+type = internal/i3
+format = <label-state> <label-mode>
+index-sort = true
+wrapping-scroll = false
+
+; Only show workspaces on the same output as the bar
+; pin-workspaces = true
+
+label-mode-padding = 2
+label-mode-foreground = ${colors.foreground}
+label-mode-background = ${colors.background-alt}
+
+; focused = Active workspace on focused monitor
+label-focused = %index%
+label-focused-background = ${colors.background-alt}
+label-focused-underline = ${colors.primary}
+label-focused-padding = 2
+
+; unfocused = Inactive workspace on any monitor
+label-unfocused = %index%
+label-unfocused-padding = 2
+
+; visible = Active workspace on unfocused monitor
+label-visible = %index%
+label-visible-background = ${self.label-focused-background}
+label-visible-underline = ${self.label-focused-underline}
+label-visible-padding = 2
+
+; urgent = Workspace with urgency hint set
+label-urgent = %index%
+label-urgent-background = ${colors.background-alt}
+label-urgent-underline = ${colors.alert}
+label-urgent-padding = 2
+
+; Separator in between workspaces
+; label-separator = |
+
+[module/xbacklight]
+type = internal/xbacklight
+
+format = <bar>
+; label = 
+format-prefix = "ﯦ "
+; label = BL
+
+; bar-width = 11
+bar-width = 10
+bar-indicator = 
+bar-indicator-foreground = ${colors.foreground}
+; bar-indicator-font = 1
+; bar-fill = ─
+bar-fill = ━
+; bar-fill-font = 1
+bar-fill-foreground = ${colors.primary}
+; bar-empty = ─
+bar-empty = ━
+; bar-empty-font = 1
+bar-empty-foreground = ${colors.foreground}
+
+[module/alsa]
+type = internal/alsa
+
+format-volume = <bar-volume>
+format-volume-prefix = "墳 "
+; label-volume = 墳
+; label-volume-foreground = ${colors.foreground}
+; format-volume = <ramp-volume> <bar-volume>
+; ramp-volume-0 = 奄
+; ramp-volume-1 = 奔
+; ramp-volume-2 = 墳
+
+format-muted = <label-muted>
+; format-muted-prefix = " "
+format-muted-prefix = "ﱝ "
+; format-muted-foreground = ${colors.foreground}
+label-muted = muted
+
+bar-volume-width = 10
+bar-volume-foreground-0 = ${colors.primary}
+; bar-volume-foreground-0 = ${xrdb:polybar.color1}
+; bar-volume-foreground-1 = #55aa55
+; bar-volume-foreground-2 = #55aa55
+; bar-volume-foreground-3 = #55aa55
+; bar-volume-foreground-4 = #55aa55
+; bar-volume-foreground-5 = #f5a70a
+; bar-volume-foreground-6 = #ff5555
+bar-volume-gradient = false
+bar-volume-indicator = 
+; bar-volume-indicator-font = 2
+bar-volume-fill = ━
+; bar-volume-fill-font = 2
+bar-volume-empty = ━
+; bar-volume-empty-font = 2
+bar-volume-empty-foreground = ${colors.foreground}
+
+[module/date]
+type = internal/date
+interval = 5
+
+date = %Y-%m-%d
+; date-alt = " %Y-%m-%d"
+
+time = %H:%M
+; time-alt = %H:%M:%S
+
+; format-prefix = 
+; format-prefix-foreground = ${colors.foreground-alt}
+; format-underline = #0a6cf5
+
+label = %date% %time%
+
+[module/wireless-network]
+type = internal/network
+;; ip route | grep '^default' | awk '{print $5}' | head -n1
+interface = wlp2s0
+interval = 3.0
+
+; format-connected = <ramp-signal> <label-connected>
+format-connected = <label-connected>
+; format-connected-underline = ${colors.primary}
+format-connected-prefix = "直 "
+label-connected = %essid%
+
+; format-disconnected =
+format-disconnected = <label-disconnected>
+; format-disconnected-underline = ${self.format-connected-underline}
+format-disconnected-prefix = "睊 "
+label-disconnected = disconnected
+;label-disconnected-foreground = ${colors.foreground-alt}
+
+; ramp-signal-0 = 
+; ramp-signal-1 = 
+; ramp-signal-2 = 
+; ramp-signal-3 = 
+; ramp-signal-4 = 
+; ramp-signal-foreground = ${colors.foreground-alt}
+
+[module/memory]
+type = internal/memory
+interval = 2
+format-prefix = " "
+; format-prefix-foreground = ${colors.foreground-alt}
+; format-underline = ${colors.primary}
+label = %percentage_used%%
+
+[module/cpu]
+type = internal/cpu
+interval = 2
+format-prefix = " "
+; format-prefix-foreground = ${colors.foreground-alt}
+; format-underline = ${colors.primary}
+label = %percentage%%
+
+[module/battery]
+type = internal/battery
+; ls -l /sys/class/power_supply/
+battery = BAT0
+adapter = AC
+full-at = 98
+
+; format-charging = <animation-charging> <label-charging>
+format-charging = <ramp-capacity> <label-charging>
+; format-charging-prefix = " "
+label-charging = %percentage%%
+; format-charging-underline = ${colors.primary}
+
+; format-discharging = <animation-discharging> <label-discharging>
+format-discharging = <ramp-capacity> <label-discharging>
+; format-discharging-prefix = " "
+label-discharging = %percentage%%
+; format-discharging-underline = ${self.format-charging-underline}
+
+format-full = <ramp-capacity> <label-full>
+; format-full-prefix = " "
+label-full = %percentage%%
+; format-full-prefix-foreground = ${colors.foreground-alt}
+; format-full-underline = ${self.format-charging-underline}
+
+; ramp-capacity-0 = 
+ramp-capacity-0 = 
+ramp-capacity-1 = 
+ramp-capacity-2 = 
+ramp-capacity-3 = 
+; ramp-capacity-foreground = ${colors.foreground-alt}
+
+; animation-charging-0 = 
+; animation-charging-1 = 
+; animation-charging-2 = 
+; animation-charging-foreground = ${colors.foreground-alt}
+; animation-charging-framerate = 750
+
+; animation-discharging-0 = 
+; animation-discharging-1 = 
+; animation-discharging-2 = 
+; animation-discharging-foreground = ${colors.foreground-alt}
+; animation-discharging-framerate = 750

@@ -221,40 +221,6 @@ bindsym $mod+Shift+minus move scratchpad
 # If there are multiple scratchpad windows, this command cycles through them.
 bindsym $mod+minus scratchpad show
 
-# * i3bar
-# ** Settings
-# Start i3bar to display a workspace bar (plus the system information i3status if available)
-bar {
-    i3bar_command i3bar
-    status_command i3status
-    position bottom
-
-## please set your primary output first. Example: 'xrandr --output eDP1 --primary'
-#   tray_output primary
-#   tray_output eDP1
-
-    bindsym button4 nop
-    bindsym button5 nop
-    strip_workspace_numbers yes
-
-    colors {
-        background $background
-        statusline $foreground
-        separator  $active_color
-
-#                          border        backgr.     text
-        focused_workspace  $active_color $background $foreground
-        active_workspace   $background   $background $foreground
-        inactive_workspace $background   $background $foreground
-        binding_mode       $active_color $background $foreground
-        urgent_workspace   $urgent_color $background $foreground
-    }
-}
-
-# ** Keybindings
-# hide/unhide i3status bar
-bindsym $mod+m bar mode toggle
-
 # * Modes
 # ** Gaps
 # Press $mod+Shift+g to enter the gap mode. Choose o or i for
@@ -367,7 +333,9 @@ exec --no-startup-id clipit
 exec --no-startup-id xautolock -time 10 -locker blurlock
 exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
-## rebind keys
+# status bar
+exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+# rebind keys
 exec --no-startup-id setxkbmap -option 'ctrl:swapcaps'; xcape -e 'Control_L=Escape'
 
 # ** Keybindings
