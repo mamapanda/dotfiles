@@ -366,7 +366,6 @@ for MODE. MODE may be a symbol or a list of modes."
 
 ;;;; Behavior
 (gsetq auto-save-default nil
-       blink-cursor-blinks 0
        c-default-style '((java-mode . "java")
                          (awk-mode . "awk")
                          (other . "stroustrup"))
@@ -387,7 +386,7 @@ for MODE. MODE may be a symbol or a list of modes."
                tab-width 4
                truncate-lines t)
 
-(blink-cursor-mode 1)
+(blink-cursor-mode -1)
 (delete-selection-mode 1)
 (electric-pair-mode 1)
 (global-auto-revert-mode t)
@@ -799,10 +798,20 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Readers
 (use-package elfeed
+  :defer t
   :config
   (gsetq elfeed-feeds (panda-get-private-data 'elfeed-feeds)
          elfeed-search-title-max-width 100
          elfeed-search-filter "@1-month-ago +unread"))
+
+(use-package image-mode
+  :straight nil
+  :defer t
+  :gfhook '(panda-set-image-locals)
+  :config
+  (defun panda-set-image-locals ()
+    (display-line-numbers-mode -1)
+    (gsetq-local evil-default-cursor (list nil))))
 
 (use-package nov
   :mode ("\\.epub$" . nov-mode)
@@ -1273,6 +1282,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 ;;;; Org
 (use-package org
+  :straight nil
   :gfhook '(panda-trim-on-save-mode)
   :general
   (panda-space "a" 'org-agenda)
@@ -1285,6 +1295,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
                       ((org-agenda-overriding-header "Unscheduled TODOs:")
                        (org-agenda-skip-function
                         '(org-agenda-skip-entry-if 'timestamp)))))))
+         org-catch-invisible-edits 'error
          org-src-fontify-natively t
          org-src-tab-acts-natively t))
 

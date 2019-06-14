@@ -4,7 +4,6 @@
 - [[#emacs][Emacs]]
   - [[#use-package-keyword-order][~use-package~ Keyword Order]]
   - [[#mode-specific-mapping-conventions][Mode-specific Mapping Conventions]]
-- [[#i3][i3]]
 
 * Emacs
 ** ~use-package~ Keyword Order
@@ -52,8 +51,3 @@ convention when it doesn't make sense (e.g. ~c~ as compile in
 | ~x~ | find references |
 | ~,~ | repl            |
 | ~\~ | restart server  |
-
-* i3
-The XKB keyboard options may have to be added to
-~/etc/X11/mhwd.d/intel.conf~ to persist after a suspend. Making a
-systemd resume unit doesn't seem to work.
