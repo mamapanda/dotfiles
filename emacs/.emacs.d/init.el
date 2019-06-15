@@ -4,8 +4,7 @@
 
 ;;;; Startup Optimizations
 (cl-defmacro panda-setq-init (symbol value &rest args)
-  "Same as `setq', but only applies during initialization and restores
-the original values of the variables in `after-init-hook'."
+  "Same as `setq', but the values only apply during init time."
   (cl-labels ((build-form
                (symbol value args)
                (cons
@@ -83,7 +82,6 @@ It should contain an alist literal for `panda-get-private-data'.")
          evil-want-Y-yank-to-eol t)
   (gsetq-default evil-symbol-word-search t)
   (progn
-    (general-evil-setup)
     ;; for bindings that will stay constant
     (general-create-definer panda-space
       :states '(normal operator motion visual)
@@ -108,7 +106,7 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;;;;; Defuns
 (defun panda-bind-visual-line-motions (keymap)
   "Bind visual line equivalents of evil motions in KEYMAP."
-  (general-mmap :keymaps keymap
+  (general-def 'motion :keymaps keymap
     "j"  'evil-next-visual-line
     "k"  'evil-previous-visual-line
     "0"  'evil-beginning-of-visual-line
@@ -171,6 +169,11 @@ It should contain an alist literal for `panda-get-private-data'.")
         (goto-char pos))
     (message "Buffer is not visiting a file")))
 
+(defun panda-configure-image-view ()
+  "Configure settings for viewing an image."
+  (display-line-numbers-mode -1)
+  (gsetq-local evil-default-cursor (list nil)))
+
 (defun panda-sudo-reload-file ()
   "Reload the current file with root privileges, preserving point."
   (interactive)
@@ -182,8 +185,7 @@ It should contain an alist literal for `panda-get-private-data'.")
 
 ;;;;; Macros
 (defmacro panda-add-hook-once (hook fn &optional append local)
-  "Same as `add-hook', but FN is immediately removed from HOOK after
-it has been run once."
+  "Same as `add-hook', but FN is removed from HOOK after being run."
   (let ((hook-fn-name (gensym)))
     `(progn
        (defun ,hook-fn-name ()
@@ -207,8 +209,7 @@ it has been run once."
        (advice-add (quote ,command) :around (function ,advice-name)))))
 
 (cl-defmacro panda-with-gui (&body body)
-  "If a daemon is running, then add BODY to `after-make-frame-functions'
-with a lambda wrapper. Else, simply evaluate BODY."
+  "Run BODY when a gui is available."
   (declare (indent defun))
   (if (daemonp)
       `(add-to-list 'after-make-frame-functions
@@ -298,8 +299,8 @@ will automatically skip over those.")
   "Regexp representing the right delimiter for the inside of a function.")
 
 (defmacro panda-set-inner-defun-regexp (mode begin end)
-  "Set `panda-inner-defun-begin-regexp' and `panda-inner-defun-end-regexp'
-for MODE. MODE may be a symbol or a list of modes."
+  "Set `panda-inner-defun-begin-regexp' and `panda-inner-defun-end-regexp' for MODE.
+MODE may be a symbol or a list of modes."
   (declare (indent defun))
   (let* ((mode-list (if (listp mode) mode (list mode)))
          (hook-names (mapcar (lambda (mode) (intern (format "%s-hook" mode))) mode-list)))
@@ -399,10 +400,10 @@ for MODE. MODE may be a symbol or a list of modes."
 (panda-disable-repeat evil-backward-char)
 
 ;;;; Keybindings
-(general-nmap :keymaps 'override
+(general-def 'normal override
   "Q" 'save-buffer)
 
-(general-nmap
+(general-def 'normal
   "C-r"        nil
   "U"          'redo
   "_"          'eval-expression
@@ -411,20 +412,20 @@ for MODE. MODE may be a symbol or a list of modes."
   "[ <return>" 'panda-insert-newline-before
   "] <return>" 'panda-insert-newline-after)
 
-(general-imap "<C-backspace>" 'evil-delete-backward-word)
+(general-def 'insert "<C-backspace>" 'evil-delete-backward-word)
 
-(general-mmap
+(general-def 'motion
   "SPC" nil
   "[d"  'panda-backward-defun
   "]d"  'panda-forward-defun)
 
-(general-otomap
+(general-def 'outer
   "e"  'panda-outer-buffer
   "d"  'panda-outer-defun
   "ld" 'panda-outer-last-defun
   "nd" 'panda-outer-next-defun)
 
-(general-itomap
+(general-def 'inner
   "e"  'panda-inner-buffer
   "d"  'panda-inner-defun
   "ld" 'panda-inner-last-defun
@@ -435,7 +436,6 @@ for MODE. MODE may be a symbol or a list of modes."
   "b"   'switch-to-buffer
   "B"   'kill-buffer
   "d"   'dired
-  "D"   'image-dired
   "f"   'find-file
   "h"   'help-command
   "t"   'bookmark-jump
@@ -464,14 +464,13 @@ for MODE. MODE may be a symbol or a list of modes."
 
 (use-package display-line-numbers
   :demand t
-  :general
-  (panda-space "l" 'panda-toggle-line-numbers)
+  :general (panda-space "l" 'panda-toggle-line-numbers)
   :config
   (progn
     (gsetq display-line-numbers-type 'visual)
     (defun panda-toggle-line-numbers ()
-      "Toggle between `display-line-numbers-type' and absolute line
-numbers in the current buffer."
+      "Toggle between `display-line-numbers-type' and absolute line numbers.
+The changes are local to the current buffer."
       (interactive)
       (gsetq display-line-numbers
              (if (eq display-line-numbers display-line-numbers-type)
@@ -508,13 +507,13 @@ numbers in the current buffer."
   (global-hl-todo-mode))
 
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :ghook 'prog-mode-hook)
 
 ;;;; Editing
 (use-package evil-args
   :general
-  (general-itomap "a" 'evil-inner-arg)
-  (general-otomap "a" 'evil-outer-arg))
+  ('inner "a" 'evil-inner-arg)
+  ('outer "a" 'evil-outer-arg))
 
 (use-package evil-commentary
   :config
@@ -548,24 +547,21 @@ numbers in the current buffer."
 
 (use-package evil-numbers
   :general
-  (general-nmap
-    "C-a" 'evil-numbers/inc-at-pt
-    "C-s" 'evil-numbers/dec-at-pt))
+  ('normal "C-a" 'evil-numbers/inc-at-pt
+           "C-s" 'evil-numbers/dec-at-pt))
 
 (use-package evil-surround
   :config
   (global-evil-surround-mode 1))
 
 (use-package expand-region
-  :general
-  (general-vmap "v" 'er/expand-region))
+  :general ('visual "v" 'er/expand-region))
 
 (use-package replace
   :straight nil
   :general
   (panda-space "o" 'occur)
-  (general-nmap occur-mode-map
-    "C-<return>" 'occur-mode-display-occurrence))
+  ('normal occur-mode-map "C-<return>" 'occur-mode-display-occurrence))
 
 (use-package targets
   :straight (:type git :host github :repo "noctuid/targets.el")
@@ -587,8 +583,7 @@ numbers in the current buffer."
 
 ;;;; Navigation
 (use-package avy
-  :general
-  (general-mmap "C-SPC" 'evil-avy-goto-char-timer)
+  :general ('motion "C-SPC" 'evil-avy-goto-char-timer)
   :config
   (gsetq avy-all-windows         nil
          avy-all-windows-alt     t
@@ -614,15 +609,13 @@ numbers in the current buffer."
   (global-evil-visualstar-mode 1))
 
 (use-package imenu
-  :general
-  (panda-space-sc "i" 'imenu)
+  :general (panda-space-sc "i" 'imenu)
   :config
   (gsetq imenu-auto-rescan t))
 
 (use-package projectile
   :defer t
-  :general
-  (panda-space "p" '(:keymap projectile-command-map))
+  :general (panda-space "p" '(:keymap projectile-command-map))
   :config
   (gsetq projectile-indexing-method 'alien
          projectile-completion-system 'ivy)
@@ -635,9 +628,8 @@ numbers in the current buffer."
 (use-package ivy
   :demand t
   :general
-  (general-def :keymaps 'ivy-minibuffer-map
-    "<return>"   'ivy-alt-done
-    "C-<return>" 'ivy-immediate-done)
+  (ivy-minibuffer-map "<return>"   'ivy-alt-done
+                      "C-<return>" 'ivy-immediate-done)
   :config
   (gsetq ivy-wrap t
          ivy-re-builders-alist '((swiper . ivy--regex-plus)
@@ -674,9 +666,7 @@ numbers in the current buffer."
   (counsel-projectile-mode 1))
 
 (use-package helm
-  :general
-  (general-def :keymaps 'helm-map
-    "<escape>" 'helm-keyboard-quit)
+  :general (helm-map "<escape>" 'helm-keyboard-quit)
   :config
   (gsetq helm-echo-input-in-header-line        t
          helm-ff-fuzzy-matching                nil
@@ -715,24 +705,25 @@ numbers in the current buffer."
 
 ;;; Tools
 ;;;; File Manager
+(use-package image-dired
+  :defer t
+  :gfhook ('image-dired-display-image-mode-hook 'panda-configure-image-view)
+  :general (panda-space "D" 'image-dired))
+
 (use-package dired-filter
   :defer t
-  :general
-  (panda-space-sc dired-mode-map
-    "f" '(:keymap dired-filter-map)))
+  :general (panda-space-sc dired-mode-map "f" '(:keymap dired-filter-map)))
 
 (use-package dired-open
-  :general
-  (general-nmap :keymaps 'dired-mode-map
-    "<C-return>" 'dired-open-xdg))
+  :general ('normal dired-mode-map "<C-return>" 'dired-open-xdg))
 
 (use-package dired-subtree
   :general
-  (general-nmap dired-mode-map
-    "zo"    'panda-dired-subtree-insert
-    "zc"    'panda-dired-subtree-remove
-    "za"    'dired-subtree-toggle
-    "<tab>" 'dired-subtree-cycle)
+  ('normal dired-mode-map
+           "zo"    'panda-dired-subtree-insert
+           "zc"    'panda-dired-subtree-remove
+           "za"    'dired-subtree-toggle
+           "<tab>" 'dired-subtree-cycle)
   :config
   (defun panda-dired-subtree-insert ()
     "Like `dired-subtree-insert', but doesn't move point."
@@ -755,8 +746,7 @@ numbers in the current buffer."
 
 ;;;; Git
 (use-package magit
-  :general
-  (panda-space "g" 'magit-status)
+  :general (panda-space "g" 'magit-status)
   :config
   (gsetq magit-auto-revert-mode nil))
 
@@ -769,14 +759,12 @@ numbers in the current buffer."
 (use-package evil-magit :after magit)
 
 (use-package git-timemachine
-  :general
-  (panda-space "G" 'git-timemachine))
+  :general (panda-space "G" 'git-timemachine))
 
 ;;;; Music
 (use-package emms
   :straight nil ; yay -S emms-git
-  :general
-  (panda-space "m" 'emms)
+  :general (panda-space "m" 'emms)
   :config
   (require 'emms-setup)
   (require 'emms-info-libtag)
@@ -807,39 +795,49 @@ This is adapted from `emms-info-track-description'."
 (use-package image-mode
   :straight nil
   :defer t
-  :gfhook '(panda-set-image-locals)
-  :config
-  (defun panda-set-image-locals ()
-    (display-line-numbers-mode -1)
-    (gsetq-local evil-default-cursor (list nil))))
+  :gfhook 'panda-configure-image-view)
 
 (use-package nov
   :mode ("\\.epub$" . nov-mode)
-  :gfhook '(visual-line-mode)
+  :gfhook 'visual-line-mode
   :config
   (gsetq nov-text-width most-positive-fixnum))
 
 (use-package pdf-tools
   :mode ("\\.pdf$" . pdf-view-mode)
-  :gfhook ('pdf-view-mode-hook 'panda-set-pdf-locals)
+  :gfhook ('pdf-view-mode-hook 'panda-configure-image-view)
   :config
   (gsetq-default pdf-view-display-size 'fit-page)
-  (defun panda-set-pdf-locals ()
-    (display-line-numbers-mode -1)
-    (gsetq-local evil-default-cursor (list nil)))
   (pdf-tools-install))
 
 ;;;; Shell
 (use-package eshell
   :general
   (panda-space "<return>" 'eshell)
-  (general-def ctl-x-4-map "<return>" 'panda-eshell-other-window)
+  (ctl-x-4-map "<return>" 'panda-eshell-other-window)
   :config
+  (gsetq eshell-hist-ignoredups t
+         eshell-history-size 1024)
   (defun panda-eshell-other-window (&optional arg)
     "Open `eshell' in another window."
     (interactive "P")
     (switch-to-buffer-other-window
      (save-window-excursion (eshell arg)))))
+
+(use-package esh-autosuggest
+  :ghook 'eshell-mode-hook)
+
+(use-package fish-completion
+  :ghook 'eshell-mode-hook)
+
+(use-package vterm
+  :general
+  (panda-space "<S-return>" 'vterm)
+  (ctl-x-4-map "<S-return>" 'vterm-other-window)
+  :init
+  (defvar vterm-install t)
+  :config
+  (gsetq vterm-shell "fish"))
 
 ;;;; System
 (use-package disk-usage :defer t)
@@ -850,13 +848,12 @@ This is adapted from `emms-info-track-description'."
 (use-package company
   :defer t
   :general
-  (general-def company-active-map
-    "C-p"      'company-select-previous
-    "C-n"      'company-select-next
-    "C-b"      'company-previous-page
-    "C-f"      'company-next-page
-    "<return>" 'company-complete-selection
-    "C-g"      'company-abort)
+  (company-active-map "C-p"      'company-select-previous
+                      "C-n"      'company-select-next
+                      "C-b"      'company-previous-page
+                      "C-f"      'company-next-page
+                      "<return>" 'company-complete-selection
+                      "C-g"      'company-abort)
   :init
   (defvar company-active-map (make-sparse-keymap))
   :config
@@ -876,7 +873,7 @@ This is adapted from `emms-info-track-description'."
   (gsetq flycheck-display-errors-delay 0.5))
 
 (use-package flycheck-posframe
-  :hook (flycheck-mode . flycheck-posframe-mode)
+  :ghook 'flycheck-mode-hook
   :config
   (flycheck-posframe-configure-pretty-defaults))
 
@@ -890,11 +887,22 @@ This is adapted from `emms-info-track-description'."
                                   required-args
                                   extra-args
                                   config-file)
-  "Defines a formatter based on NAME, PROGRAM, REQUIRED-ARGS, and
-EXTRA-ARGS and enables it to run on save in MODE. MODE may be a
-single mode or a list of modes. Additionally, if CONFIG-FILE is found
-in the current directory or one of its parents, then the formatter
-program's arguments are locally set to REQUIRED-ARGS only."
+  "Defines a formatter and enables it to run on save in MODE.
+
+NAME is the name to use for the formatter.
+
+MODE may be a single mode or a list of modes.
+
+PROGRAM defines what executable to run.
+
+REQUIRED-ARGS are args that are absolutely required for the formatter
+program to work.
+
+EXTRA-ARGS are additional arguments to pass to the formatter.
+
+CONFIG-FILE defines the configuration file for the formatter. If
+CONFIG-FILE is found in the current directory or one of its parents,
+then EXTRA-ARGS is not passed to the formatter program."
   (declare (indent defun))
   (cl-assert (symbolp name))
   (cl-assert program)
@@ -956,7 +964,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
   (require 'dap-python)
   ;; `dap--breakpoints-file' is declared with `defconst'
   (gsetq dap-utils-extension-path (no-littering-expand-var-file-name "dap")
-         dap--breakpoints-file) (no-littering-expand-var-file-name "dap/breakpoints")
+         dap--breakpoints-file (no-littering-expand-var-file-name "dap/breakpoints"))
   (dap-mode 1)
   (dap-ui-mode 1))
 
@@ -980,6 +988,14 @@ program's arguments are locally set to REQUIRED-ARGS only."
       (cl-destructuring-bind (evil-operator . lispyville-operator) operators
         (panda-evil-goggles-add lispyville-operator evil-operator)))))
 
+(use-package lispy
+  :ghook 'lispyville-mode-hook
+  :config
+  (gsetq lispy-key-theme '(lispy special))
+  (lispy-define-key lispy-mode-map-special "<" 'lispy-slurp-or-barf-left)
+  (lispy-define-key lispy-mode-map-special ">" 'lispy-slurp-or-barf-right)
+  (general-def lispy-mode-map-lispy "\"" 'lispy-doublequote))
+
 ;;;; Snippets
 (use-package yasnippet
   :config
@@ -998,21 +1014,18 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package ivy-yasnippet
   :after ivy yasnippet
-  :general
-  (panda-space "y" 'ivy-yasnippet))
+  :general (panda-space "y" 'ivy-yasnippet))
 
 ;;;; View / Layout
 (use-package olivetti :defer t)
 
 (use-package outshine
   :defer t
-  :general
-  (panda-space-sc outshine-mode-map
-    "I" 'outshine-imenu)
+  :general (panda-space-sc outshine-mode-map "I" 'outshine-imenu)
   :config
   (gsetq outshine-org-style-global-cycling-at-bob-p t)
   ;; this is down here because of the `lookup-key' call
-  (general-nmap :keymaps 'outshine-mode-map
+  (general-def 'normal outshine-mode-map
     "<tab>"     (lookup-key outshine-mode-map (kbd "TAB"))
     "<backtab>" 'outshine-cycle-buffer)
   ;; needed for `outshine-imenu', since outshine doesn't load imenu
@@ -1044,7 +1057,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
     :program "clang-format"))
 
 (use-package ccls
-  :hook ((c-mode c++-mode) . panda-ccls)
+  :ghook ('(c-mode-hook c++-mode-hook) 'panda-ccls)
   :config
   (defun panda-ccls ()
     "Load \"ccls\", then call `lsp'."
@@ -1102,6 +1115,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
    (make-lsp-client :new-connection (lsp-stdio-connection '("dls"))
                     :major-modes '(d-mode)
                     :server-id 'dls))
+  (add-to-list 'lsp-language-id-configuration '(d-mode . "d"))
   (panda-formatter-def dfmt
     :mode d-mode
     :program "dfmt"
@@ -1118,7 +1132,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
                                    panda-set-elisp-locals
                                    yas-minor-mode))
   :general
-  (panda-space-sc '(emacs-lisp-mode-map lisp-interaction-mode-map)
+  (panda-space-sc (emacs-lisp-mode-map lisp-interaction-mode-map)
     ",b" 'eval-buffer
     ",d" 'eval-defun
     ",e" 'eval-last-sexp
@@ -1130,7 +1144,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package macrostep
   :general
-  (panda-space-sc '(emacs-lisp-mode-map lisp-interaction-mode-map)
+  (panda-space-sc (emacs-lisp-mode-map lisp-interaction-mode-map)
     "m" 'macrostep-expand))
 
 ;;;; Fish
@@ -1165,7 +1179,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 ;;;; HTML / CSS
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode))
-  :gfhook '(lsp)
+  :gfhook 'lsp
   :init
   (gsetq web-mode-enable-auto-closing t
          web-mode-enable-auto-indentation t
@@ -1186,7 +1200,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
 
 (use-package css-mode
   :defer t
-  :gfhook '(lsp)
+  :gfhook 'lsp
   :config
   (panda-formatter-def prettier-css
     :mode css-mode
@@ -1196,7 +1210,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
     :config-file ".prettierrc"))
 
 (use-package emmet-mode
-  :hook ((web-mode css-mode) . emmet-mode))
+  :ghook '(web-mode-hook css-mode-hook))
 
 ;;;; JavaScript / TypeScript
 (use-package js
@@ -1225,24 +1239,10 @@ program's arguments are locally set to REQUIRED-ARGS only."
     ",r" 'nodejs-repl-send-region
     ",," 'nodejs-repl))
 
-(use-package tide
-  :disabled t
-  :hook ((js-mode typescript-mode) . panda-enable-tide)
-  :general
-  (panda-space-sc tide-mode-map
-    "r"  'tide-rename-symbol
-    "\\" 'tide-restart-server)
-  :config
-  (defun panda-enable-tide ()
-    (company-mode 1)
-    (flycheck-mode 1)
-    (tide-setup)
-    (tide-hl-identifier-mode 1)))
-
 ;;;; JSON
 (use-package json-mode
   :defer t
-  :gfhook '(panda-disable-js-hooks)
+  :gfhook 'panda-disable-js-hooks
   :config
   (defun panda-disable-js-hooks ()
     (company-mode -1)
@@ -1267,12 +1267,12 @@ program's arguments are locally set to REQUIRED-ARGS only."
 ;;;; Makefile
 (use-package make-mode
   :defer t
-  :gfhook ('makefile-mode-hook  '(panda-trim-on-save-mode yas-minor-mode)))
+  :gfhook ('makefile-mode-hook '(panda-trim-on-save-mode yas-minor-mode)))
 
 ;;;; Markdown
 (use-package markdown-mode
   :defer t
-  :gfhook '(yas-minor-mode)
+  :gfhook 'yas-minor-mode
   :config
   (panda-formatter-def prettier-markdown
     :mode markdown-mode
@@ -1283,31 +1283,37 @@ program's arguments are locally set to REQUIRED-ARGS only."
 ;;;; Org
 (use-package org
   :straight nil
-  :gfhook '(panda-trim-on-save-mode)
+  :gfhook 'panda-trim-on-save-mode
   :general
-  (panda-space "a" 'org-agenda)
+  (panda-space
+    "a" 'org-agenda
+    "A" 'org-capture)
   :config
-  (gsetq org-agenda-files (directory-files-recursively "~/org/agenda" "\\.org$")
-         org-agenda-custom-commands
+  (gsetq org-directory "~/org")
+  (gsetq org-agenda-custom-commands
          '(("n" "Agenda and unscheduled TODOs"
             ((agenda "")
-             (alltodo ""
-                      ((org-agenda-overriding-header "Unscheduled TODOs:")
-                       (org-agenda-skip-function
-                        '(org-agenda-skip-entry-if 'timestamp)))))))
+             (alltodo "" ((org-agenda-overriding-header "Unscheduled TODOs:")
+                          (org-agenda-skip-function
+                           '(org-agenda-skip-entry-if 'timestamp)))))))
+         org-agenda-files (list (expand-file-name "agenda" org-directory))
+         org-capture-templates '(("d" "Deadline TODO" entry (file "agenda/refile.org")
+                                  "* TODO %?\n  DEADLINE: %t")
+                                 ("s" "Scheduled TODO" entry (file "agenda/refile.org")
+                                  "* TODO %?\n  SCHEDULED: %t"))
          org-catch-invisible-edits 'error
          org-src-fontify-natively t
          org-src-tab-acts-natively t))
 
 (use-package toc-org
-  :hook (org-mode . toc-org-mode))
+  :ghook 'org-mode-hook)
 
 (use-package helm-org-rifle :defer t)
 
 (use-package evil-org
   :after org ; :after takes precedence over :demand
   :demand t ; required for evil-org-agenda to work properly
-  :hook (org-mode . evil-org-mode)
+  :ghook 'org-mode-hook
   :config
   (evil-org-set-key-theme '(additional calendar insert navigation))
   (require 'evil-org-agenda)
@@ -1356,7 +1362,8 @@ program's arguments are locally set to REQUIRED-ARGS only."
    (make-lsp-client :new-connection (lsp-stdio-connection
                                      '("R" "--slave" "-e" "languageserver::run()"))
                     :major-modes '(ess-r-mode)
-                    :server-id 'R)))
+                    :server-id 'R))
+  (add-to-list 'lsp-language-id-configuration '(ess-r-mode . "r")))
 
 ;;;; Rust
 (use-package rust-mode
@@ -1368,7 +1375,7 @@ program's arguments are locally set to REQUIRED-ARGS only."
     :program "rustfmt"))
 
 (use-package cargo
-  :hook (rust-mode . cargo-minor-mode))
+  :ghook ('rust-mode-hook 'cargo-minor-mode))
 
 ;;;; Shell Script
 (use-package sh-script
