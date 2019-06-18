@@ -1283,7 +1283,7 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; Org
 (use-package org
   :straight nil
-  :gfhook 'panda-trim-on-save-mode
+  :gfhook 'panda-format-on-save-mode
   :general
   (panda-space
     "a" 'org-agenda
