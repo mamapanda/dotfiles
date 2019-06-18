@@ -1,9 +1,9 @@
 [colors]
 background = ${xrdb:polybar.background}
-background-alt = ${xrdb:polybar.backgroundAlt}
+background-alt = ${xrdb:polybar.background-alt}
 foreground = ${xrdb:polybar.foreground}
-primary = ${xrdb:polybar.primaryColor}
-alert = ${xrdb:polybar.alertColor}
+primary = ${xrdb:polybar.primary-color}
+alert = ${xrdb:polybar.alert-color}
 
 [bar/main]
 ; bottom = true
