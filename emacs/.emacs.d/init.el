@@ -132,33 +132,10 @@ It should contain an alist literal for `panda-get-private-data'.")
     (indent-region (point-min) (point-max))
     (delete-trailing-whitespace)))
 
-(defun panda-insert-space-before (&optional count)
-  "Insert COUNT spaces before point."
-  (interactive "P")
-  (dotimes (i (or count 1))
-    (insert " ")))
-
-(defun panda-insert-space-after (&optional count)
-  "Insert COUNT spaces after point."
-  (interactive "P")
-  (save-excursion
-    (evil-forward-char)
-    (dotimes (i (or count 1))
-      (insert " "))))
-
-(defun panda-insert-newline-before (&optional count)
-  "Insert COUNT newlines before point and indent."
-  (interactive "P")
-  (dotimes (i (or count 1))
-    (newline-and-indent)))
-
-(defun panda-insert-newline-after (&optional count)
-  "Insert COUNT newlines after point and indent."
-  (interactive "P")
-  (save-excursion
-    (evil-forward-char)
-    (dotimes (i (or count 1))
-      (newline-and-indent))))
+(defun panda-kill-this-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (kill-buffer (current-buffer)))
 
 (defun panda-reload-file ()
   "Reload the current file, preserving point."
@@ -173,6 +150,11 @@ It should contain an alist literal for `panda-get-private-data'.")
   "Configure settings for viewing an image."
   (display-line-numbers-mode -1)
   (gsetq-local evil-default-cursor (list nil)))
+
+(defun panda-static-evil-ex (&optional initial-input)
+  "`evil-ex' that doesn't move point."
+  (interactive)
+  (save-excursion (call-interactively #'evil-ex)))
 
 (defun panda-sudo-reload-file ()
   "Reload the current file with root privileges, preserving point."
@@ -265,14 +247,6 @@ It should contain an alist literal for `panda-get-private-data'.")
   "Move backward COUNT defuns."
   (let ((count (or count 1)))
     (panda-forward-defun (- count))))
-
-;;;;; Operators
-(evil-define-operator panda-query-replace (beg end type)
-  "Evil operator for `query-replace'."
-  (save-excursion
-    (unless (evil-visual-state-p)
-      (evil-visual-select beg end type))
-    (call-interactively #'query-replace)))
 
 ;;;;; Text Objects
 ;;;;;; Buffer
@@ -372,6 +346,7 @@ MODE may be a symbol or a list of modes."
                          (other . "stroustrup"))
        delete-by-moving-to-trash t
        disabled-command-function nil
+       enable-recursive-minibuffers t
        inhibit-compacting-font-caches t
        make-backup-files nil
        recentf-max-saved-items 100
@@ -389,33 +364,48 @@ MODE may be a symbol or a list of modes."
 
 (blink-cursor-mode -1)
 (delete-selection-mode 1)
+(desktop-save-mode)
 (electric-pair-mode 1)
 (global-auto-revert-mode t)
 (recentf-mode 1)
 (show-paren-mode 1)
 
 (panda-disable-repeat evil-forward-char)
+(panda-disable-repeat evil-backward-char)
 (panda-disable-repeat evil-next-line)
 (panda-disable-repeat evil-previous-line)
-(panda-disable-repeat evil-backward-char)
+
+(panda-disable-repeat evil-forward-word-begin)
+(panda-disable-repeat evil-forward-word-end)
+(panda-disable-repeat evil-backward-word-begin)
+
+(panda-disable-repeat evil-forward-WORD-begin)
+(panda-disable-repeat evil-forward-WORD-end)
+(panda-disable-repeat evil-backward-WORD-begin)
+
+(panda-disable-repeat evil-backward-paragraph)
+(panda-disable-repeat evil-forward-paragraph)
 
 ;;;; Keybindings
 (general-def 'normal override
-  "Q" 'save-buffer)
+  ";"   'panda-static-evil-ex
+  "C-;" 'evil-ex
+  ":"   'eval-expression
+  ","   'execute-extended-command
+  "Q"   'save-buffer)
 
 (general-def 'normal
-  "C-r"        nil
-  "U"          'redo
-  "_"          'eval-expression
-  "[ SPC"      'panda-insert-space-before
-  "] SPC"      'panda-insert-space-after
-  "[ <return>" 'panda-insert-newline-before
-  "] <return>" 'panda-insert-newline-after)
+  "C-r" nil
+  "U"   'redo)
 
 (general-def 'insert "<C-backspace>" 'evil-delete-backward-word)
 
 (general-def 'motion
   "SPC" nil
+  ";"   nil
+  ","   nil
+  "gs"  'evil-repeat-find-char
+  "gS"  'evil-repeat-find-char-reverse
   "[d"  'panda-backward-defun
   "]d"  'panda-forward-defun)
 
@@ -432,22 +422,24 @@ MODE may be a symbol or a list of modes."
   "nd" 'panda-inner-next-defun)
 
 (panda-space
-  "SPC" 'execute-extended-command
-  "b"   'switch-to-buffer
-  "B"   'kill-buffer
-  "d"   'dired
-  "f"   'find-file
-  "h"   'help-command
-  "t"   'bookmark-jump
-  "T"   'bookmark-set
-  "4"   '(:keymap ctl-x-4-map)
-  "%"   (general-key "C-x C-q"))
+  "b" 'switch-to-buffer
+  "d" 'dired
+  "f" 'find-file
+  "h" 'help-command
+  "o" 'occur
+  "t" 'bookmark-jump
+  "T" 'bookmark-set
+  "4" '(:keymap ctl-x-4-map)
+  "5" '(:keymap ctl-x-5-map)
+  "%" (general-key "C-x C-q"))
 
 (panda-space-sc
   "c" 'compile
   "k" 'previous-error
   "j" 'next-error
   "x" 'xref-find-references)
+
+(evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
 
 ;;; Global Packages
 ;;;; Appearance
@@ -552,16 +544,23 @@ The changes are local to the current buffer."
 
 (use-package evil-surround
   :config
+  (general-def 'visual evil-surround-mode-map
+    "s"  'evil-surround-region
+    "S"  'evil-Surround-region
+    "gS" nil)
   (global-evil-surround-mode 1))
+
+(use-package evil-traces
+  :straight (evil-traces
+             :host github
+             :repo "mamapanda/evil-traces"
+             :local-repo "~/code/emacs-lisp/evil-traces")
+  :config
+  (evil-traces-use-diff-faces)
+  (evil-traces-mode))
 
 (use-package expand-region
   :general ('visual "v" 'er/expand-region))
-
-(use-package replace
-  :straight nil
-  :general
-  (panda-space "o" 'occur)
-  ('normal occur-mode-map "C-<return>" 'occur-mode-display-occurrence))
 
 (use-package targets
   :straight (:type git :host github :repo "noctuid/targets.el")
@@ -574,6 +573,12 @@ The changes are local to the current buffer."
   (gsetq undo-tree-enable-undo-in-region nil))
 
 ;;;; Help
+(use-package helpful
+  :general
+  (help-map "f" 'helpful-callable
+            "k" 'helpful-key
+            "v" 'helpful-variable))
+
 (use-package which-key
   :config
   (gsetq which-key-popup-type 'side-window
@@ -590,16 +595,38 @@ The changes are local to the current buffer."
          avy-background          t
          avy-indent-line-overlay t))
 
+(use-package deadgrep
+  :general (panda-space "s" 'deadgrep))
+
+(use-package evil-fringe-mark
+  :config
+  (global-evil-fringe-mark-mode))
+
 (use-package evil-matchit
   :config
   (global-evil-matchit-mode 1))
 
 (use-package evil-snipe
   :config
-  (gsetq evil-snipe-repeat-keys  nil
-         evil-snipe-smart-case   t
-         evil-snipe-scope        'visible
-         evil-snipe-repeat-scope 'visible)
+  (gsetq evil-snipe-repeat-keys   t
+         evil-snipe-smart-case    t
+         evil-snipe-scope         'visible
+         evil-snipe-repeat-scope  'visible
+         evil-snipe-tab-increment t)
+  (general-def 'visual evil-snipe-local-mode-map
+    "x" 'evil-snipe-x
+    "X" 'evil-snipe-X
+    "z" 'evil-snipe-s
+    "Z" 'evil-snipe-S)
+  (general-def 'motion evil-snipe-override-local-mode-map
+    ";"  nil
+    ","  nil
+    "gs" 'evil-snipe-repeat
+    "gS" 'evil-snipe-repeat-reverse)
+  (setf (cdr evil-snipe-parent-transient-map) nil)
+  (general-def evil-snipe-parent-transient-map
+    "s" 'evil-snipe-repeat
+    "S" 'evil-snipe-repeat-reverse)
   (evil-snipe-mode 1)
   (evil-snipe-override-mode 1))
 
@@ -627,15 +654,15 @@ The changes are local to the current buffer."
 
 (use-package ivy
   :demand t
-  :general
-  (ivy-minibuffer-map "<return>"   'ivy-alt-done
-                      "C-<return>" 'ivy-immediate-done)
   :config
   (gsetq ivy-wrap t
          ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                  (t . ivy--regex-fuzzy))
          confirm-nonexistent-file-or-buffer t
          ivy-count-format "(%d/%d) ")
+  (general-def ivy-minibuffer-map
+    "<return>"   'ivy-alt-done
+    "C-<return>" 'ivy-immediate-done)
   (ivy-mode 1))
 
 (use-package counsel
@@ -643,8 +670,7 @@ The changes are local to the current buffer."
   :general
   (panda-space
     "F" 'counsel-recentf
-    "s" 'counsel-git-grep
-    "S" 'counsel-rg)
+    "S" 'counsel-git-grep)
   :config
   (counsel-mode 1))
 
@@ -666,17 +692,19 @@ The changes are local to the current buffer."
   (counsel-projectile-mode 1))
 
 (use-package helm
-  :general (helm-map "<escape>" 'helm-keyboard-quit)
+  :defer t
   :config
   (gsetq helm-echo-input-in-header-line        t
          helm-ff-fuzzy-matching                nil
          helm-find-files-ignore-thing-at-point t
          helm-split-window-inside-p            t
          helm-mini-default-sources             '(helm-source-buffers-list
-                                                 helm-source-recentf)))
+                                                 helm-source-recentf))
+  (general-def helm-map "<escape>" 'helm-keyboard-quit))
 
 ;;;; Windows
 (use-package eyebrowse
+  :demand t
   :general
   (panda-space
     "<tab>" 'eyebrowse-last-window-config
@@ -687,6 +715,8 @@ The changes are local to the current buffer."
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
+  (gsetq eyebrowse-close-window-config-prompt t
+         eyebrowse-new-workspace t)
   (defun panda-eyebrowse-create-window-config (tag)
     (interactive "sWindow Config Tag: ")
     (eyebrowse-create-window-config)
@@ -847,30 +877,29 @@ This is adapted from `emms-info-track-description'."
 ;;;; Completion / Linting
 (use-package company
   :defer t
-  :general
-  (company-active-map "C-p"      'company-select-previous
-                      "C-n"      'company-select-next
-                      "C-b"      'company-previous-page
-                      "C-f"      'company-next-page
-                      "<return>" 'company-complete-selection
-                      "C-g"      'company-abort)
   :init
   (defvar company-active-map (make-sparse-keymap))
   :config
-  (gsetq company-dabbrev-code-modes nil
-         company-minimum-prefix-length 2
+  (gsetq company-backends                  (delete 'company-dabbrev company-backends)
+         company-dabbrev-code-modes        nil
+         company-minimum-prefix-length     2
          company-tooltip-align-annotations t)
-  (delete 'company-dabbrev company-backends))
+  (general-def company-active-map
+    "C-p"      'company-select-previous
+    "C-n"      'company-select-next
+    "C-b"      'company-previous-page
+    "C-f"      'company-next-page
+    "<return>" 'company-complete-selection
+    "C-g"      'company-abort))
 
 (use-package flycheck
   :defer t
-  :general
+  :config
+  (gsetq flycheck-display-errors-delay 0.5)
   (panda-space-sc flycheck-mode-map
     "e" 'flycheck-list-errors
     "j" 'flycheck-next-error
-    "k" 'flycheck-previous-error)
-  :config
-  (gsetq flycheck-display-errors-delay 0.5))
+    "k" 'flycheck-previous-error))
 
 (use-package flycheck-posframe
   :ghook 'flycheck-mode-hook
@@ -929,27 +958,26 @@ then EXTRA-ARGS is not passed to the formatter program."
 
 ;;;; Language Server
 (use-package lsp-mode
+  :defer t
   :commands lsp-register-client
-  :general
-  (panda-space-sc lsp-mode-map
-    "r"  'lsp-rename
-    "x"  'lsp-find-references
-    "\\" 'lsp-restart-workspace)
   :config
   (gsetq lsp-enable-indentation nil
          lsp-enable-on-type-formatting nil
-         lsp-prefer-flymake nil))
+         lsp-prefer-flymake nil)
+  (panda-space-sc lsp-mode-map
+    "r"  'lsp-rename
+    "x"  'lsp-find-references
+    "\\" 'lsp-restart-workspace))
 
 (use-package company-lsp :after company lsp)
 
 (use-package lsp-ui
   :after lsp
-  :general
+  :config
+  (gsetq lsp-ui-sideline-show-diagnostics nil)
   (panda-space-sc lsp-ui-mode-map
     "i" 'lsp-ui-imenu
-    "R" 'lsp-ui-sideline-apply-code-actions)
-  :config
-  (gsetq lsp-ui-sideline-show-diagnostics nil))
+    "R" 'lsp-ui-sideline-apply-code-actions))
 
 (use-package dap-mode
   :general
@@ -972,7 +1000,13 @@ then EXTRA-ARGS is not passed to the formatter program."
 (use-package lispyville
   :defer t
   :config
-  (lispyville-set-key-theme '(commentary operators slurp/barf-cp))
+  (lispyville-set-key-theme '(additional-motions
+                              c-w
+                              commentary
+                              operators
+                              prettify
+                              slurp/barf-cp))
+  (general-unbind 'motion lispyville-mode-map "{" "}")
   (with-eval-after-load 'evil-goggles
     (dolist (operators '((evil-yank . lispyville-yank)
                          (evil-delete . lispyville-delete)
@@ -989,6 +1023,7 @@ then EXTRA-ARGS is not passed to the formatter program."
         (panda-evil-goggles-add lispyville-operator evil-operator)))))
 
 (use-package lispy
+  :disabled t
   :ghook 'lispyville-mode-hook
   :config
   (gsetq lispy-key-theme '(lispy special))
@@ -1012,22 +1047,17 @@ then EXTRA-ARGS is not passed to the formatter program."
 
 (use-package yasnippet-snippets :after yasnippet)
 
-(use-package ivy-yasnippet
-  :after ivy yasnippet
-  :general (panda-space "y" 'ivy-yasnippet))
-
 ;;;; View / Layout
 (use-package olivetti :defer t)
 
 (use-package outshine
   :defer t
-  :general (panda-space-sc outshine-mode-map "I" 'outshine-imenu)
   :config
   (gsetq outshine-org-style-global-cycling-at-bob-p t)
-  ;; this is down here because of the `lookup-key' call
   (general-def 'normal outshine-mode-map
     "<tab>"     (lookup-key outshine-mode-map (kbd "TAB"))
     "<backtab>" 'outshine-cycle-buffer)
+  (panda-space-sc outshine-mode-map "I" 'outshine-imenu)
   ;; needed for `outshine-imenu', since outshine doesn't load imenu
   (require 'imenu))
 
@@ -1083,7 +1113,10 @@ then EXTRA-ARGS is not passed to the formatter program."
     (gsetq-local evil-args-delimiters '(" "))))
 
 (use-package slime
-  :general
+  :defer t
+  :config
+  (gsetq inferior-lisp-program "sbcl"
+         slime-contribs '(slime-fancy))
   (panda-space-sc slime-mode-map
     "m"  'macrostep-expand
     ",b" 'slime-eval-buffer
@@ -1091,9 +1124,6 @@ then EXTRA-ARGS is not passed to the formatter program."
     ",e" 'slime-eval-last-expression
     ",r" 'slime-eval-region
     ",," 'slime)
-  :config
-  (gsetq inferior-lisp-program "sbcl"
-         slime-contribs '(slime-fancy))
   (slime-setup))
 
 (use-package slime-company
@@ -1131,14 +1161,13 @@ then EXTRA-ARGS is not passed to the formatter program."
                                    panda-format-on-save-mode
                                    panda-set-elisp-locals
                                    yas-minor-mode))
-  :general
+  :config
   (panda-space-sc (emacs-lisp-mode-map lisp-interaction-mode-map)
     ",b" 'eval-buffer
     ",d" 'eval-defun
     ",e" 'eval-last-sexp
     ",r" 'eval-region
     ",," 'ielm)
-  :config
   (defun panda-set-elisp-locals ()
     (gsetq-local evil-args-delimiters '(" "))))
 
@@ -1300,7 +1329,9 @@ then EXTRA-ARGS is not passed to the formatter program."
          org-capture-templates '(("d" "Deadline TODO" entry (file "agenda/refile.org")
                                   "* TODO %?\n  DEADLINE: %t")
                                  ("s" "Scheduled TODO" entry (file "agenda/refile.org")
-                                  "* TODO %?\n  SCHEDULED: %t"))
+                                  "* TODO %?\n  SCHEDULED: %t")
+                                 ("t" "TODO" entry (file "agenda/refile.org")
+                                  "* TODO %?"))
          org-catch-invisible-edits 'error
          org-src-fontify-natively t
          org-src-tab-acts-natively t))
@@ -1323,15 +1354,14 @@ then EXTRA-ARGS is not passed to the formatter program."
 (use-package python
   :defer t
   :gfhook '(lsp panda-set-python-locals yas-minor-mode)
-  :general
+  :config
+  (gsetq python-indent-offset 4)
   (panda-space-sc python-mode-map
     ",b" 'python-shell-send-buffer
     ",d" 'python-shell-send-defun
     ",f" 'python-shell-send-file
     ",r" 'python-shell-send-region
     ",," 'run-python)
-  :config
-  (gsetq python-indent-offset 4)
   (defun panda-set-python-locals ()
     (gsetq-local yas-indent-line 'fixed)
     (gsetq-local yas-also-auto-indent-first-line nil))
@@ -1346,7 +1376,9 @@ then EXTRA-ARGS is not passed to the formatter program."
 (use-package ess
   :defer t
   :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp yas-minor-mode))
-  :general
+  :config
+  (gsetq ess-ask-for-ess-directory nil
+         ess-use-flymake nil)
   (panda-space-sc ess-r-mode-map
     ",b" 'ess-eval-buffer
     ",d" 'ess-eval-function
@@ -1355,9 +1387,6 @@ then EXTRA-ARGS is not passed to the formatter program."
     ",p" 'ess-eval-paragraph
     ",r" 'ess-eval-region
     ",," 'R)
-  :config
-  (gsetq ess-ask-for-ess-directory nil
-         ess-use-flymake nil)
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection
                                      '("R" "--slave" "-e" "languageserver::run()"))
