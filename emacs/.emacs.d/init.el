@@ -909,53 +909,6 @@ This is adapted from `emms-info-track-description'."
 ;;;; Formatting
 (use-package reformatter)
 
-(cl-defmacro panda-formatter-def (name
-                                  &key
-                                  mode
-                                  program
-                                  required-args
-                                  extra-args
-                                  config-file)
-  "Defines a formatter and enables it to run on save in MODE.
-
-NAME is the name to use for the formatter.
-
-MODE may be a single mode or a list of modes.
-
-PROGRAM defines what executable to run.
-
-REQUIRED-ARGS are args that are absolutely required for the formatter
-program to work.
-
-EXTRA-ARGS are additional arguments to pass to the formatter.
-
-CONFIG-FILE defines the configuration file for the formatter. If
-CONFIG-FILE is found in the current directory or one of its parents,
-then EXTRA-ARGS is not passed to the formatter program."
-  (declare (indent defun))
-  (cl-assert (symbolp name))
-  (cl-assert program)
-  (let ((mode-list (if (listp mode) mode (list mode)))
-        (args-name (intern (format "%s-args" name)))
-        (setup-fn-name (intern (format "%s-setup" name)))
-        (format-on-save-name (intern (format "%s-on-save-mode" name))))
-    `(progn
-       (defvar ,args-name
-         ,(when-let (program-args (append required-args extra-args))
-            `(quote ,program-args)))
-       (reformatter-define ,name
-         :program ,program
-         :args ,args-name)
-       (defun ,setup-fn-name ()
-         (,format-on-save-name 1)
-         ,(when config-file
-            `(when (locate-dominating-file default-directory ,config-file)
-               (gsetq-local ,args-name (quote ,required-args)))))
-       ,@(mapcar (lambda (mode)
-                   (let ((mode-hook (intern (format "%s-hook" mode))))
-                     `(add-hook ',mode-hook #',setup-fn-name)))
-                 mode-list))))
-
 ;;;; Language Server
 (use-package lsp-mode
   :defer t
@@ -1065,26 +1018,33 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; Assembly
 (use-package asm-mode
   :defer t
-  :gfhook '(panda-set-asm-locals yas-minor-mode)
+  :gfhook '(asmfmt-on-save-mode panda-set-asm-locals yas-minor-mode)
   :config
   (gsetq asm-comment-char ?#)
   (defun panda-set-asm-locals ()
     (gsetq-local indent-tabs-mode t)
     (gsetq-local tab-always-indent (default-value 'tab-always-indent)))
-  (panda-formatter-def asmfmt
-    :mode asm-mode
-    :program "asmfmt"))
+  (progn
+    (defvar asmfmt-args nil
+      "Arguments for asmfmt.")
+    (reformatter-define asmfmt
+      :program "asmfmt"
+      :args asmfmt-args)))
 
 ;;;; C / C++
 (use-package cc-mode
   :defer t
-  :gfhook ('(c-mode-hook c++-mode-hook) '(panda-set-c-locals yas-minor-mode))
+  :gfhook ('(c-mode-hook c++-mode-hook)
+           '(clang-format-on-save-mode panda-set-c-locals yas-minor-mode))
   :config
   (defun panda-set-c-locals ()
     (c-set-offset 'innamespace 0))
-  (panda-formatter-def clang-format
-    :mode (c-mode c++-mode)
-    :program "clang-format"))
+  (progn
+    (defvar clang-format-args nil
+      "Arguments for clang-format.")
+    (reformatter-define clang-format
+      :program "clang-format"
+      :args clang-format-args)))
 
 (use-package ccls
   :ghook ('(c-mode-hook c++-mode-hook) 'panda-ccls)
@@ -1139,18 +1099,22 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; D
 (use-package d-mode
   :defer t
-  :gfhook '(lsp yas-minor-mode)
+  :gfhook '(dfmt-on-save-mode lsp yas-minor-mode)
   :config
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection '("dls"))
-                    :major-modes '(d-mode)
-                    :server-id 'dls))
-  (add-to-list 'lsp-language-id-configuration '(d-mode . "d"))
-  (panda-formatter-def dfmt
-    :mode d-mode
-    :program "dfmt"
-    :extra-args ("--brace_style=otbs" "--space_after_cast=false" "--max_line_length=80")
-    :config-file ".editorconfig"))
+  (progn
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection '("dls"))
+                      :major-modes '(d-mode)
+                      :server-id 'dls))
+    (add-to-list 'lsp-language-id-configuration '(d-mode . "d")))
+  (progn
+    (defvar dfmt-args '("--brace_style=otbs"
+                        "--space_after_cast=false"
+                        "--max_line_length=80")
+      "Arguments for dfmt.")
+    (reformatter-define dfmt
+      :program "dfmt"
+      :args dfmt-args)))
 
 ;;;; Emacs Lisp
 (use-package elisp-mode
@@ -1197,18 +1161,21 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; Go
 (use-package go-mode
   :defer t
-  :gfhook '(lsp panda-set-go-locals yas-minor-mode)
+  :gfhook '(gofmt-on-save-mode lsp panda-set-go-locals yas-minor-mode)
   :config
   (defun panda-set-go-locals ()
     (gsetq-local indent-tabs-mode t))
-  (panda-formatter-def gofmt
-    :mode go-mode
-    :program "gofmt"))
+  (progn
+    (defvar gofmt-args nil
+      "Arguments for gofmt.")
+    (reformatter-define gofmt
+      :program "gofmt"
+      :args gofmt-args)))
 
 ;;;; HTML / CSS
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode))
-  :gfhook 'lsp
+  :gfhook '(lsp prettier-html-on-save-mode)
   :init
   (gsetq web-mode-enable-auto-closing t
          web-mode-enable-auto-indentation t
@@ -1221,22 +1188,21 @@ then EXTRA-ARGS is not passed to the formatter program."
          web-mode-script-padding 4
          web-mode-block-padding 4)
   :config
-  (panda-formatter-def prettier-html
-    :mode web-mode
+  (defvar prettier-html-args '("--stdin" "--parser" "html")
+    "Arguments for prettier with HTML.")
+  (reformatter-define prettier-html
     :program "prettier"
-    :required-args ("--stdin" "--parser" "html")
-    :config-file ".prettierrc"))
+    :args prettier-html-args))
 
 (use-package css-mode
   :defer t
-  :gfhook 'lsp
+  :gfhook '(lsp prettier-css-on-save-mode)
   :config
-  (panda-formatter-def prettier-css
-    :mode css-mode
+  (defvar prettier-css-args '("--stdin" "--parser" "css" "--tab-width" "4")
+    "Arguments for prettier with CSS.")
+  (reformatter-define prettier-css
     :program "prettier"
-    :required-args ("--stdin" "--parser" "css")
-    :extra-args ("--tab-width" "4")
-    :config-file ".prettierrc"))
+    :args prettier-css-args))
 
 (use-package emmet-mode
   :ghook '(web-mode-hook css-mode-hook))
@@ -1244,20 +1210,20 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; JavaScript / TypeScript
 (use-package js
   :defer t
-  :gfhook '(lsp yas-minor-mode))
+  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode))
 
 (use-package rjsx-mode :defer t)
 
 (use-package typescript-mode
   :defer t
-  :gfhook '(lsp yas-minor-mode))
+  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode))
 
-(panda-formatter-def prettier-ts
-  :mode (js-mode typescript-mode)
+(defvar prettier-ts-args '("--stdin" "--parser" "typescript" "--tab-width" "4")
+  "Arguments for prettier with TypeScript.")
+
+(reformatter-define prettier-ts
   :program "prettier"
-  :required-args ("--stdin" "--parser" "typescript")
-  :extra-args ("--tab-width" "4")
-  :config-file ".prettierrc")
+  :args prettier-ts-args)
 
 (use-package nodejs-repl
   :general
@@ -1271,18 +1237,18 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; JSON
 (use-package json-mode
   :defer t
-  :gfhook 'panda-disable-js-hooks
+  :gfhook '(panda-disable-js-hooks prettier-json-on-save-mode)
   :config
   (defun panda-disable-js-hooks ()
     (company-mode -1)
     (flycheck-mode -1)
     (prettier-ts-on-save-mode -1))
-  (panda-formatter-def prettier-json
-    :mode json-mode
-    :program "prettier"
-    :required-args ("--stdin" "--parser" "json")
-    :extra-args ("--tab-width" "4")
-    :config-file ".prettierrc"))
+  (progn
+    (defvar prettier-json-args '("--stdin" "--parser" "--json" "--tab-width" "4")
+      "Arguments for prettier with JSON.")
+    (reformatter-define prettier-json
+      :program "prettier"
+      :args prettier-json-args)))
 
 ;;;; Latex
 (use-package tex
@@ -1301,13 +1267,13 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; Markdown
 (use-package markdown-mode
   :defer t
-  :gfhook 'yas-minor-mode
+  :gfhook '(prettier-md-on-save-mode yas-minor-mode)
   :config
-  (panda-formatter-def prettier-markdown
-    :mode markdown-mode
+  (defvar prettier-md-args '("--stdin" "--parser" "markdown")
+    "Arguments for prettier with Markdown.")
+  (reformatter-define prettier-md
     :program "prettier"
-    :required-args ("--stdin" "--parser" "markdown")
-    :config-file ".prettierrc"))
+    :args prettier-md-args))
 
 ;;;; Org
 (use-package org
@@ -1353,7 +1319,7 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; Python
 (use-package python
   :defer t
-  :gfhook '(lsp panda-set-python-locals yas-minor-mode)
+  :gfhook '(black-on-save-mode lsp panda-set-python-locals yas-minor-mode)
   :config
   (gsetq python-indent-offset 4)
   (panda-space-sc python-mode-map
@@ -1365,12 +1331,12 @@ then EXTRA-ARGS is not passed to the formatter program."
   (defun panda-set-python-locals ()
     (gsetq-local yas-indent-line 'fixed)
     (gsetq-local yas-also-auto-indent-first-line nil))
-  (panda-formatter-def black
-    :mode python-mode
-    :program "black"
-    :required-args ("-" "--quiet")
-    :extra-args ("--line-length" "80")
-    :config-file "pyproject.toml"))
+  (progn
+    (defvar black-args '("-" "--quiet" "--line-length" "80")
+      "Arguments for black.")
+    (reformatter-define black
+      :program "black"
+      :args black-args)))
 
 ;;;; R
 (use-package ess
@@ -1397,11 +1363,13 @@ then EXTRA-ARGS is not passed to the formatter program."
 ;;;; Rust
 (use-package rust-mode
   :defer t
-  :gfhook '(lsp yas-minor-mode)
+  :gfhook '(lsp rustfmt-on-save-mode yas-minor-mode)
   :config
-  (panda-formatter-def rustfmt
-    :mode rust-mode
-    :program "rustfmt"))
+  (defvar rustfmt-args nil
+    "Arguments for rustfmt.")
+  (reformatter-define rustfmt
+    :program "rustfmt"
+    :args rustfmt-args))
 
 (use-package cargo
   :ghook ('rust-mode-hook 'cargo-minor-mode))
