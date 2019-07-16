@@ -2,8 +2,6 @@
 # wm independent hotkeys
 #
 
-# TODO: we might eventually split the dotfiles layout into {desktop, editor, term, lang}
-
 # terminal emulator
 super + Return
 	kitty
