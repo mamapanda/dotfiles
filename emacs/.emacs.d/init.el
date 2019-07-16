@@ -72,6 +72,7 @@ It should contain an alist literal for `panda-get-private-data'.")
 
 ;;; Evil
 (use-package evil
+  ;; :straight (:host github :repo "mamapanda/evil" :local-repo "~/code/emacs-lisp/evil")
   :init
   (gsetq evil-want-keybinding nil)
   :config
@@ -218,6 +219,7 @@ It should contain an alist literal for `panda-get-private-data'.")
     (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
 
 ;;;;; Motions
+;; TODO: replace with things.el
 (evil-define-motion panda-forward-defun (&optional count)
   "Move forward COUNT defuns."
   (let* ((count (or count 1))
@@ -353,6 +355,7 @@ MODE may be a symbol or a list of modes."
        require-final-newline t
        save-abbrevs nil
        tramp-default-method "ssh"
+       use-dialog-box nil
        vc-follow-symlinks t)
 
 (gsetq-default bidi-display-reordering nil
