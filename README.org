@@ -2,11 +2,9 @@
 
 This repository contains my personal dotfiles setup, managed with GNU Stow.
 
-- *WM:* i3-gaps
+- *WM:* bspwm
 - *Bar:* polybar
 - *Terminal:* kitty
 - *Shell:* fish
-- *Wallpaper:* [[https://forum.manjaro.org/t/manjaro-wallpapers-by-muser-vol-1/19386/133][by muser]]
+- *Editor:* Emacs
 - *Color Scheme:* ~doom-vibrant~ from [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
-
-[[./screenshot.png]]
