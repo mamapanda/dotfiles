@@ -219,7 +219,6 @@ It should contain an alist literal for `panda-get-private-data'.")
     (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
 
 ;;;;; Motions
-;; TODO: replace with things.el
 (evil-define-motion panda-forward-defun (&optional count)
   "Move forward COUNT defuns."
   (let* ((count (or count 1))
@@ -544,6 +543,9 @@ The changes are local to the current buffer."
   :general
   ('normal "C-a" 'evil-numbers/inc-at-pt
            "C-s" 'evil-numbers/dec-at-pt))
+
+(use-package evil-replace-with-register
+  :general ('normal "gR" 'evil-replace-with-register))
 
 (use-package evil-surround
   :config
