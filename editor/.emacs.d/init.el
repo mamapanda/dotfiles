@@ -176,21 +176,6 @@ It should contain an alist literal for `panda-get-private-data'.")
          (remove-hook ,hook (quote ,hook-fn-name) ,local))
        (add-hook ,hook (quote ,hook-fn-name) ,append ,local))))
 
-(cl-defmacro panda-disable-repeat (command)
-  "Disable repeating COMMAND."
-  (cl-assert (commandp command))
-  (let ((advice-name (intern (format "panda--no-repeat-%s" command))))
-    `(progn
-       (defun ,advice-name (old-fn &rest args)
-         ,(format "Advice to disable repeating %s." command)
-         (when (or (not (eq last-command (function ,command)))
-                   (not (called-interactively-p))
-                   (evil-operator-state-p))
-           (apply old-fn args))
-         ;; hopefully this doesn't blow up
-         (setq this-command (function ,command)))
-       (advice-add (quote ,command) :around (function ,advice-name)))))
-
 (cl-defmacro panda-with-gui (&body body)
   "Run BODY when a gui is available."
   (declare (indent defun))
@@ -371,22 +356,6 @@ MODE may be a symbol or a list of modes."
 (global-auto-revert-mode t)
 (recentf-mode 1)
 (show-paren-mode 1)
-
-(panda-disable-repeat evil-forward-char)
-(panda-disable-repeat evil-backward-char)
-(panda-disable-repeat evil-next-line)
-(panda-disable-repeat evil-previous-line)
-
-(panda-disable-repeat evil-forward-word-begin)
-(panda-disable-repeat evil-forward-word-end)
-(panda-disable-repeat evil-backward-word-begin)
-
-(panda-disable-repeat evil-forward-WORD-begin)
-(panda-disable-repeat evil-forward-WORD-end)
-(panda-disable-repeat evil-backward-WORD-begin)
-
-(panda-disable-repeat evil-backward-paragraph)
-(panda-disable-repeat evil-forward-paragraph)
 
 ;;;; Keybindings
 (general-def 'normal override
@@ -570,6 +539,14 @@ The changes are local to the current buffer."
 (use-package targets
   :straight (:type git :host github :repo "noctuid/targets.el")
   :config
+  (progn
+    (defun panda-show-reg--targets-fix (orig-fn)
+      "Advice to not error with `targets--reset-position'."
+      (let ((register-alist (cl-remove 'targets--reset-position
+                                       register-alist
+                                       :key #'car)))
+        (funcall orig-fn)))
+    (advice-add #'evil-show-registers :around #'panda-show-reg--targets-fix))
   (targets-setup t))
 
 (use-package undo-tree
@@ -585,11 +562,33 @@ The changes are local to the current buffer."
             "v" 'helpful-variable))
 
 (use-package which-key
+  :defer t
   :config
   (gsetq which-key-popup-type 'side-window
          which-key-side-window-location 'bottom
-         which-key-idle-delay 1.0)
-  (which-key-mode 1))
+         which-key-idle-delay 1.0))
+
+;;;; Keys
+(use-package keyfreq
+  :config
+  (keyfreq-mode)
+  (keyfreq-autosave-mode))
+
+(use-package no-spam
+  :straight (no-spam
+             :fetcher github
+             :repo "mamapanda/no-spam"
+             :local-repo "~/code/emacs-lisp/no-spam")
+  :config
+  (gsetq no-spam-default-exception #'evil-operator-state-p)
+  (no-spam-add-repeat-delay (evil-forward-char evil-backward-char))
+  (no-spam-add-repeat-delay (evil-next-line evil-previous-line))
+  (no-spam-add-repeat-delay (evil-forward-WORD-begin evil-backward-WORD-begin))
+  (no-spam-add-repeat-delay (evil-forward-word-begin evil-backward-word-begin))
+  (no-spam-add-repeat-delay (evil-forward-WORD-end evil-backward-WORD-end))
+  (no-spam-add-repeat-delay (evil-forward-word-end evil-backward-word-end))
+  (no-spam-add-repeat-delay (evil-forward-paragraph evil-backward-paragraph))
+  (no-spam-mode))
 
 ;;;; Navigation
 (use-package avy
