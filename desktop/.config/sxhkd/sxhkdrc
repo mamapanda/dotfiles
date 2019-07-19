@@ -19,7 +19,7 @@ super + @space
     amixer -q set Master {5%+,5%-,toggle}
 
 # shutdown
-super + {_,shift + }Escape
+super + {_,shift + }BackSpace
     shutdown {_,--reboot }now
 
 # screenshot
