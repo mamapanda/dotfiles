@@ -1,0 +1,21 @@
+sanitize tridactyllocal tridactylsync
+
+keymap ; :
+keymap : ;
+
+bind K tabprev
+bind J tabnext
+
+bind / fillcmdline find
+bind ? fillcmdline find -?
+bind n findnext 1
+bind N findnext -1
+bind \ nohlsearch
+
+set editorcmd     emacs
+set modeindicator false
+set newtab        about:blank
+set smoothscroll  true
+
+guiset_quiet gui  none
+guiset_quiet tabs always
