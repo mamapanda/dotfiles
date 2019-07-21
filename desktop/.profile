@@ -10,4 +10,4 @@ export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS="@im=fcitx"
 
-export PATH="$PATH:$HOME/.local/bin:$HOME/.npm/bin:$HOME/go/bin"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.npm/bin:$HOME/go/bin:$HOME/.gem/ruby/2.6.0/bin"

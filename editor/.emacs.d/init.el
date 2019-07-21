@@ -1,26 +1,20 @@
 ;;; Init.el Setup  -*- lexical-binding: t -*-
-;;;; cl-lib
-(require 'cl-lib)
-
 ;;;; Startup Optimizations
-(cl-defmacro panda-setq-init (symbol value &rest args)
-  "Same as `setq', but the values only apply during init time."
-  (cl-labels ((build-form
-               (symbol value args)
-               (cons
-                `(progn
-                   (unless after-init-time
-                     (setq ,symbol ,value))
-                   (add-hook 'after-init-hook
-                             (lambda ()
-                               (setq ,symbol (quote ,(symbol-value symbol))))))
-                (when args
-                  (build-form (cl-first args) (cl-second args) (nthcdr 2 args))))))
-    `(progn
-       ,@(build-form symbol value args))))
+(defvar panda--pre-init-file-name-handler-alist file-name-handler-alist
+  "The value of `file-name-handler-alist' before init.el was loaded.")
 
-(panda-setq-init gc-cons-threshold 64000000
-                 file-name-handler-alist nil)
+(defvar panda--pre-init-gc-cons-threshold gc-cons-threshold
+  "The value of `gc-cons-threshold' before init.el was loaded.")
+
+(defun panda--restore-init-optimization-variables ()
+  "Restore variables that were modified for init time optimization."
+  (setq file-name-handler-alist panda--pre-init-file-name-handler-alist
+        gc-cons-threshold       panda--pre-init-gc-cons-threshold))
+
+(setq file-name-handler-alist nil
+      gc-cons-threshold       64000000)
+
+(add-hook 'after-init-hook #'panda--restore-init-optimization-variables)
 
 ;;;; Package Management
 (setq package-enable-at-startup nil
@@ -45,6 +39,8 @@
 (setq straight-use-package-by-default t)
 
 ;;;; Libraries
+(require 'cl-lib)
+
 (use-package general
   :config
   (defalias 'gsetq 'general-setq)
@@ -358,9 +354,8 @@ MODE may be a symbol or a list of modes."
 (show-paren-mode 1)
 
 ;;;; Keybindings
-(general-def 'normal override
+(general-def '(normal motion) override
   ";"   'panda-static-evil-ex
-  "C-;" 'evil-ex
   ":"   'eval-expression
   ","   'execute-extended-command
   "Q"   'save-buffer)
@@ -375,6 +370,8 @@ MODE may be a symbol or a list of modes."
   "SPC" nil
   ";"   nil
   ","   nil
+  "`"   'evil-goto-mark-line
+  "'"   'evil-goto-mark
   "gs"  'evil-repeat-find-char
   "gS"  'evil-repeat-find-char-reverse
   "[d"  'panda-backward-defun
@@ -400,6 +397,7 @@ MODE may be a symbol or a list of modes."
   "o" 'occur
   "t" 'bookmark-jump
   "T" 'bookmark-set
+  "x" 'xref-find-references
   "4" '(:keymap ctl-x-4-map)
   "5" '(:keymap ctl-x-5-map)
   "%" (general-key "C-x C-q"))
@@ -923,7 +921,6 @@ This is adapted from `emms-info-track-description'."
          lsp-prefer-flymake nil)
   (panda-space-sc lsp-mode-map
     "r"  'lsp-rename
-    "x"  'lsp-find-references
     "\\" 'lsp-restart-workspace))
 
 (use-package company-lsp :after company lsp)
@@ -1013,10 +1010,7 @@ This is adapted from `emms-info-track-description'."
   (gsetq outshine-org-style-global-cycling-at-bob-p t)
   (general-def 'normal outshine-mode-map
     "<tab>"     (lookup-key outshine-mode-map (kbd "TAB"))
-    "<backtab>" 'outshine-cycle-buffer)
-  (panda-space-sc outshine-mode-map "I" 'outshine-imenu)
-  ;; needed for `outshine-imenu', since outshine doesn't load imenu
-  (require 'imenu))
+    "<backtab>" 'outshine-cycle-buffer))
 
 ;;; Language Modes
 ;;;; Assembly
