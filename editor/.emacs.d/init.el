@@ -68,9 +68,12 @@ It should contain an alist literal for `panda-get-private-data'.")
 
 ;;; Evil
 (use-package evil
-  ;; :straight (:host github :repo "mamapanda/evil" :local-repo "~/code/emacs-lisp/evil")
   :init
   (gsetq evil-want-keybinding nil)
+  (setq load-path (cl-nset-difference
+                   load-path
+                   (mapcar #'straight--build-dir '("goto-chg" "undo-tree"))
+                   :test #'file-equal-p))
   :config
   (gsetq evil-move-beyond-eol    t
          evil-toggle-key         "C-s-+"
@@ -362,7 +365,8 @@ MODE may be a symbol or a list of modes."
 
 (general-def 'normal
   "C-r" nil
-  "U"   'redo)
+  "g;"  nil
+  "g,"  nil)
 
 (general-def 'insert "<C-backspace>" 'evil-delete-backward-word)
 
@@ -547,10 +551,8 @@ The changes are local to the current buffer."
     (advice-add #'evil-show-registers :around #'panda-show-reg--targets-fix))
   (targets-setup t))
 
-(use-package undo-tree
-  :defer t
-  :config
-  (gsetq undo-tree-enable-undo-in-region nil))
+(use-package undo-propose
+  :general ('normal "U" 'undo-propose))
 
 ;;;; Help
 (use-package helpful
@@ -692,6 +694,9 @@ The changes are local to the current buffer."
   :after counsel projectile
   :config
   (counsel-projectile-mode 1))
+
+(use-package goto-last-change
+  :general ('normal "g;" 'goto-last-change))
 
 (use-package helm
   :defer t
