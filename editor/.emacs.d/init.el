@@ -97,8 +97,10 @@ It should contain an alist literal for `panda-get-private-data'.")
 
 (use-package evil-collection
   :config
-  (gsetq evil-collection-key-blacklist '("SPC"))
-  (delete 'company evil-collection-mode-list)
+  (gsetq evil-collection-key-blacklist '("SPC")
+         evil-collection-mode-list (cl-nset-difference
+                                    evil-collection-mode-list
+                                    '(company outline)))
   (evil-collection-init))
 
 ;;; Basic Configuration
@@ -338,6 +340,7 @@ MODE may be a symbol or a list of modes."
        require-final-newline t
        save-abbrevs nil
        tramp-default-method "ssh"
+       undo-limit 1000000
        use-dialog-box nil
        vc-follow-symlinks t)
 
@@ -346,7 +349,7 @@ MODE may be a symbol or a list of modes."
                c-basic-offset 4
                indent-tabs-mode nil
                tab-width 4
-               truncate-lines t)
+               truncate-lines nil)
 
 (blink-cursor-mode -1)
 (delete-selection-mode 1)
@@ -366,7 +369,10 @@ MODE may be a symbol or a list of modes."
 (general-def 'normal
   "C-r" nil
   "g;"  nil
-  "g,"  nil)
+  "g,"  nil
+  "gD"  'xref-find-references
+  "[e"  'previous-error
+  "]e"  'next-error)
 
 (general-def 'insert "<C-backspace>" 'evil-delete-backward-word)
 
@@ -395,22 +401,16 @@ MODE may be a symbol or a list of modes."
 
 (panda-space
   "b" 'switch-to-buffer
+  "c" 'compile
   "d" 'dired
   "f" 'find-file
   "h" 'help-command
   "o" 'occur
   "t" 'bookmark-jump
   "T" 'bookmark-set
-  "x" 'xref-find-references
   "4" '(:keymap ctl-x-4-map)
   "5" '(:keymap ctl-x-5-map)
   "%" (general-key "C-x C-q"))
-
-(panda-space-sc
-  "c" 'compile
-  "k" 'previous-error
-  "j" 'next-error
-  "x" 'xref-find-references)
 
 (evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
 
@@ -481,8 +481,9 @@ The changes are local to the current buffer."
   ('outer "a" 'evil-outer-arg))
 
 (use-package evil-commentary
-  :config
-  (evil-commentary-mode 1))
+  :general
+  ('normal "gc" 'evil-commentary
+           "gy" 'evil-commentary-yank))
 
 (use-package evil-exchange
   :config
@@ -507,8 +508,9 @@ The changes are local to the current buffer."
   (evil-goggles-mode 1))
 
 (use-package evil-lion
-  :config
-  (evil-lion-mode 1))
+  :general
+  ('normal "gl" 'evil-lion-left
+           "gL" 'evil-lion-right))
 
 (use-package evil-numbers
   :general
@@ -542,13 +544,13 @@ The changes are local to the current buffer."
   :straight (:type git :host github :repo "noctuid/targets.el")
   :config
   (progn
-    (defun panda-show-reg--targets-fix (orig-fn)
+    (defun panda-show-reg-targets-fix (orig-fn)
       "Advice to not error with `targets--reset-position'."
       (let ((register-alist (cl-remove 'targets--reset-position
                                        register-alist
                                        :key #'car)))
         (funcall orig-fn)))
-    (advice-add #'evil-show-registers :around #'panda-show-reg--targets-fix))
+    (advice-add #'evil-show-registers :around #'panda-show-reg-targets-fix))
   (targets-setup t))
 
 (use-package undo-propose
@@ -562,7 +564,7 @@ The changes are local to the current buffer."
             "v" 'helpful-variable))
 
 (use-package which-key
-  :defer t
+  :disabled t
   :config
   (gsetq which-key-popup-type 'side-window
          which-key-side-window-location 'bottom
@@ -640,7 +642,7 @@ The changes are local to the current buffer."
   (global-evil-visualstar-mode 1))
 
 (use-package imenu
-  :general (panda-space-sc "i" 'imenu)
+  :general (panda-space "i" 'imenu)
   :config
   (gsetq imenu-auto-rescan t))
 
@@ -749,7 +751,7 @@ The changes are local to the current buffer."
 
 (use-package dired-filter
   :defer t
-  :general (panda-space-sc dired-mode-map "f" '(:keymap dired-filter-map)))
+  :general ('normal dired-mode-map "gf" '(:keymap dired-filter-map)))
 
 (use-package dired-open
   :general ('normal dired-mode-map "<C-return>" 'dired-open-xdg))
@@ -776,10 +778,10 @@ The changes are local to the current buffer."
 
 (use-package dired-ranger
   :general
-  (panda-space-sc dired-mode-map
-    "c" 'dired-ranger-copy
-    "m" 'dired-ranger-move
-    "p" 'dired-ranger-paste))
+  ('normal dired-mode-map
+           "gc" 'dired-ranger-copy
+           "gm" 'dired-ranger-move
+           "gp" 'dired-ranger-paste))
 
 ;;;; Git
 (use-package magit
@@ -903,10 +905,9 @@ This is adapted from `emms-info-track-description'."
   :defer t
   :config
   (gsetq flycheck-display-errors-delay 0.5)
-  (panda-space-sc flycheck-mode-map
-    "e" 'flycheck-list-errors
-    "j" 'flycheck-next-error
-    "k" 'flycheck-previous-error))
+  (general-def 'normal flycheck-mode-map
+    "[e" 'flycheck-previous-error
+    "]e" 'flycheck-next-error))
 
 (use-package flycheck-posframe
   :ghook 'flycheck-mode-hook
@@ -924,6 +925,10 @@ This is adapted from `emms-info-track-description'."
   (gsetq lsp-enable-indentation nil
          lsp-enable-on-type-formatting nil
          lsp-prefer-flymake nil)
+  ;; LSP does hook onto xref, but these functions are more reliable.
+  (general-def 'normal lsp-mode-map
+    "gd" 'lsp-find-definition
+    "gD" 'lsp-find-references)
   (panda-space-sc lsp-mode-map
     "r"  'lsp-rename
     "\\" 'lsp-restart-workspace))
@@ -1242,7 +1247,7 @@ This is adapted from `emms-info-track-description'."
   :defer t
   :gfhook '(panda-disable-js-hooks prettier-json-on-save-mode)
   :config
-  (defun panda-disable-js-hooks ()
+  (defun panda-disable-js-hooks () ;; TODO: We probably don't need this anymore with LSP
     (company-mode -1)
     (flycheck-mode -1)
     (prettier-ts-on-save-mode -1))
@@ -1306,6 +1311,9 @@ This is adapted from `emms-info-track-description'."
          org-src-tab-acts-natively t))
 
 (use-package toc-org
+  :ghook 'org-mode-hook)
+
+(use-package org-bullets
   :ghook 'org-mode-hook)
 
 (use-package helm-org-rifle :defer t)
@@ -1376,6 +1384,11 @@ This is adapted from `emms-info-track-description'."
 
 (use-package cargo
   :ghook ('rust-mode-hook 'cargo-minor-mode))
+
+;;;; Vim
+(use-package vimrc-mode
+  :defer t
+  :gfhook '(panda-trim-on-save-mode))
 
 ;;;; Shell Script
 (use-package sh-script
