@@ -49,6 +49,15 @@
 
 (use-package no-littering)
 
+(use-package reformatter)
+
+(use-package major-mode-hydra
+  :demand t
+  :general
+  ('normal "\\" 'major-mode-hydra)
+  :config
+  (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
+
 ;;;; Custom File
 (gsetq custom-file (no-littering-expand-etc-file-name "custom.el"))
 (when (file-exists-p custom-file)
@@ -87,11 +96,7 @@ It should contain an alist literal for `panda-get-private-data'.")
       :states '(normal operator motion visual)
       :keymaps 'override
       :prefix "SPC"
-      :prefix-map 'panda-space-map)
-    ;; for bindings that may change depending on active minor modes
-    (general-create-definer panda-space-sc
-      :states '(normal operator motion visual)
-      :prefix "SPC ;"))
+      :prefix-map 'panda-space-map))
   (add-hook 'prog-mode-hook #'hs-minor-mode)
   (evil-mode 1))
 
@@ -522,6 +527,7 @@ The changes are local to the current buffer."
 
 (use-package evil-surround
   :config
+  ;; TODO: move some of these back to :general to be more organized
   (general-def 'visual evil-surround-mode-map
     "s"  'evil-surround-region
     "S"  'evil-Surround-region
@@ -914,9 +920,6 @@ This is adapted from `emms-info-track-description'."
   :config
   (flycheck-posframe-configure-pretty-defaults))
 
-;;;; Formatting
-(use-package reformatter)
-
 ;;;; Language Server
 (use-package lsp-mode
   :defer t
@@ -925,29 +928,20 @@ This is adapted from `emms-info-track-description'."
   (gsetq lsp-enable-indentation nil
          lsp-enable-on-type-formatting nil
          lsp-prefer-flymake nil)
-  ;; LSP does hook onto xref, but these functions are more reliable.
+  ;; LSP hooks onto xref, but these functions are more reliable.
   (general-def 'normal lsp-mode-map
     "gd" 'lsp-find-definition
-    "gD" 'lsp-find-references)
-  (panda-space-sc lsp-mode-map
-    "r"  'lsp-rename
-    "\\" 'lsp-restart-workspace))
+    "gD" 'lsp-find-references))
 
 (use-package company-lsp :after company lsp)
 
 (use-package lsp-ui
   :after lsp
   :config
-  (gsetq lsp-ui-sideline-show-diagnostics nil)
-  (panda-space-sc lsp-ui-mode-map
-    "i" 'lsp-ui-imenu
-    "R" 'lsp-ui-sideline-apply-code-actions))
+  (gsetq lsp-ui-sideline-show-diagnostics nil))
 
 (use-package dap-mode
-  :general
-  (panda-space-sc lsp-mode-map
-    "d" 'dap-debug
-    "D" 'dap-hydra)
+  :commands dap-debug dap-hydra
   :config
   (require 'dap-chrome)
   (require 'dap-firefox)
@@ -959,6 +953,26 @@ This is adapted from `emms-info-track-description'."
          dap--breakpoints-file (no-littering-expand-var-file-name "dap/breakpoints"))
   (dap-mode 1)
   (dap-ui-mode 1))
+
+(defmacro panda-configure-lsp-hydra (mode)
+  "Add LSP hydra heads to MODE's major-mode hydra."
+  `(major-mode-hydra-define+ ,mode nil
+     ("Find"
+      (("s" lsp-ui-find-workspace-symbol "workspace-symbol"))
+      "Refactor"
+      (("r" lsp-rename "rename")
+       ("c" lsp-ui-sideline-apply-code-actions "code action")
+       ("o" lsp-organize-imports "organize imports"))
+      "View"
+      (("i" lsp-ui-imenu "imenu")
+       ("l" lsp-lens-mode "lens")
+       ("E" lsp-ui-flycheck-list "errors"))
+      "Debug"
+      (("D" dap-debug "start")
+       ("d" dap-hydra "hydra"))
+      "Workspace"
+      (("<backspace>" lsp-restart-workspace "restart")
+       ("<delete>" lsp-shutdown-workspace "shutdown")))))
 
 ;;;; Lisp
 (use-package lispyville
@@ -1044,6 +1058,9 @@ This is adapted from `emms-info-track-description'."
   :defer t
   :gfhook ('(c-mode-hook c++-mode-hook)
            '(clang-format-on-save-mode panda-set-c-locals yas-minor-mode))
+  :init
+  ;; `major-mode-hydra-define+' uses `eval-and-compile' under the hood.
+  (panda-configure-lsp-hydra (c-mode c++-mode))
   :config
   (defun panda-set-c-locals ()
     (c-set-offset 'innamespace 0))
@@ -1054,6 +1071,7 @@ This is adapted from `emms-info-track-description'."
       :program "clang-format"
       :args clang-format-args)))
 
+;; TODO: major-mode-hydra ccls
 (use-package ccls
   :ghook ('(c-mode-hook c++-mode-hook) 'panda-ccls)
   :config
@@ -1082,16 +1100,20 @@ This is adapted from `emms-info-track-description'."
 
 (use-package slime
   :defer t
+  :mode-hydra
+  (lisp-mode
+   nil
+   ("Eval"
+    (("eb" slime-eval-buffer "buffer")
+     ("ed" slime-eval-defun "defun")
+     ("ee" slime-eval-last-expression "expression")
+     ("er" slime-eval-region "region")
+     ("eo" slime "open repl"))
+    "Debug"
+    (("m" macrostep-expand "macrostep"))))
   :config
   (gsetq inferior-lisp-program "sbcl"
          slime-contribs '(slime-fancy))
-  (panda-space-sc slime-mode-map
-    "m"  'macrostep-expand
-    ",b" 'slime-eval-buffer
-    ",d" 'slime-eval-defun
-    ",e" 'slime-eval-last-expression
-    ",r" 'slime-eval-region
-    ",," 'slime)
   (slime-setup))
 
 (use-package slime-company
@@ -1108,6 +1130,8 @@ This is adapted from `emms-info-track-description'."
 (use-package d-mode
   :defer t
   :gfhook '(dfmt-on-save-mode lsp yas-minor-mode)
+  :init
+  (panda-configure-lsp-hydra d-mode)
   :config
   (progn
     (lsp-register-client
@@ -1133,20 +1157,27 @@ This is adapted from `emms-info-track-description'."
                                    panda-format-on-save-mode
                                    panda-set-elisp-locals
                                    yas-minor-mode))
+  :mode-hydra
+  ((emacs-lisp-mode lisp-interaction-mode)
+   nil
+   ("Eval"
+    (("eb" eval-buffer "buffer")
+     ("ed" eval-defun "defun")
+     ("ee" eval-last-sexp "expression")
+     ("er" eval-region "region")
+     ("eo" ielm "open repl"))
+    "Test"
+    (("t" ert "run"))))
   :config
-  (panda-space-sc (emacs-lisp-mode-map lisp-interaction-mode-map)
-    ",b" 'eval-buffer
-    ",d" 'eval-defun
-    ",e" 'eval-last-sexp
-    ",r" 'eval-region
-    ",," 'ielm)
   (defun panda-set-elisp-locals ()
     (gsetq-local evil-args-delimiters '(" "))))
 
 (use-package macrostep
-  :general
-  (panda-space-sc (emacs-lisp-mode-map lisp-interaction-mode-map)
-    "m" 'macrostep-expand))
+  :mode-hydra
+  ((emacs-lisp-mode lisp-interaction-mode)
+   nil
+   ("Debug"
+    (("m" macrostep-expand "macrostep")))))
 
 ;;;; Fish
 (use-package fish-mode
@@ -1170,6 +1201,8 @@ This is adapted from `emms-info-track-description'."
 (use-package go-mode
   :defer t
   :gfhook '(gofmt-on-save-mode lsp panda-set-go-locals yas-minor-mode)
+  :init
+  (panda-configure-lsp-hydra go-mode)
   :config
   (defun panda-set-go-locals ()
     (gsetq-local indent-tabs-mode t))
@@ -1195,6 +1228,7 @@ This is adapted from `emms-info-track-description'."
          web-mode-style-padding 4
          web-mode-script-padding 4
          web-mode-block-padding 4)
+  (panda-configure-lsp-hydra web-mode)
   :config
   (defvar prettier-html-args '("--stdin" "--parser" "html")
     "Arguments for prettier with HTML.")
@@ -1205,6 +1239,8 @@ This is adapted from `emms-info-track-description'."
 (use-package css-mode
   :defer t
   :gfhook '(lsp prettier-css-on-save-mode)
+  :init
+  (panda-configure-lsp-hydra css-mode)
   :config
   (defvar prettier-css-args '("--stdin" "--parser" "css" "--tab-width" "4")
     "Arguments for prettier with CSS.")
@@ -1218,13 +1254,20 @@ This is adapted from `emms-info-track-description'."
 ;;;; JavaScript / TypeScript
 (use-package js
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode))
+  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode)
+  :init
+  (panda-configure-lsp-hydra js-mode))
 
-(use-package rjsx-mode :defer t)
+(use-package rjsx-mode
+  :defer t
+  :init
+  (panda-configure-lsp-hydra rjsx-mode))
 
 (use-package typescript-mode
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode))
+  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode)
+  :init
+  (panda-configure-lsp-hydra typescript-mode))
 
 (defvar prettier-ts-args '("--stdin" "--parser" "typescript" "--tab-width" "4")
   "Arguments for prettier with TypeScript.")
@@ -1234,13 +1277,15 @@ This is adapted from `emms-info-track-description'."
   :args prettier-ts-args)
 
 (use-package nodejs-repl
-  :general
-  (panda-space-sc js-mode-map
-    ",b" 'nodejs-repl-send-buffer
-    ",e" 'nodejs-repl-send-line
-    ",f" 'nodejs-repl-load-file
-    ",r" 'nodejs-repl-send-region
-    ",," 'nodejs-repl))
+  :mode-hydra
+  (js-mode
+   nil
+   ("Eval"
+    (("ee" nodejs-repl-send-buffer "buffer")
+     ("el" nodejs-repl-send-line "line")
+     ("ef" nodejs-repl-load-file "file")
+     ("er" nodejs-repl-send-region "region")
+     ("eo" nodejs-repl "open repl")))))
 
 ;;;; JSON
 (use-package json-mode
@@ -1331,14 +1376,18 @@ This is adapted from `emms-info-track-description'."
 (use-package python
   :defer t
   :gfhook '(black-on-save-mode lsp panda-set-python-locals yas-minor-mode)
+  :mode-hydra
+  (python-mode
+   ("Eval"
+    (("eb" python-shell-send-buffer "buffer")
+     ("ed" python-shell-send-defun "defun")
+     ("ef" python-shell-send-file "file")
+     ("er" python-shell-send-region "region")
+     ("eo" run-python "open repl"))))
+  :init
+  (panda-configure-lsp-hydra python-mode)
   :config
   (gsetq python-indent-offset 4)
-  (panda-space-sc python-mode-map
-    ",b" 'python-shell-send-buffer
-    ",d" 'python-shell-send-defun
-    ",f" 'python-shell-send-file
-    ",r" 'python-shell-send-region
-    ",," 'run-python)
   (defun panda-set-python-locals ()
     (gsetq-local yas-indent-line 'fixed)
     (gsetq-local yas-also-auto-indent-first-line nil))
@@ -1353,28 +1402,36 @@ This is adapted from `emms-info-track-description'."
 (use-package ess
   :defer t
   :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp yas-minor-mode))
+  :mode-hydra
+  (ess-r-mode
+   nil
+   ("Eval"
+    (("eb" ess-eval-buffer "buffer")
+     ("ed" ess-eval-function "function")
+     ("ef" ess-load-file "file")
+     ("el" ess-eval-line "line")
+     ("ep" ess-eval-paragraph "paragraph")
+     ("er" ess-eval-region "region")
+     ("eo" R "open repl"))))
+  :init
+  (panda-configure-lsp-hydra ess-r-mode)
   :config
   (gsetq ess-ask-for-ess-directory nil
          ess-use-flymake nil)
-  (panda-space-sc ess-r-mode-map
-    ",b" 'ess-eval-buffer
-    ",d" 'ess-eval-function
-    ",f" 'ess-load-file
-    ",e" 'ess-eval-line
-    ",p" 'ess-eval-paragraph
-    ",r" 'ess-eval-region
-    ",," 'R)
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection
-                                     '("R" "--slave" "-e" "languageserver::run()"))
-                    :major-modes '(ess-r-mode)
-                    :server-id 'R))
-  (add-to-list 'lsp-language-id-configuration '(ess-r-mode . "r")))
+  (progn
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection
+                                       '("R" "--slave" "-e" "languageserver::run()"))
+                      :major-modes '(ess-r-mode)
+                      :server-id 'R))
+    (add-to-list 'lsp-language-id-configuration '(ess-r-mode . "r"))))
 
 ;;;; Rust
 (use-package rust-mode
   :defer t
   :gfhook '(lsp rustfmt-on-save-mode yas-minor-mode)
+  :init
+  (panda-configure-lsp-hydra rust-mode)
   :config
   (defvar rustfmt-args nil
     "Arguments for rustfmt.")
