@@ -54,11 +54,12 @@
 (use-package major-mode-hydra
   :demand t
   :general
-  ('normal "\\" 'major-mode-hydra)
+  ('(normal visual) "\\" 'major-mode-hydra)
   :config
   (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
 
 ;;;; Custom File
+;; TODO: I really want to figure out a way to not load custom settings.
 (gsetq custom-file (no-littering-expand-etc-file-name "custom.el"))
 (when (file-exists-p custom-file)
   (load custom-file))
@@ -84,28 +85,27 @@ It should contain an alist literal for `panda-get-private-data'.")
                    (mapcar #'straight--build-dir '("goto-chg" "undo-tree"))
                    :test #'file-equal-p))
   :config
-  (gsetq evil-move-beyond-eol    t
-         evil-toggle-key         "C-s-+"
-         evil-want-C-d-scroll    t
-         evil-want-C-u-scroll    t
-         evil-want-Y-yank-to-eol t)
+  (gsetq evil-disable-insert-state-bindings t
+         evil-jumps-cross-buffers           nil
+         evil-move-beyond-eol               t
+         evil-toggle-key                    "C-s-+"
+         evil-want-C-d-scroll               t
+         evil-want-C-u-scroll               t
+         evil-want-Y-yank-to-eol            t)
   (gsetq-default evil-symbol-word-search t)
-  (progn
-    ;; for bindings that will stay constant
-    (general-create-definer panda-space
-      :states '(normal operator motion visual)
-      :keymaps 'override
-      :prefix "SPC"
-      :prefix-map 'panda-space-map))
+  (general-create-definer panda-space
+    :states '(normal operator motion visual)
+    :keymaps 'override
+    :prefix "SPC"
+    :prefix-map 'panda-space-map)
   (add-hook 'prog-mode-hook #'hs-minor-mode)
   (evil-mode 1))
 
 (use-package evil-collection
   :config
-  (gsetq evil-collection-key-blacklist '("SPC")
-         evil-collection-mode-list (cl-nset-difference
-                                    evil-collection-mode-list
-                                    '(company outline)))
+  (gsetq evil-collection-key-blacklist '("SPC"))
+  (delete 'company evil-collection-mode-list)
+  (delete 'outline evil-collection-mode-list)
   (evil-collection-init))
 
 ;;; Basic Configuration
@@ -321,33 +321,32 @@ MODE may be a symbol or a list of modes."
     (panda-forward-defun count)
     (panda-inner-defun)))
 
-;;;; Appearance
-(gsetq default-frame-alist '((fullscreen . maximized)
-                             (font . "Consolas-11")
-                             (menu-bar-lines . 0)
-                             (tool-bar-lines . 0)
-                             (vertical-scroll-bars . nil))
-       inhibit-startup-screen t
-       ring-bell-function 'ignore
-       visible-bell nil)
-
-;;;; Behavior
-(gsetq auto-save-default nil
-       c-default-style '((java-mode . "java")
-                         (awk-mode . "awk")
-                         (other . "stroustrup"))
-       delete-by-moving-to-trash t
-       disabled-command-function nil
-       enable-recursive-minibuffers t
+;;;; Settings
+(gsetq auto-save-default              nil
+       blink-cursor-blinks            0
+       c-default-style                '((java-mode            . "java")
+                                        (awk-mode             . "awk")
+                                        (other                . "stroustrup"))
+       default-frame-alist            '((fullscreen           . maximized)
+                                        (font                 . "Consolas-11")
+                                        (menu-bar-lines       . 0)
+                                        (tool-bar-lines       . 0)
+                                        (vertical-scroll-bars . nil))
+       delete-by-moving-to-trash      t
+       disabled-command-function      nil
+       enable-recursive-minibuffers   t
        inhibit-compacting-font-caches t
-       make-backup-files nil
-       recentf-max-saved-items 100
-       require-final-newline t
-       save-abbrevs nil
-       tramp-default-method "ssh"
-       undo-limit 1000000
-       use-dialog-box nil
-       vc-follow-symlinks t)
+       inhibit-startup-screen         t
+       make-backup-files              nil
+       recentf-max-saved-items        100
+       require-final-newline          t
+       ring-bell-function             'ignore
+       save-abbrevs                   nil
+       tramp-default-method           "ssh"
+       undo-limit                     1000000
+       use-dialog-box                 nil
+       vc-follow-symlinks             t
+       visible-bell                   nil)
 
 (gsetq-default bidi-display-reordering nil
                buffer-file-coding-system 'utf-8
@@ -356,7 +355,7 @@ MODE may be a symbol or a list of modes."
                tab-width 4
                truncate-lines nil)
 
-(blink-cursor-mode -1)
+(blink-cursor-mode)
 (delete-selection-mode 1)
 (desktop-save-mode)
 (electric-pair-mode 1)
@@ -379,7 +378,10 @@ MODE may be a symbol or a list of modes."
   "[e"  'previous-error
   "]e"  'next-error)
 
-(general-def 'insert "<C-backspace>" 'evil-delete-backward-word)
+(general-def 'insert
+  "<C-backspace>" 'evil-delete-backward-word
+  "C-x r i"       'evil-paste-from-register
+  "M-o"           'evil-execute-in-normal-state)
 
 (general-def 'motion
   "SPC" nil
@@ -389,8 +391,8 @@ MODE may be a symbol or a list of modes."
   "'"   'evil-goto-mark
   "gs"  'evil-repeat-find-char
   "gS"  'evil-repeat-find-char-reverse
-  "[d"  'panda-backward-defun
-  "]d"  'panda-forward-defun)
+  "M-h" 'beginning-of-defun
+  "M-l" 'end-of-defun)
 
 (general-def 'outer
   "e"  'panda-outer-buffer
@@ -416,6 +418,12 @@ MODE may be a symbol or a list of modes."
   "4" '(:keymap ctl-x-4-map)
   "5" '(:keymap ctl-x-5-map)
   "%" (general-key "C-x C-q"))
+
+(setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
+(general-def evil-ex-completion-map
+  "<escape>" 'minibuffer-keyboard-quit
+  "TAB"      'evil-ex-completion
+  "C-x r i"  'evil-paste-from-register)
 
 (evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
 
@@ -449,12 +457,15 @@ The changes are local to the current buffer."
   (progn
     (defun panda--evil-ex-relative-lines (old-fn &optional initial-input)
       "Enable relative line numbers for `evil-ex'."
-      (let ((current-display-line-numbers display-line-numbers))
+      (let ((current-display-line-numbers display-line-numbers)
+            (buffer (current-buffer)))
         (unwind-protect
             (progn
               (gsetq display-line-numbers 'relative)
               (funcall old-fn initial-input))
-          (gsetq display-line-numbers current-display-line-numbers))))
+          (when (buffer-live-p buffer)
+            (with-current-buffer buffer
+              (gsetq display-line-numbers current-display-line-numbers))))))
     (advice-add 'evil-ex :around #'panda--evil-ex-relative-lines))
   (progn
     (panda-with-gui
@@ -475,6 +486,11 @@ The changes are local to the current buffer."
 (use-package hl-todo
   :config
   (global-hl-todo-mode))
+
+(use-package posframe
+  :defer t
+  :config
+  (gsetq posframe-mouse-banish nil))
 
 (use-package rainbow-delimiters
   :ghook 'prog-mode-hook)
@@ -522,12 +538,38 @@ The changes are local to the current buffer."
   ('normal "C-a" 'evil-numbers/inc-at-pt
            "C-s" 'evil-numbers/dec-at-pt))
 
+;; TODO: we could probably make a "Visual Hints" section
+(use-package evil-owl
+  :straight (evil-owl
+             :host github
+             :repo "mamapanda/evil-owl"
+             :local-repo "~/code/emacs-lisp/evil-owl")
+  :custom-face
+  (evil-owl-group-name ((t (
+                            :inherit font-lock-function-name-face
+                            :weight bold
+                            :underline t))))
+  (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
+  :config
+  (gsetq evil-owl-register-char-limit 100
+         evil-owl-idle-delay          0.75
+         evil-owl-register-format     (concat " " evil-owl-register-format)
+         evil-owl-local-mark-format   (concat " " evil-owl-local-mark-format)
+         evil-owl-global-mark-format  (concat " " evil-owl-global-mark-format))
+  (gsetq evil-owl-extra-posframe-args
+         `(
+           :background-color ,(face-background 'mode-line)
+           :right-fringe 8
+           :width 50
+           :height 20
+           :poshandler posframe-poshandler-point-bottom-left-corner))
+  (evil-owl-mode))
+
 (use-package evil-replace-with-register
   :general ('normal "gR" 'evil-replace-with-register))
 
 (use-package evil-surround
   :config
-  ;; TODO: move some of these back to :general to be more organized
   (general-def 'visual evil-surround-mode-map
     "s"  'evil-surround-region
     "S"  'evil-Surround-region
@@ -727,16 +769,39 @@ The changes are local to the current buffer."
     "W"     'eyebrowse-close-window-config
     "e"     'panda-eyebrowse-create-window-config
     "E"     'eyebrowse-rename-window-config)
+  ('normal eyebrowse-mode-map
+           "gt" 'eyebrowse-next-window-config
+           "gT" 'eyebrowse-prev-window-config)
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
-  (gsetq eyebrowse-close-window-config-prompt t
-         eyebrowse-new-workspace t)
+  (gsetq eyebrowse-new-workspace t)
   (defun panda-eyebrowse-create-window-config (tag)
     (interactive "sWindow Config Tag: ")
     (eyebrowse-create-window-config)
     (let ((created-config (eyebrowse--get 'current-slot)))
       (eyebrowse-rename-window-config created-config tag)))
+  (with-eval-after-load 'doom-modeline
+    (doom-modeline-def-segment workspace-name
+      "Custom workspace segment for doom-modeline.
+Besides the current workspace's tag, the first letter of inactive
+workspaces' tags are also shown."
+      (when (and eyebrowse-mode (doom-modeline--active))
+        (assq-delete-all 'eyebrowse-mode mode-line-misc-info)
+        (let* ((current-slot (eyebrowse--get 'current-slot))
+               (window-configs (eyebrowse--get 'window-configs)))
+          (format
+           " %s "
+           (mapconcat
+            (lambda (window-config)
+              (let ((slot (cl-first window-config))
+                    (tag (cl-third window-config)))
+                (if (= slot current-slot)
+                    (propertize tag 'face 'doom-modeline-buffer-file)
+                  (propertize (if (string-empty-p tag) tag (substring tag 0 1))
+                              'face 'doom-modeline-buffer-path))))
+            window-configs
+            (propertize "|" 'face 'doom-modeline-buffer-path)))))))
   (eyebrowse-mode 1))
 
 (use-package winner
@@ -1001,10 +1066,9 @@ This is adapted from `emms-info-track-description'."
         (panda-evil-goggles-add lispyville-operator evil-operator)))))
 
 (use-package lispy
-  :disabled t
   :ghook 'lispyville-mode-hook
   :config
-  (gsetq lispy-key-theme '(lispy special))
+  (lispy-set-key-theme '(lispy special))
   (lispy-define-key lispy-mode-map-special "<" 'lispy-slurp-or-barf-left)
   (lispy-define-key lispy-mode-map-special ">" 'lispy-slurp-or-barf-right)
   (general-def lispy-mode-map-lispy "\"" 'lispy-doublequote))
@@ -1166,6 +1230,15 @@ This is adapted from `emms-info-track-description'."
      ("ee" eval-last-sexp "expression")
      ("er" eval-region "region")
      ("eo" ielm "open repl"))
+    "Compile"
+    (("c" byte-compile-file "file"))
+    "Check"
+    (("C" checkdoc "checkdoc"))
+    "Debug"
+    (("E" toggle-debug-on-error "on error")
+     ("q" toggle-debug-on-quit "on quit")
+     ("d" debug-on-entry "on entry")
+     ("D" cancel-debug-on-entry "cancel on entry"))
     "Test"
     (("t" ert "run"))))
   :config
@@ -1178,6 +1251,28 @@ This is adapted from `emms-info-track-description'."
    nil
    ("Debug"
     (("m" macrostep-expand "macrostep")))))
+
+(use-package package-lint
+  :mode-hydra
+  ((emacs-lisp-mode lisp-interaction-mode)
+   nil
+   ("Check"
+    (("p" package-lint-current-buffer "package-lint")))))
+
+(use-package emr
+  :mode-hydra
+  ((emacs-lisp-mode lisp-interaction-mode)
+   nil
+   ("Refactor"
+    (("l" emr-el-extract-to-let "extract to let")
+     ("v" emr-el-extract-variable "extract variable")
+     ("f" emr-el-extract-function "extract function")
+     ("k" emr-el-extract-constant "extract constant")
+     ("L" emr-el-inline-let-variable "inline let variable")
+     ("V" emr-el-inline-variable "inline variable")
+     ("F" emr-el-inline-function "inline function")
+     ("a" emr-el-insert-autoload-directive "add autoload")
+     ("x" emr-el-delete-let-binding-form "delete let form")))))
 
 ;;;; Fish
 (use-package fish-mode
