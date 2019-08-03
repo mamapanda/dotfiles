@@ -1247,18 +1247,13 @@ This is adapted from `emms-info-track-description'."
 ;;;; JSON
 (use-package json-mode
   :defer t
-  :gfhook '(panda-disable-js-hooks prettier-json-on-save-mode)
+  :gfhook '(prettier-json-on-save-mode)
   :config
-  (defun panda-disable-js-hooks () ;; TODO: We probably don't need this anymore with LSP
-    (company-mode -1)
-    (flycheck-mode -1)
-    (prettier-ts-on-save-mode -1))
-  (progn
-    (defvar prettier-json-args '("--stdin" "--parser" "--json" "--tab-width" "4")
-      "Arguments for prettier with JSON.")
-    (reformatter-define prettier-json
-      :program "prettier"
-      :args prettier-json-args)))
+  (defvar prettier-json-args '("--stdin" "--parser" "--json" "--tab-width" "4")
+    "Arguments for prettier with JSON.")
+  (reformatter-define prettier-json
+    :program "prettier"
+    :args prettier-json-args))
 
 ;;;; Latex
 (use-package tex

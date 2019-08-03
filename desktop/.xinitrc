@@ -21,10 +21,11 @@ case $session in
 
         compton -b
         nitrogen --restore
+        redshift &
 
         clipit &
         xfce4-power-manager
-        xautolock -time 10 -locker blurlock &
+        xautolock -time 10 -locker "betterlockscreen -l" &
 
         setxkbmap -option 'ctrl:swapcaps'
         xcape -e 'Control_L=Escape'

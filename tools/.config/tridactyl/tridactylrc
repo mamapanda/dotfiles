@@ -6,16 +6,18 @@ keymap : ;
 bind K tabprev
 bind J tabnext
 
-bind / fillcmdline find
-bind ? fillcmdline find -?
-bind n findnext 1
-bind N findnext -1
-bind \ nohlsearch
+bind /     fillcmdline find
+bind ?     fillcmdline find -?
+bind n     findnext 1
+bind N     findnext -1
+bind <C-/> nohlsearch
 
-set editorcmd     emacs
-set modeindicator false
-set newtab        about:blank
-set smoothscroll  true
+set allowautofocus false
+set editorcmd      emacs
+set hintuppercase  false
+set modeindicator  false
+set newtab         https://www.startpage.com/en/?
+set smoothscroll   true
 
-guiset_quiet gui  none
-guiset_quiet tabs always
+guiset_quiet hoverlink   none
+guiset_quiet statuspanel none
