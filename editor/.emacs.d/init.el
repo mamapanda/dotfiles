@@ -125,13 +125,6 @@ It should contain an alist literal for `panda-get-private-data'.")
     "g^" 'evil-first-non-blank
     "g$" 'evil-end-of-line))
 
-(defun panda-find-init-file (&optional arg)
-  "Open `user-init-file'. If ARG is non-nil, open it in another window."
-  (interactive "P")
-  (if arg
-      (find-file-other-window user-init-file)
-    (find-file user-init-file)))
-
 (defun panda-format-buffer ()
   "Indent the entire buffer and delete trailing whitespace."
   (interactive)
@@ -209,37 +202,6 @@ It should contain an alist literal for `panda-get-private-data'.")
       (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
     (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
 
-;;;;; Motions
-(evil-define-motion panda-forward-defun (&optional count)
-  "Move forward COUNT defuns."
-  (let* ((count (or count 1))
-         (defun-bounds (bounds-of-thing-at-point 'defun))
-         (at-defun-begin (eq (point) (car defun-bounds)))
-         ;; Emacs counts the ending newline as part of the defun,
-         ;; but we don't want to include it.
-         (at-defun-end (and (eq (point) (cdr defun-bounds))
-                            (looking-back "\n"))))
-    (cond ((> count 0)
-           (progn
-             (dotimes (i count)
-               (end-of-defun))
-             ;; We need to jump an extra time if we were in a defun.
-             (when (and defun-bounds (not at-defun-end))
-               (end-of-defun))
-             (beginning-of-defun)))
-          ((< count 0)
-           (progn
-             (dotimes (i (- count))
-               (beginning-of-defun))
-             ;; We need to jump an extra time if we were in a defun.
-             (when (and defun-bounds (not at-defun-begin) (not at-defun-end))
-               (beginning-of-defun)))))))
-
-(evil-define-motion panda-backward-defun (&optional count)
-  "Move backward COUNT defuns."
-  (let ((count (or count 1)))
-    (panda-forward-defun (- count))))
-
 ;;;;; Text Objects
 ;;;;;; Buffer
 (evil-define-text-object panda-outer-buffer (&optional count beg end type)
@@ -256,70 +218,7 @@ It should contain an alist literal for `panda-get-private-data'.")
   (cl-destructuring-bind (begin . end) (bounds-of-thing-at-point 'defun)
     (evil-range begin end)))
 
-(defvar panda-inner-defun-begin-regexp "{"
-  "Regexp representing the left delimiter for the inside of a function.
-This should not include any mandatory newlines, as `panda-inner-defun'
-will automatically skip over those.")
-
-(defvar panda-inner-defun-end-regexp "}"
-  "Regexp representing the right delimiter for the inside of a function.")
-
-(defmacro panda-set-inner-defun-regexp (mode begin end)
-  "Set `panda-inner-defun-begin-regexp' and `panda-inner-defun-end-regexp' for MODE.
-MODE may be a symbol or a list of modes."
-  (declare (indent defun))
-  (let* ((mode-list (if (listp mode) mode (list mode)))
-         (hook-names (mapcar (lambda (mode) (intern (format "%s-hook" mode))) mode-list)))
-    `(general-add-hook (quote ,hook-names)
-                       (lambda ()
-                         (gsetq-local panda-inner-defun-begin-regexp ,begin)
-                         (gsetq-local panda-inner-defun-end-regexp ,end)))))
-
-(panda-set-inner-defun-regexp (emacs-lisp-mode lisp-interaction-mode lisp-mode) "(" ")")
-(panda-set-inner-defun-regexp python-mode ":" "")
-
-(evil-define-text-object panda-inner-defun (&optional count beg end type)
-  "Select inside a function."
-  (cl-destructuring-bind (defun-begin . (defun-end . _)) (panda-outer-defun)
-    ;; require \n on both ends to make it linewise
-    (let* ((make-linewise t)
-           (begin (save-excursion
-                    (goto-char defun-begin)
-                    (re-search-forward panda-inner-defun-begin-regexp)
-                    (if (looking-at "[[:blank:]]*\n")
-                        (progn
-                          (next-line)
-                          (beginning-of-line))
-                      (setq make-linewise nil))
-                    (point)))
-           (end (save-excursion
-                  (goto-char defun-end)
-                  (re-search-backward panda-inner-defun-end-regexp)
-                  (if (looking-back "\n[[:blank:]]*")
-                      (search-backward "\n")
-                    (setq make-linewise nil))
-                  (point))))
-      (evil-range begin end (if make-linewise 'line type)))))
-
-(evil-define-text-object panda-outer-last-defun (&optional count beg end type)
-  (save-excursion
-    (panda-backward-defun count)
-    (panda-outer-defun)))
-
-(evil-define-text-object panda-outer-next-defun (&optional count beg end type)
-  (save-excursion
-    (panda-forward-defun count)
-    (panda-outer-defun)))
-
-(evil-define-text-object panda-inner-last-defun (&optional count beg end type)
-  (save-excursion
-    (panda-backward-defun count)
-    (panda-inner-defun)))
-
-(evil-define-text-object panda-inner-next-defun (&optional count beg end type)
-  (save-excursion
-    (panda-forward-defun count)
-    (panda-inner-defun)))
+(defalias 'panda-inner-defun 'panda-outer-defun)
 
 ;;;; Settings
 (gsetq auto-save-default              nil
@@ -395,16 +294,12 @@ MODE may be a symbol or a list of modes."
   "M-l" 'end-of-defun)
 
 (general-def 'outer
-  "e"  'panda-outer-buffer
-  "d"  'panda-outer-defun
-  "ld" 'panda-outer-last-defun
-  "nd" 'panda-outer-next-defun)
+  "e" 'panda-outer-buffer
+  "d" 'panda-outer-defun)
 
 (general-def 'inner
-  "e"  'panda-inner-buffer
-  "d"  'panda-inner-defun
-  "ld" 'panda-inner-last-defun
-  "nd" 'panda-inner-next-defun)
+  "e" 'panda-inner-buffer
+  "d" 'panda-inner-defun)
 
 (panda-space
   "b" 'switch-to-buffer
@@ -611,13 +506,6 @@ The changes are local to the current buffer."
             "k" 'helpful-key
             "v" 'helpful-variable))
 
-(use-package which-key
-  :disabled t
-  :config
-  (gsetq which-key-popup-type 'side-window
-         which-key-side-window-location 'bottom
-         which-key-idle-delay 1.0))
-
 ;;;; Keys
 (use-package keyfreq
   :config
@@ -729,16 +617,6 @@ The changes are local to the current buffer."
   (counsel-mode 1))
 
 (use-package ivy-hydra :defer t)
-
-(use-package ivy-rich
-  :after ivy
-  :config
-  (ivy-set-display-transformer 'ivy-switch-buffer-other-window
-                               'ivy-rich--ivy-switch-buffer-transformer)
-  (with-eval-after-load 'counsel-projectile
-    (ivy-set-display-transformer 'counsel-projectile-switch-to-buffer
-                                 'ivy-rich--ivy-switch-buffer-transformer))
-  (ivy-rich-mode 1))
 
 (use-package counsel-projectile
   :after counsel projectile
@@ -924,15 +802,9 @@ This is adapted from `emms-info-track-description'."
 (use-package eshell
   :general
   (panda-space "<return>" 'eshell)
-  (ctl-x-4-map "<return>" 'panda-eshell-other-window)
   :config
   (gsetq eshell-hist-ignoredups t
-         eshell-history-size 1024)
-  (defun panda-eshell-other-window (&optional arg)
-    "Open `eshell' in another window."
-    (interactive "P")
-    (switch-to-buffer-other-window
-     (save-window-excursion (eshell arg)))))
+         eshell-history-size 1024))
 
 (use-package esh-autosuggest
   :ghook 'eshell-mode-hook)
@@ -940,18 +812,8 @@ This is adapted from `emms-info-track-description'."
 (use-package fish-completion
   :ghook 'eshell-mode-hook)
 
-(use-package vterm
-  :general
-  (panda-space "<S-return>" 'vterm)
-  (ctl-x-4-map "<S-return>" 'vterm-other-window)
-  :init
-  (defvar vterm-install t)
-  :config
-  (gsetq vterm-shell "fish"))
-
 ;;;; System
 (use-package disk-usage :defer t)
-(use-package helm-system-packages :defer t)
 
 ;;; Mode-Specific Configuration
 ;;;; Completion / Linting
