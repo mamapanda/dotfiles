@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: defface
+# key: dfa
+# --
+(defface ${1:name} ${2:'((t (:inherit ${3:region})))}
+  "$4")

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: defcustom
+# key: dc
+# --
+(defcustom ${1:name} ${2:nil}
+  "$3"
+  :type '${4:boolean})

@@ -949,8 +949,6 @@ This is adapted from `emms-info-track-description'."
     (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
       (advice-add company-tab-func :around #'panda--company-yas-tab-advice))))
 
-(use-package yasnippet-snippets :after yasnippet)
-
 ;;;; View / Layout
 (use-package olivetti :defer t)
 
@@ -983,7 +981,7 @@ This is adapted from `emms-info-track-description'."
 (use-package cc-mode
   :defer t
   :gfhook ('(c-mode-hook c++-mode-hook)
-           '(clang-format-on-save-mode panda-set-c-locals yas-minor-mode))
+           '(clang-format-on-save-mode panda-set-c-locals))
   :init
   ;; `major-mode-hydra-define+' uses `eval-and-compile' under the hood.
   (panda-configure-lsp-hydra (c-mode c++-mode))
@@ -1009,7 +1007,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; CMake
 (use-package cmake-mode
   :defer t
-  :gfhook '(panda-format-on-save-mode yas-minor-mode))
+  :gfhook '(panda-format-on-save-mode))
 
 ;;;; Common Lisp
 (use-package lisp-mode
@@ -1018,8 +1016,7 @@ This is adapted from `emms-info-track-description'."
   :gfhook '(company-mode
             lispyville-mode
             panda-format-on-save-mode
-            panda-set-lisp-locals
-            yas-minor-mode)
+            panda-set-lisp-locals)
   :config
   (defun panda-set-lisp-locals ()
     (gsetq-local evil-args-delimiters '(" "))))
@@ -1055,7 +1052,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; D
 (use-package d-mode
   :defer t
-  :gfhook '(dfmt-on-save-mode lsp yas-minor-mode)
+  :gfhook '(dfmt-on-save-mode lsp)
   :init
   (panda-configure-lsp-hydra d-mode)
   :config
@@ -1139,25 +1136,25 @@ This is adapted from `emms-info-track-description'."
 ;;;; Fish
 (use-package fish-mode
   :defer t
-  :gfhook '(panda-trim-on-save-mode yas-minor-mode))
+  :gfhook '(panda-trim-on-save-mode))
 
 ;;;; Git Files
 (use-package gitattributes-mode
   :defer t
-  :gfhook '(panda-format-on-save-mode yas-minor-mode))
+  :gfhook '(panda-format-on-save-mode))
 
 (use-package gitconfig-mode
   :defer t
-  :gfhook '(panda-format-on-save-mode yas-minor-mode))
+  :gfhook '(panda-format-on-save-mode))
 
 (use-package gitignore-mode
   :defer t
-  :gfhook '(panda-format-on-save-mode yas-minor-mode))
+  :gfhook '(panda-format-on-save-mode))
 
 ;;;; Go
 (use-package go-mode
   :defer t
-  :gfhook '(gofmt-on-save-mode lsp panda-set-go-locals yas-minor-mode)
+  :gfhook '(gofmt-on-save-mode lsp panda-set-go-locals)
   :init
   (panda-configure-lsp-hydra go-mode)
   :config
@@ -1211,7 +1208,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; JavaScript / TypeScript
 (use-package js
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode)
+  :gfhook '(lsp prettier-ts-on-save-mode)
   :init
   (panda-configure-lsp-hydra js-mode))
 
@@ -1222,7 +1219,7 @@ This is adapted from `emms-info-track-description'."
 
 (use-package typescript-mode
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode yas-minor-mode)
+  :gfhook '(lsp prettier-ts-on-save-mode)
   :init
   (panda-configure-lsp-hydra typescript-mode))
 
@@ -1259,7 +1256,7 @@ This is adapted from `emms-info-track-description'."
 (use-package tex
   :straight auctex
   :defer t
-  :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode yas-minor-mode))
+  :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode))
   :config
   (gsetq TeX-auto-save t
          TeX-parse-self t))
@@ -1267,12 +1264,12 @@ This is adapted from `emms-info-track-description'."
 ;;;; Makefile
 (use-package make-mode
   :defer t
-  :gfhook ('makefile-mode-hook '(panda-trim-on-save-mode yas-minor-mode)))
+  :gfhook ('makefile-mode-hook '(panda-trim-on-save-mode)))
 
 ;;;; Markdown
 (use-package markdown-mode
   :defer t
-  :gfhook '(prettier-md-on-save-mode yas-minor-mode)
+  :gfhook '(prettier-md-on-save-mode)
   :config
   (defvar prettier-md-args '("--stdin" "--parser" "markdown")
     "Arguments for prettier with Markdown.")
@@ -1327,7 +1324,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Python
 (use-package python
   :defer t
-  :gfhook '(black-on-save-mode lsp panda-set-python-locals yas-minor-mode)
+  :gfhook '(black-on-save-mode lsp panda-set-python-locals)
   :mode-hydra
   (python-mode
    ("Eval"
@@ -1353,7 +1350,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; R
 (use-package ess
   :defer t
-  :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp yas-minor-mode))
+  :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp))
   :mode-hydra
   (ess-r-mode
    nil
@@ -1381,7 +1378,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Rust
 (use-package rust-mode
   :defer t
-  :gfhook '(lsp rustfmt-on-save-mode yas-minor-mode)
+  :gfhook '(lsp rustfmt-on-save-mode)
   :init
   (panda-configure-lsp-hydra rust-mode)
   :config
@@ -1402,15 +1399,15 @@ This is adapted from `emms-info-track-description'."
 ;;;; Shell Script
 (use-package sh-script
   :defer t
-  :gfhook ('sh-mode-hook '(panda-format-on-save-mode yas-minor-mode)))
+  :gfhook ('sh-mode-hook '(panda-format-on-save-mode)))
 
 ;;;; YAML
 (use-package yaml-mode
   :defer t
-  :gfhook '(panda-trim-on-save-mode yas-minor-mode))
 
 ;;; Fun
 (use-package 2048-game :defer t)
+  :gfhook '(panda-trim-on-save-mode))
 
 ;;; End Init
 (provide 'init)

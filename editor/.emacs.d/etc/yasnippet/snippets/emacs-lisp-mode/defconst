@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: defconst
+# key: dco
+# --
+(defconst ${1:name} ${2:nil}
+  "$3")
