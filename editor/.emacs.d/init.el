@@ -9,10 +9,10 @@
 (defun panda--restore-init-optimization-variables ()
   "Restore variables that were modified for init time optimization."
   (setq file-name-handler-alist panda--pre-init-file-name-handler-alist
-        gc-cons-threshold       panda--pre-init-gc-cons-threshold))
+        gc-cons-threshold panda--pre-init-gc-cons-threshold))
 
 (setq file-name-handler-alist nil
-      gc-cons-threshold       64000000)
+      gc-cons-threshold 64000000)
 
 (add-hook 'after-init-hook #'panda--restore-init-optimization-variables)
 
@@ -86,12 +86,12 @@ It should contain an alist literal for `panda-get-private-data'.")
                    :test #'file-equal-p))
   :config
   (gsetq evil-disable-insert-state-bindings t
-         evil-jumps-cross-buffers           nil
-         evil-move-beyond-eol               t
-         evil-toggle-key                    "C-s-+"
-         evil-want-C-d-scroll               t
-         evil-want-C-u-scroll               t
-         evil-want-Y-yank-to-eol            t)
+         evil-jumps-cross-buffers nil
+         evil-move-beyond-eol t
+         evil-toggle-key "C-s-+"
+         evil-want-C-d-scroll t
+         evil-want-C-u-scroll t
+         evil-want-Y-yank-to-eol t)
   (gsetq-default evil-symbol-word-search t)
   (general-create-definer panda-space
     :states '(normal operator motion visual)
@@ -221,31 +221,31 @@ It should contain an alist literal for `panda-get-private-data'.")
 (defalias 'panda-inner-defun 'panda-outer-defun)
 
 ;;;; Settings
-(gsetq auto-save-default              nil
-       blink-cursor-blinks            0
-       c-default-style                '((java-mode            . "java")
-                                        (awk-mode             . "awk")
-                                        (other                . "stroustrup"))
-       default-frame-alist            '((fullscreen           . maximized)
-                                        (font                 . "Consolas-11")
-                                        (menu-bar-lines       . 0)
-                                        (tool-bar-lines       . 0)
-                                        (vertical-scroll-bars . nil))
-       delete-by-moving-to-trash      t
-       disabled-command-function      nil
-       enable-recursive-minibuffers   t
+(gsetq auto-save-default nil
+       blink-cursor-blinks 0
+       c-default-style '((java-mode . "java")
+                         (awk-mode . "awk")
+                         (other . "stroustrup"))
+       default-frame-alist '((fullscreen . maximized)
+                             (font . "Consolas-11")
+                             (menu-bar-lines . 0)
+                             (tool-bar-lines . 0)
+                             (vertical-scroll-bars . nil))
+       delete-by-moving-to-trash t
+       disabled-command-function nil
+       enable-recursive-minibuffers t
        inhibit-compacting-font-caches t
-       inhibit-startup-screen         t
-       make-backup-files              nil
-       recentf-max-saved-items        100
-       require-final-newline          t
-       ring-bell-function             'ignore
-       save-abbrevs                   nil
-       tramp-default-method           "ssh"
-       undo-limit                     1000000
-       use-dialog-box                 nil
-       vc-follow-symlinks             t
-       visible-bell                   nil)
+       inhibit-startup-screen t
+       make-backup-files nil
+       recentf-max-saved-items 100
+       require-final-newline t
+       ring-bell-function 'ignore
+       save-abbrevs nil
+       tramp-default-method "ssh"
+       undo-limit 1000000
+       use-dialog-box nil
+       vc-follow-symlinks t
+       visible-bell nil)
 
 (gsetq-default bidi-display-reordering nil
                buffer-file-coding-system 'utf-8
@@ -264,32 +264,32 @@ It should contain an alist literal for `panda-get-private-data'.")
 
 ;;;; Keybindings
 (general-def '(normal motion) override
-  ";"   'panda-static-evil-ex
-  ":"   'eval-expression
-  ","   'execute-extended-command
-  "Q"   'save-buffer)
+  ";" 'panda-static-evil-ex
+  ":" 'eval-expression
+  "," 'execute-extended-command
+  "Q" 'save-buffer)
 
 (general-def 'normal
   "C-r" nil
-  "g;"  nil
-  "g,"  nil
-  "gD"  'xref-find-references
-  "[e"  'previous-error
-  "]e"  'next-error)
+  "g;" nil
+  "g," nil
+  "gD" 'xref-find-references
+  "[e" 'previous-error
+  "]e" 'next-error)
 
 (general-def 'insert
   "<C-backspace>" 'evil-delete-backward-word
-  "C-x r i"       'evil-paste-from-register
-  "M-o"           'evil-execute-in-normal-state)
+  "C-x r i" 'evil-paste-from-register
+  "M-o" 'evil-execute-in-normal-state)
 
 (general-def 'motion
   "SPC" nil
-  ";"   nil
-  ","   nil
-  "`"   'evil-goto-mark-line
-  "'"   'evil-goto-mark
-  "gs"  'evil-repeat-find-char
-  "gS"  'evil-repeat-find-char-reverse
+  ";" nil
+  "," nil
+  "`" 'evil-goto-mark-line
+  "'" 'evil-goto-mark
+  "gs" 'evil-repeat-find-char
+  "gS" 'evil-repeat-find-char-reverse
   "M-h" 'beginning-of-defun
   "M-l" 'end-of-defun)
 
@@ -317,8 +317,8 @@ It should contain an alist literal for `panda-get-private-data'.")
 (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
 (general-def evil-ex-completion-map
   "<escape>" 'minibuffer-keyboard-quit
-  "TAB"      'evil-ex-completion
-  "C-x r i"  'evil-paste-from-register)
+  "TAB" 'evil-ex-completion
+  "C-x r i" 'evil-paste-from-register)
 
 (evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
 
@@ -466,8 +466,8 @@ The changes are local to the current buffer."
 (use-package evil-surround
   :config
   (general-def 'visual evil-surround-mode-map
-    "s"  'evil-surround-region
-    "S"  'evil-Surround-region
+    "s" 'evil-surround-region
+    "S" 'evil-Surround-region
     "gS" nil)
   (global-evil-surround-mode 1))
 
@@ -532,9 +532,9 @@ The changes are local to the current buffer."
 (use-package avy
   :general ('motion "C-SPC" 'evil-avy-goto-char-timer)
   :config
-  (gsetq avy-all-windows         nil
-         avy-all-windows-alt     t
-         avy-background          t
+  (gsetq avy-all-windows nil
+         avy-all-windows-alt t
+         avy-background t
          avy-indent-line-overlay t))
 
 (use-package deadgrep
@@ -550,10 +550,10 @@ The changes are local to the current buffer."
 
 (use-package evil-snipe
   :config
-  (gsetq evil-snipe-repeat-keys   t
-         evil-snipe-smart-case    t
-         evil-snipe-scope         'visible
-         evil-snipe-repeat-scope  'visible
+  (gsetq evil-snipe-repeat-keys t
+         evil-snipe-smart-case t
+         evil-snipe-scope 'visible
+         evil-snipe-repeat-scope 'visible
          evil-snipe-tab-increment t)
   (general-def 'visual evil-snipe-local-mode-map
     "x" 'evil-snipe-x
@@ -561,8 +561,8 @@ The changes are local to the current buffer."
     "z" 'evil-snipe-s
     "Z" 'evil-snipe-S)
   (general-def 'motion evil-snipe-override-local-mode-map
-    ";"  nil
-    ","  nil
+    ";" nil
+    "," nil
     "gs" 'evil-snipe-repeat
     "gS" 'evil-snipe-repeat-reverse)
   (setf (cdr evil-snipe-parent-transient-map) nil)
@@ -603,7 +603,7 @@ The changes are local to the current buffer."
          confirm-nonexistent-file-or-buffer t
          ivy-count-format "(%d/%d) ")
   (general-def ivy-minibuffer-map
-    "<return>"   'ivy-alt-done
+    "<return>" 'ivy-alt-done
     "C-<return>" 'ivy-immediate-done)
   (ivy-mode 1))
 
@@ -629,12 +629,12 @@ The changes are local to the current buffer."
 (use-package helm
   :defer t
   :config
-  (gsetq helm-echo-input-in-header-line        t
-         helm-ff-fuzzy-matching                nil
+  (gsetq helm-echo-input-in-header-line t
+         helm-ff-fuzzy-matching nil
          helm-find-files-ignore-thing-at-point t
-         helm-split-window-inside-p            t
-         helm-mini-default-sources             '(helm-source-buffers-list
-                                                 helm-source-recentf))
+         helm-split-window-inside-p t
+         helm-mini-default-sources '(helm-source-buffers-list
+                                     helm-source-recentf))
   (general-def helm-map "<escape>" 'helm-keyboard-quit))
 
 ;;;; Windows
@@ -643,10 +643,10 @@ The changes are local to the current buffer."
   :general
   (panda-space
     "<tab>" 'eyebrowse-last-window-config
-    "w"     'eyebrowse-switch-to-window-config
-    "W"     'eyebrowse-close-window-config
-    "e"     'panda-eyebrowse-create-window-config
-    "E"     'eyebrowse-rename-window-config)
+    "w" 'eyebrowse-switch-to-window-config
+    "W" 'eyebrowse-close-window-config
+    "e" 'panda-eyebrowse-create-window-config
+    "E" 'eyebrowse-rename-window-config)
   ('normal eyebrowse-mode-map
            "gt" 'eyebrowse-next-window-config
            "gT" 'eyebrowse-prev-window-config)
@@ -708,9 +708,9 @@ workspaces' tags are also shown."
 (use-package dired-subtree
   :general
   ('normal dired-mode-map
-           "zo"    'panda-dired-subtree-insert
-           "zc"    'panda-dired-subtree-remove
-           "za"    'dired-subtree-toggle
+           "zo" 'panda-dired-subtree-insert
+           "zc" 'panda-dired-subtree-remove
+           "za" 'dired-subtree-toggle
            "<tab>" 'dired-subtree-cycle)
   :config
   (defun panda-dired-subtree-insert ()
@@ -761,16 +761,16 @@ workspaces' tags are also shown."
     "Return a description of TRACK.
 This is adapted from `emms-info-track-description'."
     (let ((artist (emms-track-get track 'info-artist))
-          (title  (emms-track-get track 'info-title)))
+          (title (emms-track-get track 'info-title)))
       (cond ((and artist title) (concat title " - " artist))
             (title title)
             (t (emms-track-simple-description track)))))
-  (gsetq emms-info-functions                      '(emms-info-libtag)
-         emms-player-list                         '(emms-player-vlc)
-         emms-repeat-playlist                     t
-         emms-source-file-default-directory       "~/Music"
+  (gsetq emms-info-functions '(emms-info-libtag)
+         emms-player-list '(emms-player-vlc)
+         emms-repeat-playlist t
+         emms-source-file-default-directory "~/Music"
          emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
-         emms-track-description-function          'panda-emms-track-description))
+         emms-track-description-function 'panda-emms-track-description))
 
 ;;;; Readers
 (use-package elfeed
@@ -957,7 +957,7 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq outshine-org-style-global-cycling-at-bob-p t)
   (general-def 'normal outshine-mode-map
-    "<tab>"     (lookup-key outshine-mode-map (kbd "TAB"))
+    "<tab>" (lookup-key outshine-mode-map (kbd "TAB"))
     "<backtab>" 'outshine-cycle-buffer))
 
 ;;; Language Modes
