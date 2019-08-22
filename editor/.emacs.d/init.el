@@ -59,7 +59,6 @@
   (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
 
 ;;;; Custom File
-;; TODO: I really want to figure out a way to not load custom settings.
 (gsetq custom-file (no-littering-expand-etc-file-name "custom.el"))
 (when (file-exists-p custom-file)
   (load custom-file))
@@ -79,11 +78,11 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;;; Evil
 (use-package evil
   :init
-  (gsetq evil-want-keybinding nil)
-  (setq load-path (cl-nset-difference
-                   load-path
-                   (mapcar #'straight--build-dir '("goto-chg" "undo-tree"))
-                   :test #'file-equal-p))
+  (dolist (package '("goto-chg" "undo-tree"))
+    (let ((build-dir (straight--build-dir package)))
+      (setq load-path (cl-delete build-dir load-path :test #'file-equal-p))))
+  (gsetq evil-respect-visual-line-mode t
+         evil-want-keybinding nil)
   :config
   (gsetq evil-disable-insert-state-bindings t
          evil-jumps-cross-buffers nil
@@ -111,20 +110,6 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;;; Basic Configuration
 ;;;; Definitions
 ;;;;; Defuns
-(defun panda-bind-visual-line-motions (keymap)
-  "Bind visual line equivalents of evil motions in KEYMAP."
-  (general-def 'motion :keymaps keymap
-    "j"  'evil-next-visual-line
-    "k"  'evil-previous-visual-line
-    "0"  'evil-beginning-of-visual-line
-    "^"  'evil-first-non-blank-of-visual-line
-    "$"  'evil-end-of-visual-line
-    "gj" 'evil-next-line
-    "gk" 'evil-previous-line
-    "g0" 'evil-beginning-of-line
-    "g^" 'evil-first-non-blank
-    "g$" 'evil-end-of-line))
-
 (defun panda-format-buffer ()
   "Indent the entire buffer and delete trailing whitespace."
   (interactive)
@@ -291,7 +276,9 @@ It should contain an alist literal for `panda-get-private-data'.")
   "gs" 'evil-repeat-find-char
   "gS" 'evil-repeat-find-char-reverse
   "M-h" 'beginning-of-defun
-  "M-l" 'end-of-defun)
+  "M-l" 'end-of-defun
+  "H" 'backward-sexp
+  "L" 'forward-sexp)
 
 (general-def 'outer
   "e" 'panda-outer-buffer
@@ -302,17 +289,17 @@ It should contain an alist literal for `panda-get-private-data'.")
   "d" 'panda-inner-defun)
 
 (panda-space
-  "b" 'switch-to-buffer
+  "b" 'switch-to-buffer                 ; C-x b
   "c" 'compile
-  "d" 'dired
-  "f" 'find-file
-  "h" 'help-command
-  "o" 'occur
-  "t" 'bookmark-jump
-  "T" 'bookmark-set
-  "4" '(:keymap ctl-x-4-map)
-  "5" '(:keymap ctl-x-5-map)
-  "%" (general-key "C-x C-q"))
+  "d" 'dired                            ; C-x d
+  "f" 'find-file                        ; C-x C-f
+  "h" 'help-command                     ; C-h
+  "o" 'occur                            ; M-s o
+  "t" 'bookmark-jump                    ; C-x r b
+  "T" 'bookmark-set                     ; C-x r m
+  "4" '(:keymap ctl-x-4-map)            ; C-x 4
+  "5" '(:keymap ctl-x-5-map)            ; C-x 5
+  "%" (general-key "C-x C-q"))          ; C-x C-q
 
 (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
 (general-def evil-ex-completion-map
@@ -325,7 +312,7 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;;; Global Packages
 ;;;; Appearance
 (use-package base16-theme
-  :defer t
+  :disabled t
   :config
   (gsetq base16-distinct-fringe-background nil)
   (panda-with-gui
@@ -385,7 +372,8 @@ The changes are local to the current buffer."
 (use-package posframe
   :defer t
   :config
-  (gsetq posframe-mouse-banish nil))
+  (gsetq posframe-mouse-banish nil)
+  (set-face-background 'internal-border (face-foreground 'font-lock-comment-face)))
 
 (use-package rainbow-delimiters
   :ghook 'prog-mode-hook)
@@ -433,7 +421,6 @@ The changes are local to the current buffer."
   ('normal "C-a" 'evil-numbers/inc-at-pt
            "C-s" 'evil-numbers/dec-at-pt))
 
-;; TODO: we could probably make a "Visual Hints" section
 (use-package evil-owl
   :straight (evil-owl
              :host github
@@ -446,18 +433,14 @@ The changes are local to the current buffer."
                             :underline t))))
   (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
   :config
-  (gsetq evil-owl-register-char-limit 100
-         evil-owl-idle-delay          0.75
-         evil-owl-register-format     (concat " " evil-owl-register-format)
-         evil-owl-local-mark-format   (concat " " evil-owl-local-mark-format)
-         evil-owl-global-mark-format  (concat " " evil-owl-global-mark-format))
+  (gsetq evil-owl-register-char-limit 50
+         evil-owl-idle-delay 0.75)
   (gsetq evil-owl-extra-posframe-args
          `(
-           :background-color ,(face-background 'mode-line)
-           :right-fringe 8
+           :poshandler posframe-poshandler-point-bottom-left-corner
            :width 50
            :height 20
-           :poshandler posframe-poshandler-point-bottom-left-corner))
+           :internal-border-width 2))
   (evil-owl-mode))
 
 (use-package evil-replace-with-register
@@ -477,6 +460,10 @@ The changes are local to the current buffer."
              :repo "mamapanda/evil-traces"
              :local-repo "~/code/emacs-lisp/evil-traces")
   :config
+  (defun panda-no-ex-range-and-arg-p ()
+    "Return non-nil if both `evil-ex-range' and `evil-ex-argument' are nil."
+    (and (null evil-ex-range) (null evil-ex-argument)))
+  (gsetq evil-traces-suspend-function #'panda-no-ex-range-and-arg-p)
   (evil-traces-use-diff-faces)
   (evil-traces-mode))
 
@@ -577,6 +564,9 @@ The changes are local to the current buffer."
   (gsetq evil-visualstar/persistent t)
   (global-evil-visualstar-mode 1))
 
+(use-package goto-last-change
+  :general ('normal "g;" 'goto-last-change))
+
 (use-package imenu
   :general (panda-space "i" 'imenu)
   :config
@@ -591,9 +581,6 @@ The changes are local to the current buffer."
   (projectile-mode))
 
 ;;;; UI Completion
-(use-package flx :defer t)
-(use-package smex :defer t)
-
 (use-package ivy
   :demand t
   :config
@@ -618,13 +605,16 @@ The changes are local to the current buffer."
 
 (use-package ivy-hydra :defer t)
 
+(use-package ivy-prescient
+  :config
+  (gsetq ivy-prescient-retain-classic-highlighting t)
+  (prescient-persist-mode)
+  (ivy-prescient-mode))
+
 (use-package counsel-projectile
   :after counsel projectile
   :config
   (counsel-projectile-mode 1))
-
-(use-package goto-last-change
-  :general ('normal "g;" 'goto-last-change))
 
 (use-package helm
   :defer t
@@ -661,25 +651,26 @@ The changes are local to the current buffer."
       (eyebrowse-rename-window-config created-config tag)))
   (with-eval-after-load 'doom-modeline
     (doom-modeline-def-segment workspace-name
-      "Custom workspace segment for doom-modeline.
-Besides the current workspace's tag, the first letter of inactive
-workspaces' tags are also shown."
-      (when (and eyebrowse-mode (doom-modeline--active))
+      "Custom workspace segment for doom-modeline."
+      (when eyebrowse-mode
         (assq-delete-all 'eyebrowse-mode mode-line-misc-info)
-        (let* ((current-slot (eyebrowse--get 'current-slot))
-               (window-configs (eyebrowse--get 'window-configs)))
+        (let ((segment-face (if (doom-modeline--active)
+                                'doom-modeline-buffer-path
+                              'mode-line-inactive))
+              (current-face (if (doom-modeline--active)
+                                'doom-modeline-buffer-file
+                              'mode-line-inactive)))
           (format
            " %s "
            (mapconcat
             (lambda (window-config)
               (let ((slot (cl-first window-config))
                     (tag (cl-third window-config)))
-                (if (= slot current-slot)
-                    (propertize tag 'face 'doom-modeline-buffer-file)
-                  (propertize (if (string-empty-p tag) tag (substring tag 0 1))
-                              'face 'doom-modeline-buffer-path))))
-            window-configs
-            (propertize "|" 'face 'doom-modeline-buffer-path)))))))
+                (if (= slot (eyebrowse--get 'current-slot))
+                    (propertize (format "%d:%s" slot tag) 'face current-face)
+                  (propertize (format "%d%.1s" slot tag) 'face segment-face))))
+            (eyebrowse--get 'window-configs)
+            (propertize "|" 'face segment-face)))))))
   (eyebrowse-mode 1))
 
 (use-package winner
@@ -743,6 +734,8 @@ workspaces' tags are also shown."
   :config
   (gsetq magit-todos-rg-extra-args '("--hidden" "--glob" "!.git/"))
   (magit-todos-mode))
+
+(use-package forge :after magit)
 
 (use-package evil-magit :after magit)
 
@@ -819,20 +812,11 @@ This is adapted from `emms-info-track-description'."
 ;;;; Completion / Linting
 (use-package company
   :defer t
-  :init
-  (defvar company-active-map (make-sparse-keymap))
   :config
-  (gsetq company-backends                  (delete 'company-dabbrev company-backends)
-         company-dabbrev-code-modes        nil
-         company-minimum-prefix-length     2
-         company-tooltip-align-annotations t)
-  (general-def company-active-map
-    "C-p"      'company-select-previous
-    "C-n"      'company-select-next
-    "C-b"      'company-previous-page
-    "C-f"      'company-next-page
-    "<return>" 'company-complete-selection
-    "C-g"      'company-abort))
+  (gsetq company-backends (delete 'company-dabbrev company-backends)
+         company-dabbrev-code-modes nil
+         company-minimum-prefix-length 2
+         company-tooltip-align-annotations t))
 
 (use-package flycheck
   :defer t
@@ -905,8 +889,7 @@ This is adapted from `emms-info-track-description'."
 (use-package lispyville
   :defer t
   :config
-  (lispyville-set-key-theme '(additional-motions
-                              c-w
+  (lispyville-set-key-theme '(c-w
                               commentary
                               operators
                               prettify
@@ -1404,9 +1387,6 @@ This is adapted from `emms-info-track-description'."
 ;;;; YAML
 (use-package yaml-mode
   :defer t
-
-;;; Fun
-(use-package 2048-game :defer t)
   :gfhook '(panda-trim-on-save-mode))
 
 ;;; End Init
