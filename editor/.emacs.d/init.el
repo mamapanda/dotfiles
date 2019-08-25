@@ -433,7 +433,8 @@ The changes are local to the current buffer."
                             :underline t))))
   (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
   :config
-  (gsetq evil-owl-register-char-limit 50
+  (gsetq evil-owl-display-method 'posframe
+         evil-owl-register-char-limit 50
          evil-owl-idle-delay 0.75)
   (gsetq evil-owl-extra-posframe-args
          `(
