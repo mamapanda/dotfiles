@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: unless
+# key: u
+# --
+(unless ${1:t}
+  $0)

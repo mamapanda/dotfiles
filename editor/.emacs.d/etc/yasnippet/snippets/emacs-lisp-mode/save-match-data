@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: save-match-data
+# key: smd
+# --
+(save-match-data
+  $0)
