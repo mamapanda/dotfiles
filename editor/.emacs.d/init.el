@@ -107,6 +107,19 @@ It should contain an alist literal for `panda-get-private-data'.")
   (delete 'outline evil-collection-mode-list)
   (evil-collection-init))
 
+(use-package targets
+  :straight (:type git :host github :repo "noctuid/targets.el")
+  :config
+  (progn
+    (defun panda-show-reg-targets-fix (orig-fn)
+      "Advice to not error with `targets--reset-position'."
+      (let ((register-alist (cl-remove 'targets--reset-position
+                                       register-alist
+                                       :key #'car)))
+        (funcall orig-fn)))
+    (advice-add #'evil-show-registers :around #'panda-show-reg-targets-fix))
+  (targets-setup t))
+
 ;;; Basic Configuration
 ;;;; Definitions
 ;;;;; Defuns
@@ -189,21 +202,137 @@ It should contain an alist literal for `panda-get-private-data'.")
 
 ;;;;; Text Objects
 ;;;;;; Buffer
-(evil-define-text-object panda-outer-buffer (&optional count beg end type)
+(evil-define-text-object panda-outer-buffer (count beg end type)
   "Select the whole buffer."
   :type line
   (evil-range (point-min) (point-max)))
 
 (defalias 'panda-inner-buffer 'panda-outer-buffer)
 
-;;;;;; Defun
-(evil-define-text-object panda-outer-defun (&optional count beg end type)
-  "Select a function."
-  :type line
-  (cl-destructuring-bind (begin . end) (bounds-of-thing-at-point 'defun)
-    (evil-range begin end)))
+;; We could define a remote buffer object that prompts for a buffer
+;; and switches to it, but I don't see myself using that outside of
+;; cases already covered by :read.
 
-(defalias 'panda-inner-defun 'panda-outer-defun)
+;;;;;; Defun
+;; FIXME: It seems that regexps are the wrong tool for this job, since
+;; there's no regexp that can work in all cases in some languages:
+;; https://stackoverflow.com/questions/8187857/regular-expression-to-extract-function-body
+
+;; Other considerations:
+;; - the argument list needs to be optional for most languages due to classes.
+;; - We need to watch out for strings, chars, lambdas interfering with the regexp.
+
+;; alternatively, since the opening brace is always top level and
+;; other ones are not, we could loop with forward-sexp.  In this case,
+;; we could change to using regexps to using functions to narrow.
+
+;; The following examples are untested:
+
+;; ;; for languages using braces at the top level (opening brace)
+;; (save-restriction
+;;   ;; narrow to make things easier
+;;   (narrow-to-defun)
+;;   (let (forward-sexp-function)          ; set in some modes like `python-mode'
+;;     (loop-until (or (eobp) (looking-at-p (rx (0+ (any blank ?\n)) ?\{)))
+;;       (forward-sexp)))
+;;   (search-forward "{") ; we could change this to "=" for haskell and ":" for python
+;;   (point))
+
+;; ;; for R (opening with optional brace)
+;; (save-restriction                       ; we could extract this narrowing out
+;;   (narrow-to-defun)
+;;   (search-forward "(")
+;;   (forward-sexp)
+;;   (skip-chars-forward "[:blank:]")
+;;   (when (= (char-after (point)) ?\{)    ; optional braces
+;;     (forward-char)))
+
+;; A possible flaw is that `forward-sexp' skips over some characters,
+;; like : in python-mode.  I don't know if this is actually a serious
+;; issue or not though.  Also, it seems that `forward-sexp' considers
+;; each word in a comment separately if we're inside a comment, but we
+;; shouldn't ever get inside one anyways.
+
+;; To determine if an inner defun should be linewise, we could check
+;; if the beginning/end are at bol.
+
+(defvar panda-inner-defun-delimiters-alist '((clojure-mode . lisp-mode)
+                                             (emacs-lisp-mode . lisp-mode)
+                                             (lisp-mode . ("(" . ")"))
+                                             (python-mode . (":" . ""))
+                                             (t . ("{" . "}")))
+  "An alist of major modes to inner defun delimiters.
+The key t corresponds to the default delimiters.")
+
+(defun panda-inner-defun-delimiters (mode)
+  "Get the inner defun delimiters for MODE."
+  (let ((regexps (alist-get mode panda-inner-defun-delimiters-alist)))
+    (cond
+     ((consp regexps) regexps)
+     ((and regexps (symbolp regexps)) (panda-inner-defun-delimiters regexps))
+     (t (if-let ((parent-mode (get-mode-local-parent mode)))
+            (panda-inner-defun-delimiters parent-mode)
+          (alist-get t panda-inner-defun-delimiters-alist))))))
+
+(defun panda--shrink-inner-defun (range)
+  "Shrink RANGE to that of an inner defun."
+  (cl-destructuring-bind (open-delim . close-delim) (panda-inner-defun-delimiters major-mode)
+    (let* ((begin (save-excursion
+                    (goto-char (evil-range-beginning range))
+                    ;; (re-search-forward open-delim nil t)
+                    (re-search-forward open-delim (evil-range-end range))
+                    (skip-chars-forward "[:blank:]")
+                    (when (eolp)
+                      (forward-char))
+                    (point)))
+           (end (save-excursion
+                  (goto-char (evil-range-end range))
+                  ;; (re-search-backward close-delim nil t)
+                  (re-search-backward close-delim (evil-range-beginning range))
+                  (skip-chars-backward "[:blank:]")
+                  (when (bolp)
+                    (backward-char))
+                  (point)))
+           (type (and (= (char-before begin) (char-after end) ?\n) 'line)))
+      (evil-range begin end type))))
+
+(put 'defun 'targets-no-extend t)     ; seems like defun doesn't work otherwise
+(put 'defun 'targets-shrink-inner-op #'panda--shrink-inner-defun)
+
+(targets-define-to defun 'defun nil object :linewise t :bind t :keys "d")
+
+;;;;;; Whitespace
+(defun forward-panda-whitespace (count)
+  "Move forward COUNT horizontal whitespace blocks."
+  (evil-forward-chars "[:blank:]" count))
+
+(defun panda--shrink-inner-whitespace (range)
+  "Shrink RANGE to not include the first whitespace character."
+  (evil-set-range-beginning range (1+ (evil-range-beginning range))))
+
+(put 'panda-whitespace 'targets-no-extend t) ; doesn't make sense to extend
+(put 'panda-whitespace 'targets-shrink-inner-op #'panda--shrink-inner-whitespace)
+
+(targets-define-to whitespace 'panda-whitespace nil object :bind t :keys " ")
+
+;;;;;; Whitespace Line
+;; The remote text object doesn't pick up a block at the beginning of
+;; the buffer, even though the regular/last objects work just fine.
+(defun forward-panda-whitespace-line (count)
+  "Move forward COUNT whitespace-only lines."
+  (condition-case nil
+      (evil-forward-not-thing 'evil-paragraph count)
+    (wrong-type-argument))) ; might happen at the end of the buffer
+
+(defun panda--shrink-inner-whitespace-line (range)
+  "Shrink RANGE to not include the trailing newline."
+  (evil-set-range-end range (1- (evil-range-end range))))
+
+(put 'panda-whitespace-line 'targets-no-extend t) ; doesn't make sense to extend
+(put 'panda-whitespace-line 'targets-shrink-inner-op #'panda--shrink-inner-whitespace-line)
+
+(targets-define-to whitespace-line 'panda-whitespace-line nil object
+                   :bind t :keys "\^M" :linewise t)
 
 ;;;; Settings
 (gsetq auto-save-default nil
@@ -281,12 +410,10 @@ It should contain an alist literal for `panda-get-private-data'.")
   "L" 'forward-sexp)
 
 (general-def 'outer
-  "e" 'panda-outer-buffer
-  "d" 'panda-outer-defun)
+  "e" 'panda-outer-buffer)
 
 (general-def 'inner
-  "e" 'panda-inner-buffer
-  "d" 'panda-inner-defun)
+  "e" 'panda-inner-buffer)
 
 (panda-space
   "b" 'switch-to-buffer                 ; C-x b
@@ -470,19 +597,6 @@ The changes are local to the current buffer."
 
 (use-package expand-region
   :general ('visual "v" 'er/expand-region))
-
-(use-package targets
-  :straight (:type git :host github :repo "noctuid/targets.el")
-  :config
-  (progn
-    (defun panda-show-reg-targets-fix (orig-fn)
-      "Advice to not error with `targets--reset-position'."
-      (let ((register-alist (cl-remove 'targets--reset-position
-                                       register-alist
-                                       :key #'car)))
-        (funcall orig-fn)))
-    (advice-add #'evil-show-registers :around #'panda-show-reg-targets-fix))
-  (targets-setup t))
 
 (use-package undo-propose
   :general ('normal "U" 'undo-propose))

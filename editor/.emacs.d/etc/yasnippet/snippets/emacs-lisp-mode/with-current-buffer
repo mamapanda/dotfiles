@@ -2,5 +2,5 @@
 # name: with-current-buffer
 # key: wcb
 # --
-(with-current-buffer
+(with-current-buffer ${1:"*scratch*"}
   $0)
