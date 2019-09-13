@@ -214,87 +214,58 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;; cases already covered by :read.
 
 ;;;;;; Defun
-;; FIXME: It seems that regexps are the wrong tool for this job, since
-;; there's no regexp that can work in all cases in some languages:
-;; https://stackoverflow.com/questions/8187857/regular-expression-to-extract-function-body
+(defvar-local panda-inner-defun-bounds '("{" . "}")
+  "Variable to determine the bounds of an inner defun.
+The value can be a pair of regexps to determine the start and end,
+exclusive of the matched expressions.  It can also be a function, in
+which case the return value will be used.")
 
-;; Other considerations:
-;; - the argument list needs to be optional for most languages due to classes.
-;; - We need to watch out for strings, chars, lambdas interfering with the regexp.
-
-;; alternatively, since the opening brace is always top level and
-;; other ones are not, we could loop with forward-sexp.  In this case,
-;; we could change to using regexps to using functions to narrow.
-
-;; The following examples are untested:
-
-;; ;; for languages using braces at the top level (opening brace)
-;; (save-restriction
-;;   ;; narrow to make things easier
-;;   (narrow-to-defun)
-;;   (let (forward-sexp-function)          ; set in some modes like `python-mode'
-;;     (loop-until (or (eobp) (looking-at-p (rx (0+ (any blank ?\n)) ?\{)))
-;;       (forward-sexp)))
-;;   (search-forward "{") ; we could change this to "=" for haskell and ":" for python
-;;   (point))
-
-;; ;; for R (opening with optional brace)
-;; (save-restriction                       ; we could extract this narrowing out
-;;   (narrow-to-defun)
-;;   (search-forward "(")
-;;   (forward-sexp)
-;;   (skip-chars-forward "[:blank:]")
-;;   (when (= (char-after (point)) ?\{)    ; optional braces
-;;     (forward-char)))
-
-;; A possible flaw is that `forward-sexp' skips over some characters,
-;; like : in python-mode.  I don't know if this is actually a serious
-;; issue or not though.  Also, it seems that `forward-sexp' considers
-;; each word in a comment separately if we're inside a comment, but we
-;; shouldn't ever get inside one anyways.
-
-;; To determine if an inner defun should be linewise, we could check
-;; if the beginning/end are at bol.
-
-(defvar panda-inner-defun-delimiters-alist '((clojure-mode . lisp-mode)
-                                             (emacs-lisp-mode . lisp-mode)
-                                             (lisp-mode . ("(" . ")"))
-                                             (python-mode . (":" . ""))
-                                             (t . ("{" . "}")))
-  "An alist of major modes to inner defun delimiters.
-The key t corresponds to the default delimiters.")
-
-(defun panda-inner-defun-delimiters (mode)
-  "Get the inner defun delimiters for MODE."
-  (let ((regexps (alist-get mode panda-inner-defun-delimiters-alist)))
-    (cond
-     ((consp regexps) regexps)
-     ((and regexps (symbolp regexps)) (panda-inner-defun-delimiters regexps))
-     (t (if-let ((parent-mode (get-mode-local-parent mode)))
-            (panda-inner-defun-delimiters parent-mode)
-          (alist-get t panda-inner-defun-delimiters-alist))))))
+(defun panda--inner-defun-bounds (defun-begin defun-end open-regexp close-regexp)
+  "Find the beginning and end of an inner defun.
+DEFUN-BEGIN and DEFUN-END are the bounds of the defun.  OPEN-REGEXP
+and CLOSE-REGEXP match the delimiters of the inner defun."
+  ;; Some default parameter values (e.g. "{") can conflict with the open
+  ;; regexp.  However, they're usually nested in some sort of sexp, while the
+  ;; intended match usually isn't.  For the close regexp, I can't think of a
+  ;; single conflict case, since it's usually also the function's end.
+  (save-excursion
+    (save-match-data
+      (let ((begin (progn
+                     (goto-char defun-begin)
+                     (let (forward-sexp-function)
+                       (while (and (< (point) defun-end)
+                                   (not (looking-at-p open-regexp)))
+                         (forward-sexp)
+                         (skip-chars-forward "[:blank:]\n")))
+                     (re-search-forward open-regexp defun-end)
+                     (skip-chars-forward "[:blank:]")
+                     (when (eolp)
+                       (forward-char))
+                     (point)))
+            (end (progn
+                   (goto-char defun-end)
+                   (re-search-backward close-regexp defun-begin)
+                   (skip-chars-backward "[:blank:]")
+                   (when (bolp)
+                     (backward-char))
+                   (point))))
+        (cons begin end)))))
 
 (defun panda--shrink-inner-defun (range)
   "Shrink RANGE to that of an inner defun."
-  (cl-destructuring-bind (open-delim . close-delim) (panda-inner-defun-delimiters major-mode)
-    (let* ((begin (save-excursion
-                    (goto-char (evil-range-beginning range))
-                    ;; (re-search-forward open-delim nil t)
-                    (re-search-forward open-delim (evil-range-end range))
-                    (skip-chars-forward "[:blank:]")
-                    (when (eolp)
-                      (forward-char))
-                    (point)))
-           (end (save-excursion
-                  (goto-char (evil-range-end range))
-                  ;; (re-search-backward close-delim nil t)
-                  (re-search-backward close-delim (evil-range-beginning range))
-                  (skip-chars-backward "[:blank:]")
-                  (when (bolp)
-                    (backward-char))
-                  (point)))
-           (type (and (= (char-before begin) (char-after end) ?\n) 'line)))
-      (evil-range begin end type))))
+  (cl-destructuring-bind (begin . end)
+      (cond
+       ((consp panda-inner-defun-bounds)
+        (panda--inner-defun-bounds (evil-range-beginning range)
+                                   (evil-range-end range)
+                                   (car panda-inner-defun-bounds)
+                                   (cdr panda-inner-defun-bounds)))
+       ((functionp panda-inner-defun-bounds)
+        (funcall panda-inner-defun-bounds
+                 (evil-range-beginning range)
+                 (evil-range-end range))))
+    (evil-range begin end
+                (and (= (char-before begin) (char-after end) ?\n) 'line))))
 
 (put 'defun 'targets-no-extend t)     ; seems like defun doesn't work otherwise
 (put 'defun 'targets-shrink-inner-op #'panda--shrink-inner-defun)
@@ -1117,7 +1088,7 @@ This is adapted from `emms-info-track-description'."
             panda-set-lisp-locals)
   :config
   (defun panda-set-lisp-locals ()
-    (gsetq-local evil-args-delimiters '(" "))))
+    (setq panda-inner-defun-bounds '("(" . ")"))))
 
 (use-package slime
   :defer t
@@ -1200,7 +1171,7 @@ This is adapted from `emms-info-track-description'."
     (("t" ert "run"))))
   :config
   (defun panda-set-elisp-locals ()
-    (gsetq-local evil-args-delimiters '(" "))))
+    (setq panda-inner-defun-bounds '("(" . ")"))))
 
 (use-package macrostep
   :mode-hydra
@@ -1436,6 +1407,7 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq python-indent-offset 4)
   (defun panda-set-python-locals ()
+    (setq panda-inner-defun-bounds '(":" . ""))
     (gsetq-local yas-indent-line 'fixed)
     (gsetq-local yas-also-auto-indent-first-line nil))
   (progn
