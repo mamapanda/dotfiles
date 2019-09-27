@@ -951,25 +951,33 @@ This is adapted from `emms-info-track-description'."
   (dap-mode 1)
   (dap-ui-mode 1))
 
-(defmacro panda-configure-lsp-hydra (mode)
-  "Add LSP hydra heads to MODE's major-mode hydra."
-  `(major-mode-hydra-define+ ,mode nil
-     ("Find"
-      (("s" lsp-ui-find-workspace-symbol "workspace-symbol"))
-      "Refactor"
-      (("r" lsp-rename "rename")
-       ("c" lsp-ui-sideline-apply-code-actions "code action")
-       ("o" lsp-organize-imports "organize imports"))
-      "View"
-      (("i" lsp-ui-imenu "imenu")
-       ("l" lsp-lens-mode "lens")
-       ("E" lsp-ui-flycheck-list "errors"))
-      "Debug"
-      (("D" dap-debug "start")
-       ("d" dap-hydra "hydra"))
-      "Workspace"
-      (("<backspace>" lsp-restart-workspace "restart")
-       ("<delete>" lsp-shutdown-workspace "shutdown")))))
+(defvar panda--lsp-hydra-enabled-modes nil
+  "Major modes that already have lsp hydra heads.")
+
+(defun panda--add-lsp-hydra-heads ()
+  "Add `lsp' command heads to the current major mode's `major-mode-hydra'."
+  (unless (memq major-mode panda--lsp-hydra-enabled-modes)
+    (eval
+     `(major-mode-hydra-define+ ,major-mode nil
+        ("Find"
+         (("s" lsp-ui-find-workspace-symbol "workspace-symbol"))
+         "Refactor"
+         (("r" lsp-rename "rename")
+          ("c" lsp-ui-sideline-apply-code-actions "code action")
+          ("o" lsp-organize-imports "organize imports"))
+         "View"
+         (("i" lsp-ui-imenu "imenu")
+          ("l" lsp-lens-mode "lens")
+          ("E" lsp-ui-flycheck-list "errors"))
+         "Debug"
+         (("D" dap-debug "start")
+          ("d" dap-hydra "hydra"))
+         "Workspace"
+         (("<backspace>" lsp-restart-workspace "restart")
+          ("<delete>" lsp-shutdown-workspace "shutdown")))))
+    (push major-mode panda--lsp-hydra-enabled-modes)))
+
+(add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads)
 
 ;;;; Lisp
 (use-package lispyville
@@ -1051,9 +1059,6 @@ This is adapted from `emms-info-track-description'."
   :defer t
   :gfhook ('(c-mode-hook c++-mode-hook)
            '(clang-format-on-save-mode panda-set-c-locals))
-  :init
-  ;; `major-mode-hydra-define+' uses `eval-and-compile' under the hood.
-  (panda-configure-lsp-hydra (c-mode c++-mode))
   :config
   (defun panda-set-c-locals ()
     (c-set-offset 'innamespace 0))
@@ -1122,8 +1127,6 @@ This is adapted from `emms-info-track-description'."
 (use-package d-mode
   :defer t
   :gfhook '(dfmt-on-save-mode lsp)
-  :init
-  (panda-configure-lsp-hydra d-mode)
   :config
   (progn
     (lsp-register-client
@@ -1224,8 +1227,6 @@ This is adapted from `emms-info-track-description'."
 (use-package go-mode
   :defer t
   :gfhook '(gofmt-on-save-mode lsp panda-set-go-locals)
-  :init
-  (panda-configure-lsp-hydra go-mode)
   :config
   (defun panda-set-go-locals ()
     (gsetq-local indent-tabs-mode t))
@@ -1251,7 +1252,6 @@ This is adapted from `emms-info-track-description'."
          web-mode-style-padding 4
          web-mode-script-padding 4
          web-mode-block-padding 4)
-  (panda-configure-lsp-hydra web-mode)
   :config
   (defvar prettier-html-args '("--stdin" "--parser" "html")
     "Arguments for prettier with HTML.")
@@ -1262,8 +1262,6 @@ This is adapted from `emms-info-track-description'."
 (use-package css-mode
   :defer t
   :gfhook '(lsp prettier-css-on-save-mode)
-  :init
-  (panda-configure-lsp-hydra css-mode)
   :config
   (defvar prettier-css-args '("--stdin" "--parser" "css" "--tab-width" "4")
     "Arguments for prettier with CSS.")
@@ -1277,20 +1275,13 @@ This is adapted from `emms-info-track-description'."
 ;;;; JavaScript / TypeScript
 (use-package js
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode)
-  :init
-  (panda-configure-lsp-hydra js-mode))
+  :gfhook '(lsp prettier-ts-on-save-mode))
 
-(use-package rjsx-mode
-  :defer t
-  :init
-  (panda-configure-lsp-hydra rjsx-mode))
+(use-package rjsx-mode :defer t)
 
 (use-package typescript-mode
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode)
-  :init
-  (panda-configure-lsp-hydra typescript-mode))
+  :gfhook '(lsp prettier-ts-on-save-mode))
 
 (defvar prettier-ts-args '("--stdin" "--parser" "typescript" "--tab-width" "4")
   "Arguments for prettier with TypeScript.")
@@ -1402,8 +1393,6 @@ This is adapted from `emms-info-track-description'."
      ("ef" python-shell-send-file "file")
      ("er" python-shell-send-region "region")
      ("eo" run-python "open repl"))))
-  :init
-  (panda-configure-lsp-hydra python-mode)
   :config
   (gsetq python-indent-offset 4)
   (defun panda-set-python-locals ()
@@ -1432,8 +1421,6 @@ This is adapted from `emms-info-track-description'."
      ("ep" ess-eval-paragraph "paragraph")
      ("er" ess-eval-region "region")
      ("eo" R "open repl"))))
-  :init
-  (panda-configure-lsp-hydra ess-r-mode)
   :config
   (gsetq ess-ask-for-ess-directory nil
          ess-use-flymake nil)
@@ -1449,8 +1436,6 @@ This is adapted from `emms-info-track-description'."
 (use-package rust-mode
   :defer t
   :gfhook '(lsp rustfmt-on-save-mode)
-  :init
-  (panda-configure-lsp-hydra rust-mode)
   :config
   (defvar rustfmt-args nil
     "Arguments for rustfmt.")
