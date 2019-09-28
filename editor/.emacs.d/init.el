@@ -1015,7 +1015,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Snippets
 (use-package yasnippet
   :config
-  (gsetq yas-triggers-in-field nil
+  (gsetq yas-triggers-in-field t
          yas-indent-line 'auto
          yas-also-auto-indent-first-line t)
   (yas-reload-all)
@@ -1069,14 +1069,15 @@ This is adapted from `emms-info-track-description'."
       :program "clang-format"
       :args clang-format-args)))
 
-;; TODO: major-mode-hydra ccls
 (use-package ccls
-  :ghook ('(c-mode-hook c++-mode-hook) 'panda-ccls)
-  :config
-  (defun panda-ccls ()
-    "Load \"ccls\", then call `lsp'."
-    (require 'ccls)
-    (lsp)))
+  :ghook ('(c-mode-hook c++-mode-hook) (lambda () (require 'ccls) (lsp)))
+  :mode-hydra
+  ((c-mode c++-mode)
+   nil
+   ("View"
+    (("m" ccls-member-hierarchy "member hierarchy")
+     ("C" ccls-call-hierarchy "call hierarchy")
+     ("I" ccls-inheritance-hierarchy "inheritance hierarchy")))))
 
 ;;;; CMake
 (use-package cmake-mode
