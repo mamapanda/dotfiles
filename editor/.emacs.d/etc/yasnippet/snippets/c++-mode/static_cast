@@ -2,4 +2,4 @@
 # name: static_cast
 # key: sc
 # --
-static_cast<${1:int}>(${2:0});
+static_cast<${1:int}>(${2:0})

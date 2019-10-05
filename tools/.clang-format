@@ -1,5 +1,4 @@
 ---
-Language: Cpp
 BasedOnStyle: Google
 AccessModifierOffset: -4
 AlignConsecutiveAssignments: true
@@ -11,6 +10,7 @@ AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 BreakBeforeBraces: Attach
+ColumnLimit: 80
 IndentCaseLabels: false
 IndentWidth: 4
 ...
