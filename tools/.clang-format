@@ -1,16 +1,21 @@
 ---
 BasedOnStyle: Google
 AccessModifierOffset: -4
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
-AlignTrailingComments: true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: false
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: true
 ColumnLimit: 80
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IndentCaseLabels: false
 IndentWidth: 4
 ...
