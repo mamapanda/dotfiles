@@ -482,11 +482,6 @@ The changes are local to the current buffer."
   ('inner "a" 'evil-inner-arg)
   ('outer "a" 'evil-outer-arg))
 
-(use-package evil-commentary
-  :general
-  ('normal "gc" 'evil-commentary
-           "gy" 'evil-commentary-yank))
-
 (use-package evil-exchange
   :config
   (evil-exchange-install))
@@ -513,6 +508,14 @@ The changes are local to the current buffer."
   :general
   ('normal "gl" 'evil-lion-left
            "gL" 'evil-lion-right))
+
+;; commentary has issues with gy{motion} not pasting
+(use-package evil-nerd-commenter
+  :general
+  ('normal "gc" 'evilnc-comment-operator
+           "gy" 'evilnc-copy-and-comment-operator)
+  ('inner "c" 'evilnc-inner-comment)
+  ('outer "c" 'evilnc-outer-commenter))
 
 (use-package evil-numbers
   :general
@@ -1022,6 +1025,7 @@ This is adapted from `emms-info-track-description'."
          yas-also-auto-indent-first-line t)
   (yas-reload-all)
   (with-eval-after-load 'company
+    ;; TODO: or we can just unbind <tab> in `company-active-map'
     (defun panda--company-yas-tab-advice (old-func &rest args)
       (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
         (call-interactively old-func args)))
@@ -1099,6 +1103,9 @@ This is adapted from `emms-info-track-description'."
                           `(:compilationDatabaseDirectory ,compilation-dir))
               (throw 'break t))))))
     (lsp)))
+
+(use-package modern-cpp-font-lock
+  :ghook ('c++-mode-hook 'modern-c++-font-lock-mode))
 
 (use-package highlight-doxygen
   :ghook ('(c-mode-hook c++-mode-hook) 'highlight-doxygen-mode)
