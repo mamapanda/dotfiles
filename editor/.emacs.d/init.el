@@ -220,24 +220,33 @@ The value can be a pair of regexps to determine the start and end,
 exclusive of the matched expressions.  It can also be a function, in
 which case the return value will be used.")
 
+(defun panda--in-sexp-p  (pos)
+  "Check if POS is inside a sexp."
+  (save-excursion
+    (goto-char pos)
+    (condition-case nil
+        (progn
+          (up-list 1 t t)
+          t)
+      (scan-error nil))))
+
 (defun panda--inner-defun-bounds (defun-begin defun-end open-regexp close-regexp)
   "Find the beginning and end of an inner defun.
 DEFUN-BEGIN and DEFUN-END are the bounds of the defun.  OPEN-REGEXP
 and CLOSE-REGEXP match the delimiters of the inner defun."
-  ;; Some default parameter values (e.g. "{") can conflict with the open
-  ;; regexp.  However, they're usually nested in some sort of sexp, while the
-  ;; intended match usually isn't.  For the close regexp, I can't think of a
-  ;; single conflict case, since it's usually also the function's end.
+  ;; Some default parameter values (e.g. "{") can conflict with the open regexp.
+  ;; However, they're usually nested in some sort of sexp, while the intended
+  ;; match usually isn't.  For the close regexp, I can't think of a single
+  ;; conflict case, since it's usually also the function's end.
   (save-excursion
     (save-match-data
       (let ((begin (progn
                      (goto-char defun-begin)
-                     (let (forward-sexp-function)
-                       (while (and (< (point) defun-end)
-                                   (not (looking-at-p open-regexp)))
-                         (forward-sexp)
-                         (skip-chars-forward "[:blank:]\n")))
                      (re-search-forward open-regexp defun-end)
+                     (while (save-restriction
+                              (narrow-to-region defun-begin defun-end)
+                              (panda--in-sexp-p (match-beginning 0)))
+                       (re-search-forward open-regexp defun-end))
                      (skip-chars-forward "[:blank:]")
                      (when (eolp)
                        (forward-char))
