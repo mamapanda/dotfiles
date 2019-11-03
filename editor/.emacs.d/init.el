@@ -503,14 +503,12 @@ The changes are local to the current buffer."
 (use-package evil-goggles
   :config
   (gsetq evil-goggles-pulse nil)
-  (defun panda-evil-goggles-add (command based-on-command)
-    (catch 'break-loop
-      (dolist (cmd-config evil-goggles--commands)
-        (when (eq (car cmd-config) based-on-command)
-          (add-to-list 'evil-goggles--commands (cons command (cdr cmd-config)))
-          (when (bound-and-true-p evil-goggles-mode)
-            (evil-goggles-mode 1))
-          (throw 'break-loop t)))))
+  (defun panda-evil-goggles-add (cmd based-on-cmd)
+    "Register CMD with evil-goggles using BASED-ON-CMD's configuration."
+    (when-let ((cmd-config (alist-get based-on-cmd evil-goggles--commands)))
+      (add-to-list 'evil-goggles--commands (cons cmd cmd-config))
+      (when (bound-and-true-p evil-goggles-mode)
+        (evil-goggles-mode 1))))
   (evil-goggles-use-diff-refine-faces)
   (evil-goggles-mode 1))
 
@@ -1007,19 +1005,14 @@ This is adapted from `emms-info-track-description'."
                               slurp/barf-cp))
   (general-unbind 'motion lispyville-mode-map "{" "}")
   (with-eval-after-load 'evil-goggles
-    (dolist (operators '((evil-yank . lispyville-yank)
-                         (evil-delete . lispyville-delete)
-                         (evil-change . lispyville-change)
-                         (evil-yank-line . lispyville-yank-line)
-                         (evil-delete-line . lispyville-delete-line)
-                         (evil-change-line . lispyville-change-line)
-                         (evil-delete-char . lispyville-delete-char-or-splice)
-                         (evil-delete-backward-char . lispyville-delete-char-or-splice-backwards)
-                         (evil-substitute . lispyville-substitute)
-                         (evil-change-whole-line . lispyville-change-whole-line)
-                         (evil-join . lispyville-join)))
-      (cl-destructuring-bind (evil-operator . lispyville-operator) operators
-        (panda-evil-goggles-add lispyville-operator evil-operator)))))
+    (panda-evil-goggles-add #'lispyville-yank #'evil-yank)
+    (panda-evil-goggles-add #'lispyville-delete #'evil-delete)
+    (panda-evil-goggles-add #'lispyville-change #'evil-change)
+    (panda-evil-goggles-add #'lispyville-yank-line #'evil-yank-line)
+    (panda-evil-goggles-add #'lispyville-delete-line #'evil-delete-line)
+    (panda-evil-goggles-add #'lispyville-change-line #'evil-change-line)
+    (panda-evil-goggles-add #'lispyville-change-whole-line #'evil-change-whole-line)
+    (panda-evil-goggles-add #'lispyville-join #'evil-join)))
 
 (use-package lispy
   :ghook 'lispyville-mode-hook
