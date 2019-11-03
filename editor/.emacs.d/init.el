@@ -344,6 +344,7 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 (gsetq-default bidi-display-reordering nil
                buffer-file-coding-system 'utf-8
                c-basic-offset 4
+               fill-column 80
                indent-tabs-mode nil
                tab-width 4
                truncate-lines nil)
@@ -518,7 +519,6 @@ The changes are local to the current buffer."
   ('normal "gl" 'evil-lion-left
            "gL" 'evil-lion-right))
 
-;; commentary has issues with gy{motion} not pasting
 (use-package evil-nerd-commenter
   :general
   ('normal "gc" 'evilnc-comment-operator
@@ -922,7 +922,9 @@ This is adapted from `emms-info-track-description'."
   (gsetq flycheck-display-errors-delay 0.5)
   (general-def 'normal flycheck-mode-map
     "[e" 'flycheck-previous-error
-    "]e" 'flycheck-next-error))
+    "]e" 'flycheck-next-error)
+  (evil-declare-motion 'flycheck-previous-error)
+  (evil-declare-motion 'flycheck-next-error))
 
 (use-package flycheck-posframe
   :ghook 'flycheck-mode-hook
@@ -949,7 +951,8 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq lsp-ui-sideline-show-diagnostics nil))
 
-;; TODO: add lsp-ivy when it's released on MELPA
+;; FIXME: https://github.com/emacs-lsp/lsp-ivy/issues/5
+;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
 (use-package dap-mode
   :commands dap-debug dap-hydra
@@ -1029,12 +1032,11 @@ This is adapted from `emms-info-track-description'."
 ;;;; Snippets
 (use-package yasnippet
   :config
-  (gsetq yas-triggers-in-field t
+  (gsetq yas-triggers-in-field nil
          yas-indent-line 'auto
          yas-also-auto-indent-first-line t)
   (yas-reload-all)
   (with-eval-after-load 'company
-    ;; TODO: or we can just unbind <tab> in `company-active-map'
     (defun panda--company-yas-tab-advice (old-func &rest args)
       (unless (and (bound-and-true-p yas-minor-mode) (yas-expand))
         (call-interactively old-func args)))
