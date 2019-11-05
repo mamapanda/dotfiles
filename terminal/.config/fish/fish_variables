@@ -71,7 +71,9 @@ SETUVAR __fish_init_2_3_0:\x1d
 # greeting text upon starting fish
 SETUVAR fish_greeting:\x1d
 # keybinding style
-SETUVAR fish_key_bindings:fish_default_key_bindings
+SETUVAR fish_key_bindings:fish_vi_key_bindings
+# vi escape delay
+SETUVAR fish_escape_delay_ms:10
 
 ###############################################################################
 #                              idk what this does                             #
