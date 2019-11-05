@@ -30,9 +30,12 @@ super + {_,shift + }BackSpace
 super + comma
     firefox
 
+super + shift + comma
+    qutebrowser
+
 # editor
-super + period
-    emacs
+super + {_,shift + }period
+    emacs{_, --no-desktop}
 
 # file manager
 super + slash
