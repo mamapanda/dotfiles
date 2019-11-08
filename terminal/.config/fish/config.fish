@@ -8,8 +8,8 @@ set -g __fish_init_2_3_0
 set -g fish_greeting
 
 # vi keys
-fish_vi_key_bindings
-set -g fish_escape_delay_ms 10
+# fish_vi_key_bindings
+# set -g fish_escape_delay_ms 10
 
 # syntax colors
 set -g fish_color_command magenta
