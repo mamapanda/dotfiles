@@ -465,13 +465,14 @@ The changes are local to the current buffer."
 (use-package doom-modeline
   :config
   (gsetq doom-modeline-buffer-file-name-style 'relative-from-project
-         doom-modeline-icon nil)
+         doom-modeline-icon nil
+         doom-modeline-unicode-fallback nil)
   (panda-with-gui
     (set-face-attribute 'doom-modeline-bar nil
                         :background (face-attribute 'mode-line :background))
     (set-face-attribute 'doom-modeline-inactive-bar nil
                         :background (face-attribute 'mode-line-inactive :background)))
-  (doom-modeline-init))
+  (doom-modeline-mode 1))
 
 (use-package hl-todo
   :config
@@ -960,9 +961,8 @@ This is adapted from `emms-info-track-description'."
   (require 'dap-gdb-lldb)
   (require 'dap-go)
   (require 'dap-python)
-  ;; `dap--breakpoints-file' is declared with `defconst'
   (gsetq dap-utils-extension-path (no-littering-expand-var-file-name "dap")
-         dap--breakpoints-file (no-littering-expand-var-file-name "dap/breakpoints"))
+         dap-breakpoints-file (no-littering-expand-var-file-name "dap/breakpoints"))
   (dap-mode 1)
   (dap-ui-mode 1))
 
@@ -975,7 +975,7 @@ This is adapted from `emms-info-track-description'."
     (eval
      `(major-mode-hydra-define+ ,major-mode nil
         ("Find"
-         (("s" lsp-ui-find-workspace-symbol "workspace-symbol"))
+         (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
          "Refactor"
          (("r" lsp-rename "rename")
           ("c" lsp-ui-sideline-apply-code-actions "code action")
@@ -1025,7 +1025,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Snippets
 (use-package yasnippet
   :config
-  (gsetq yas-triggers-in-field nil
+  (gsetq yas-triggers-in-field t
          yas-indent-line 'auto
          yas-also-auto-indent-first-line t)
   (yas-reload-all)
