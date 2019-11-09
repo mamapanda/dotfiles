@@ -1164,8 +1164,10 @@ This is adapted from `emms-info-track-description'."
 ;;;; D
 (use-package d-mode
   :defer t
-  :gfhook '(dfmt-on-save-mode lsp)
+  :gfhook '(company-mode dfmt-on-save-mode flycheck-mode yas-minor-mode)
+  ;; :gfhook '(dfmt-on-save-mode lsp)
   :config
+  ;; dls fails to report some errors, while serve-d doesn't even work.
   (progn
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection '("dls"))
@@ -1180,6 +1182,11 @@ This is adapted from `emms-info-track-description'."
     (reformatter-define dfmt
       :program "dfmt"
       :args dfmt-args)))
+
+(use-package company-dcd :ghook 'd-mode-hook)
+
+(use-package flycheck-dmd-dub
+  :ghook ('d-mode-hook 'flycheck-dmd-dub-set-variables))
 
 ;;;; Emacs Lisp
 (use-package elisp-mode
