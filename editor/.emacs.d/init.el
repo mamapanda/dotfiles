@@ -419,13 +419,6 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 
 ;;; Global Packages
 ;;;; Appearance
-(use-package base16-theme
-  :disabled t
-  :config
-  (gsetq base16-distinct-fringe-background nil)
-  (panda-with-gui
-    (load-theme 'base16-oceanicnext t)))
-
 (use-package doom-themes
   :config
   (panda-with-gui (load-theme 'doom-vibrant t)))
@@ -590,28 +583,6 @@ The changes are local to the current buffer."
             "k" 'helpful-key
             "v" 'helpful-variable))
 
-;;;; Keys
-(use-package keyfreq
-  :config
-  (keyfreq-mode)
-  (keyfreq-autosave-mode))
-
-(use-package no-spam
-  :straight (no-spam
-             :fetcher github
-             :repo "mamapanda/no-spam"
-             :local-repo "~/code/emacs-lisp/no-spam")
-  :config
-  (gsetq no-spam-default-exception #'evil-operator-state-p)
-  (no-spam-add-repeat-delay (evil-forward-char evil-backward-char))
-  (no-spam-add-repeat-delay (evil-next-line evil-previous-line))
-  (no-spam-add-repeat-delay (evil-forward-WORD-begin evil-backward-WORD-begin))
-  (no-spam-add-repeat-delay (evil-forward-word-begin evil-backward-word-begin))
-  (no-spam-add-repeat-delay (evil-forward-WORD-end evil-backward-WORD-end))
-  (no-spam-add-repeat-delay (evil-forward-word-end evil-backward-word-end))
-  (no-spam-add-repeat-delay (evil-forward-paragraph evil-backward-paragraph))
-  (no-spam-mode))
-
 ;;;; Navigation
 (use-package avy
   :general ('motion "C-SPC" 'evil-avy-goto-char-timer)
@@ -623,10 +594,6 @@ The changes are local to the current buffer."
 
 (use-package deadgrep
   :general (panda-space "s" 'deadgrep))
-
-(use-package evil-fringe-mark
-  :config
-  (global-evil-fringe-mark-mode))
 
 (use-package evil-matchit
   :config
@@ -655,11 +622,6 @@ The changes are local to the current buffer."
     "S" 'evil-snipe-repeat-reverse)
   (evil-snipe-mode 1)
   (evil-snipe-override-mode 1))
-
-(use-package evil-visualstar
-  :config
-  (gsetq evil-visualstar/persistent t)
-  (global-evil-visualstar-mode 1))
 
 (use-package goto-last-change
   :general ('normal "g;" 'goto-last-change))
@@ -699,8 +661,6 @@ The changes are local to the current buffer."
     "S" 'counsel-git-grep)
   :config
   (counsel-mode 1))
-
-(use-package ivy-hydra :defer t)
 
 (use-package ivy-prescient
   :config
@@ -950,9 +910,6 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq lsp-ui-sideline-show-diagnostics nil))
 
-;; FIXME: https://github.com/emacs-lsp/lsp-ivy/issues/5
-;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-
 (use-package dap-mode
   :commands dap-debug dap-hydra
   :config
@@ -1106,9 +1063,6 @@ This is adapted from `emms-info-track-description'."
               (throw 'break t))))))
     (lsp)))
 
-(use-package modern-cpp-font-lock
-  :ghook ('c++-mode-hook 'modern-c++-font-lock-mode))
-
 (use-package highlight-doxygen
   :ghook ('(c-mode-hook c++-mode-hook) 'highlight-doxygen-mode)
   :config
@@ -1239,14 +1193,7 @@ This is adapted from `emms-info-track-description'."
    nil
    ("Refactor"
     (("l" emr-el-extract-to-let "extract to let")
-     ("v" emr-el-extract-variable "extract variable")
-     ("f" emr-el-extract-function "extract function")
-     ("k" emr-el-extract-constant "extract constant")
-     ("L" emr-el-inline-let-variable "inline let variable")
-     ("V" emr-el-inline-variable "inline variable")
-     ("F" emr-el-inline-function "inline function")
-     ("a" emr-el-insert-autoload-directive "add autoload")
-     ("x" emr-el-delete-let-binding-form "delete let form")))))
+     ("L" emr-el-inline-let-variable "inline let variable")))))
 
 ;;;; Fish
 (use-package fish-mode
@@ -1332,17 +1279,6 @@ This is adapted from `emms-info-track-description'."
 (reformatter-define prettier-ts
   :program "prettier"
   :args prettier-ts-args)
-
-(use-package nodejs-repl
-  :mode-hydra
-  (js-mode
-   nil
-   ("Eval"
-    (("ee" nodejs-repl-send-buffer "buffer")
-     ("el" nodejs-repl-send-line "line")
-     ("ef" nodejs-repl-load-file "file")
-     ("er" nodejs-repl-send-region "region")
-     ("eo" nodejs-repl "open repl")))))
 
 ;;;; JSON
 (use-package json-mode
