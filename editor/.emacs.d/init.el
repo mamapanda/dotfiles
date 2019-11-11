@@ -961,8 +961,6 @@ This is adapted from `emms-info-track-description'."
   (require 'dap-gdb-lldb)
   (require 'dap-go)
   (require 'dap-python)
-  (gsetq dap-utils-extension-path (no-littering-expand-var-file-name "dap")
-         dap-breakpoints-file (no-littering-expand-var-file-name "dap/breakpoints"))
   (dap-mode 1)
   (dap-ui-mode 1))
 
@@ -1356,6 +1354,11 @@ This is adapted from `emms-info-track-description'."
   (reformatter-define prettier-json
     :program "prettier"
     :args prettier-json-args))
+
+;;;; Kotlin
+(use-package kotlin-mode
+  :defer t
+  :gfhook '(lsp panda-format-on-save-mode))
 
 ;;;; Latex
 (use-package tex
