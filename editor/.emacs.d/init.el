@@ -407,7 +407,9 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
   "T" 'bookmark-set                     ; C-x r m
   "4" '(:keymap ctl-x-4-map)            ; C-x 4
   "5" '(:keymap ctl-x-5-map)            ; C-x 5
-  "%" (general-key "C-x C-q"))          ; C-x C-q
+  "%" (general-key "C-x C-q")           ; C-x C-q
+  "-" 'delete-trailing-whitespace
+  "=" 'panda-format-buffer)
 
 (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
 (general-def evil-ex-completion-map
@@ -1002,7 +1004,7 @@ This is adapted from `emms-info-track-description'."
     "<tab>" (lookup-key outshine-mode-map (kbd "TAB"))
     "<backtab>" 'outshine-cycle-buffer))
 
-;;; Language Modes
+;;; Languages
 ;;;; Assembly
 (use-package asm-mode
   :defer t
@@ -1068,11 +1070,6 @@ This is adapted from `emms-info-track-description'."
   :config
   (custom-set-faces '(highlight-doxygen-comment ((t nil)))))
 
-;;;; CMake
-(use-package cmake-mode
-  :defer t
-  :gfhook '(panda-format-on-save-mode))
-
 ;;;; Common Lisp
 (use-package lisp-mode
   :straight nil
@@ -1107,11 +1104,6 @@ This is adapted from `emms-info-track-description'."
   :after slime
   :config
   (slime-company-init))
-
-;;;; Config
-(use-package conf-mode
-  :defer t
-  :gfhook ('conf-unix-mode-hook 'panda-trim-on-save-mode))
 
 ;;;; D
 (use-package d-mode
@@ -1195,38 +1187,6 @@ This is adapted from `emms-info-track-description'."
     (("l" emr-el-extract-to-let "extract to let")
      ("L" emr-el-inline-let-variable "inline let variable")))))
 
-;;;; Fish
-(use-package fish-mode
-  :defer t
-  :gfhook '(panda-trim-on-save-mode))
-
-;;;; Git Files
-(use-package gitattributes-mode
-  :defer t
-  :gfhook '(panda-format-on-save-mode))
-
-(use-package gitconfig-mode
-  :defer t
-  :gfhook '(panda-format-on-save-mode))
-
-(use-package gitignore-mode
-  :defer t
-  :gfhook '(panda-format-on-save-mode))
-
-;;;; Go
-(use-package go-mode
-  :defer t
-  :gfhook '(gofmt-on-save-mode lsp panda-set-go-locals)
-  :config
-  (defun panda-set-go-locals ()
-    (gsetq-local indent-tabs-mode t))
-  (progn
-    (defvar gofmt-args nil
-      "Arguments for gofmt.")
-    (reformatter-define gofmt
-      :program "gofmt"
-      :args gofmt-args)))
-
 ;;;; HTML / CSS
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode))
@@ -1304,22 +1264,6 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq TeX-auto-save t
          TeX-parse-self t))
-
-;;;; Makefile
-(use-package make-mode
-  :defer t
-  :gfhook ('makefile-mode-hook '(panda-trim-on-save-mode)))
-
-;;;; Markdown
-(use-package markdown-mode
-  :defer t
-  :gfhook '(prettier-md-on-save-mode)
-  :config
-  (defvar prettier-md-args '("--stdin" "--parser" "markdown")
-    "Arguments for prettier with Markdown.")
-  (reformatter-define prettier-md
-    :program "prettier"
-    :args prettier-md-args))
 
 ;;;; Org
 (use-package org
@@ -1430,20 +1374,16 @@ This is adapted from `emms-info-track-description'."
 (use-package cargo
   :ghook ('rust-mode-hook 'cargo-minor-mode))
 
-;;;; Vim
-(use-package vimrc-mode
-  :defer t
-  :gfhook '(panda-trim-on-save-mode))
-
-;;;; Shell Script
-(use-package sh-script
-  :defer t
-  :gfhook ('sh-mode-hook '(panda-format-on-save-mode)))
-
-;;;; YAML
-(use-package yaml-mode
-  :defer t
-  :gfhook '(panda-trim-on-save-mode))
+;;;; Other
+(use-package cmake-mode :defer t)
+(use-package fish-mode :defer t)
+(use-package gitattributes-mode :defer t)
+(use-package gitconfig-mode :defer t)
+(use-package gitignore-mode :defer t)
+(use-package go-mode :defer t)
+(use-package markdown-mode :defer t)
+(use-package vimrc-mode :defer t)
+(use-package yaml-mode :defer t)
 
 ;;; End Init
 (provide 'init)
