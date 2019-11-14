@@ -7,10 +7,6 @@ end
 set -g __fish_init_2_3_0
 set -g fish_greeting
 
-# vi keys
-# fish_vi_key_bindings
-# set -g fish_escape_delay_ms 10
-
 # syntax colors
 set -g fish_color_command magenta
 set -g fish_color_param white
@@ -35,3 +31,22 @@ set -g fish_pager_color_progress yellow
 # other colors
 set -g fish_color_history_current yellow  # dirh current directory
 set -g fish_color_selection white --bold --background=black  # vi selection
+
+# plugin variables
+set -g FZF_LEGACY_KEYBINDINGS 0
+
+# load plugins
+for plugin_dir in $XDG_CONFIG_HOME/fish/plugin/*/
+    set plugin_dir (string trim --right --chars "/" $plugin_dir)  # just looks nicer
+
+    set fish_function_path $fish_function_path[1] $plugin_dir/functions $fish_function_path[2..-1]
+    set fish_complete_path $fish_complete_path[1] $plugin_dir/completions $fish_complete_path[2..-1]
+
+    for file in $plugin_dir/conf.d/*.fish
+        builtin source $file
+    end
+
+    if test -f $plugin_dir/init.fish
+        builtin source $plugin_dir/init.fish
+    end
+end
