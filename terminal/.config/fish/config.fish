@@ -36,17 +36,8 @@ set -g fish_color_selection white --bold --background=black  # vi selection
 set -g FZF_LEGACY_KEYBINDINGS 0
 
 # load plugins
-for plugin_dir in $XDG_CONFIG_HOME/fish/plugin/*/
-    set plugin_dir (string trim --right --chars "/" $plugin_dir)  # just looks nicer
+fundle plugin "edc/bass"
+fundle plugin "jethrokuan/fzf"
+fundle plugin "jethrokuan/z"
 
-    set fish_function_path $fish_function_path[1] $plugin_dir/functions $fish_function_path[2..-1]
-    set fish_complete_path $fish_complete_path[1] $plugin_dir/completions $fish_complete_path[2..-1]
-
-    for file in $plugin_dir/conf.d/*.fish
-        builtin source $file
-    end
-
-    if test -f $plugin_dir/init.fish
-        builtin source $plugin_dir/init.fish
-    end
-end
+fundle init
