@@ -76,11 +76,12 @@ It should contain an alist literal for `panda-get-private-data'.")
     (alist-get key data)))
 
 ;;; Evil
+;; Prevent goto-chg and undo-tree from being installed.
+(cl-pushnew 'goto-chg straight-built-in-pseudo-packages)
+(cl-pushnew 'undo-tree straight-built-in-pseudo-packages)
+
 (use-package evil
   :init
-  (dolist (package '("goto-chg" "undo-tree"))
-    (let ((build-dir (straight--build-dir package)))
-      (setq load-path (cl-delete build-dir load-path :test #'file-equal-p))))
   (gsetq evil-respect-visual-line-mode t
          evil-want-keybinding nil)
   :config
@@ -162,6 +163,13 @@ It should contain an alist literal for `panda-get-private-data'.")
         (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
         (goto-char pos))
     (message "Buffer is not visiting a file")))
+
+;;;;; Hooks
+(defun panda--run-mode-hack-hook ()
+  "Run the current major mode's `hack-local-variables' hook."
+  (run-hooks (intern (format "%s-hack-hook" major-mode))))
+
+(add-hook 'hack-local-variables-hook #'panda--run-mode-hack-hook)
 
 ;;;;; Macros
 (defmacro panda-add-hook-once (hook fn &optional append local)
@@ -357,6 +365,18 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 (recentf-mode 1)
 (show-paren-mode 1)
 
+(cl-pushnew 'evil-markers-alist desktop-locals-to-save)
+
+;; evil stores global markers in the default value of `evil-markers-alist'.
+(defvar panda--default-markers-alist nil)
+(cl-pushnew 'panda--default-markers-alist desktop-globals-to-save)
+(add-hook 'desktop-save-hook
+          (lambda ()
+            (setq panda--default-markers-alist (default-value 'evil-markers-alist))))
+(add-hook 'desktop-after-read-hook
+          (lambda ()
+            (setf (default-value 'evil-markers-alist) panda--default-markers-alist)))
+
 ;;;; Keybindings
 (general-def '(normal motion) override
   ";" 'panda-static-evil-ex
@@ -527,8 +547,8 @@ The changes are local to the current buffer."
 
 (use-package evil-owl
   :straight (evil-owl
-             :host github
-             :repo "mamapanda/evil-owl"
+             :host nil
+             :repo "git@github.com:mamapanda/evil-owl.git"
              :local-repo "~/code/emacs-lisp/evil-owl")
   :custom-face
   (evil-owl-group-name ((t (
@@ -538,8 +558,10 @@ The changes are local to the current buffer."
   (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
   :config
   (gsetq evil-owl-display-method 'posframe
+         evil-owl-global-mark-format " %m: [l: %-5l, c: %-5c] %b\n  %s"
+         evil-owl-local-mark-format " %m: [l: %-5l, c: %-5c]\n  %s"
          evil-owl-register-char-limit 50
-         evil-owl-idle-delay 0.75)
+         evil-owl-idle-delay 0.2)
   (gsetq evil-owl-extra-posframe-args
          `(
            :poshandler posframe-poshandler-point-bottom-left-corner
@@ -561,8 +583,8 @@ The changes are local to the current buffer."
 
 (use-package evil-traces
   :straight (evil-traces
-             :host github
-             :repo "mamapanda/evil-traces"
+             :host nil
+             :repo "git@github.com:mamapanda/evil-traces.git"
              :local-repo "~/code/emacs-lisp/evil-traces")
   :config
   (defun panda-no-ex-range-and-arg-p ()
@@ -587,15 +609,20 @@ The changes are local to the current buffer."
 
 ;;;; Navigation
 (use-package avy
-  :general ('motion "C-SPC" 'evil-avy-goto-char-timer)
+  :general ('motion "C-SPC" 'avy-goto-char-timer)
   :config
   (gsetq avy-all-windows nil
          avy-all-windows-alt t
-         avy-background t
-         avy-indent-line-overlay t))
+         avy-background t))
 
 (use-package deadgrep
-  :general (panda-space "s" 'deadgrep))
+  :general (panda-space "s" 'deadgrep)
+  :config
+  (defun panda-deadgrep-project-root ()
+    "Find the root directory of the current project."
+    (require 'projectile)
+    (or (projectile-project-root) default-directory))
+  (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root))
 
 (use-package evil-matchit
   :config
@@ -608,11 +635,6 @@ The changes are local to the current buffer."
          evil-snipe-scope 'visible
          evil-snipe-repeat-scope 'visible
          evil-snipe-tab-increment t)
-  (general-def 'visual evil-snipe-local-mode-map
-    "x" 'evil-snipe-x
-    "X" 'evil-snipe-X
-    "z" 'evil-snipe-s
-    "Z" 'evil-snipe-S)
   (general-def 'motion evil-snipe-override-local-mode-map
     ";" nil
     "," nil
@@ -626,6 +648,10 @@ The changes are local to the current buffer."
   (evil-snipe-override-mode 1))
 
 (use-package goto-last-change
+  :straight (goto-last-change
+             :host github
+             :repo "camdez/goto-last-change.el"
+             :fork (:host nil :repo "git@github.com:mamapanda/goto-last-change.el.git"))
   :general ('normal "g;" 'goto-last-change))
 
 (use-package imenu
@@ -665,6 +691,7 @@ The changes are local to the current buffer."
   (counsel-mode 1))
 
 (use-package ivy-prescient
+  :after ivy
   :config
   (gsetq ivy-prescient-retain-classic-highlighting t)
   (prescient-persist-mode)
@@ -874,6 +901,7 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq company-backends (delete 'company-dabbrev company-backends)
          company-dabbrev-code-modes nil
+         company-idle-delay 0.2
          company-minimum-prefix-length 2
          company-tooltip-align-annotations t))
 
@@ -897,7 +925,9 @@ This is adapted from `emms-info-track-description'."
   :defer t
   :commands lsp-register-client
   :config
-  (gsetq lsp-enable-indentation nil
+  (gsetq lsp-auto-execute-action nil
+         lsp-before-save-edits nil
+         lsp-enable-indentation nil
          lsp-enable-on-type-formatting nil
          lsp-prefer-flymake nil)
   ;; LSP hooks onto xref, but these functions are more reliable.
@@ -905,7 +935,10 @@ This is adapted from `emms-info-track-description'."
     "gd" 'lsp-find-definition
     "gD" 'lsp-find-references))
 
-(use-package company-lsp :after company lsp)
+(use-package company-lsp
+  :after company lsp
+  :config
+  (gsetq company-lsp-cache-candidates 'auto))
 
 (use-package lsp-ui
   :after lsp
