@@ -425,8 +425,6 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
   "o" 'occur                            ; M-s o
   "t" 'bookmark-jump                    ; C-x r b
   "T" 'bookmark-set                     ; C-x r m
-  "4" '(:keymap ctl-x-4-map)            ; C-x 4
-  "5" '(:keymap ctl-x-5-map)            ; C-x 5
   "%" (general-key "C-x C-q")           ; C-x C-q
   "-" 'delete-trailing-whitespace
   "=" 'panda-format-buffer)
@@ -663,55 +661,61 @@ The changes are local to the current buffer."
   :defer t
   :general (panda-space "p" '(:keymap projectile-command-map))
   :config
-  (gsetq projectile-indexing-method 'alien
-         projectile-completion-system 'ivy)
+  (gsetq projectile-indexing-method 'alien)
   (projectile-mode))
 
-;;;; UI Completion
-(use-package ivy
-  :demand t
-  :config
-  (gsetq ivy-wrap t
-         ivy-re-builders-alist '((swiper . ivy--regex-plus)
-                                 (t . ivy--regex-fuzzy))
-         confirm-nonexistent-file-or-buffer t
-         ivy-count-format "(%d/%d) ")
-  (general-def ivy-minibuffer-map
-    "<return>" 'ivy-alt-done
-    "C-<return>" 'ivy-immediate-done)
-  (ivy-mode 1))
-
-(use-package counsel
+;;;; UI
+(use-package helm
   :demand t
   :general
-  (panda-space
-    "F" 'counsel-recentf
-    "S" 'counsel-git-grep)
-  :config
-  (counsel-mode 1))
-
-(use-package ivy-prescient
-  :after ivy
-  :config
-  (gsetq ivy-prescient-retain-classic-highlighting t)
-  (prescient-persist-mode)
-  (ivy-prescient-mode))
-
-(use-package counsel-projectile
-  :after counsel projectile
-  :config
-  (counsel-projectile-mode 1))
-
-(use-package helm
-  :defer t
+  (general-def
+    [remap execute-extended-command] 'helm-M-x
+    [remap find-file] 'helm-find-files
+    [remap switch-to-buffer] 'helm-mini)
+  (panda-space "S" 'helm-grep-do-git-grep)
   :config
   (gsetq helm-echo-input-in-header-line t
+         ;; helm-ff-DEL-up-one-level-maybe t ; doesn't update the prompt
          helm-ff-fuzzy-matching nil
-         helm-find-files-ignore-thing-at-point t
+         helm-ff-skip-boring-files t
          helm-split-window-inside-p t
          helm-mini-default-sources '(helm-source-buffers-list
-                                     helm-source-recentf))
-  (general-def helm-map "<escape>" 'helm-keyboard-quit))
+                                     helm-source-projectile-files-list
+                                     helm-source-recentf
+                                     helm-source-buffer-not-found))
+  (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
+  (general-def helm-map "<escape>" 'helm-keyboard-quit)
+  (with-eval-after-load 'projectile
+    (setq projectile-completion-system 'helm))
+  (helm-mode 1))
+
+(use-package helm-company
+  :after company helm
+  :general
+  (general-def company-active-map
+    "M-h" 'helm-company)
+  :init
+  (gsetq helm-company-fuzzy-match nil))
+
+(use-package helm-lsp
+  :after helm lsp
+  :general
+  (general-def lsp-mode-map
+    [remap lsp-ui-find-workspace-symbol] 'helm-lsp-workspace-symbol))
+
+(use-package helm-make
+  :after helm
+  :general
+  (panda-space "C" 'helm-make))
+
+(use-package helm-projectile
+  :after helm
+  :init
+  (gsetq helm-projectile-fuzzy-match nil)
+  :config
+  (helm-projectile-toggle 1))
+
+(use-package helm-xref :after helm xref)
 
 ;;;; Windows
 (use-package eyebrowse
