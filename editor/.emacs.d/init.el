@@ -38,7 +38,7 @@
 (require 'use-package)
 (setq straight-use-package-by-default t)
 
-;;;; Libraries
+;;;; Early Load Packages
 (require 'cl-lib)
 
 (use-package general
@@ -49,14 +49,9 @@
 
 (use-package no-littering)
 
-(use-package reformatter)
-
-(use-package major-mode-hydra
-  :demand t
-  :general
-  ('(normal visual) "\\" 'major-mode-hydra)
+(use-package hydra
   :config
-  (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
+  (gsetq hydra-look-for-remap t))
 
 ;;;; Custom File
 (gsetq custom-file (no-littering-expand-etc-file-name "custom.el"))
@@ -924,6 +919,17 @@ This is adapted from `emms-info-track-description'."
   :config
   (flycheck-posframe-configure-pretty-defaults))
 
+;;;; Formatting
+(use-package reformatter)
+
+;;;; Keybindings
+(use-package major-mode-hydra
+  :demand t
+  :general
+  ('(normal visual) "\\" 'major-mode-hydra)
+  :config
+  (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
+
 ;;;; Language Server
 (use-package lsp-mode
   :defer t
@@ -960,33 +966,32 @@ This is adapted from `emms-info-track-description'."
   (dap-mode 1)
   (dap-ui-mode 1))
 
-(defvar panda--lsp-hydra-enabled-modes nil
-  "Major modes that already have lsp hydra heads.")
-
-(defun panda--add-lsp-hydra-heads ()
-  "Add `lsp' command heads to the current major mode's `major-mode-hydra'."
-  (unless (memq major-mode panda--lsp-hydra-enabled-modes)
-    (eval
-     `(major-mode-hydra-define+ ,major-mode nil
-        ("Find"
-         (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
-         "Refactor"
-         (("r" lsp-rename "rename")
-          ("c" lsp-ui-sideline-apply-code-actions "code action")
-          ("o" lsp-organize-imports "organize imports"))
-         "View"
-         (("i" lsp-ui-imenu "imenu")
-          ("l" lsp-lens-mode "lens")
-          ("E" lsp-ui-flycheck-list "errors"))
-         "Debug"
-         (("D" dap-debug "start")
-          ("d" dap-hydra "hydra"))
-         "Workspace"
-         (("<backspace>" lsp-restart-workspace "restart")
-          ("<delete>" lsp-shutdown-workspace "shutdown")))))
-    (push major-mode panda--lsp-hydra-enabled-modes)))
-
-(add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads)
+(with-eval-after-load 'major-mode-hydra
+  (defvar panda--lsp-hydra-enabled-modes nil
+    "Major modes that already have lsp hydra heads.")
+  (defun panda--add-lsp-hydra-heads ()
+    "Add `lsp' command heads to the current major mode's `major-mode-hydra'."
+    (unless (memq major-mode panda--lsp-hydra-enabled-modes)
+      (eval
+       `(major-mode-hydra-define+ ,major-mode nil
+          ("Find"
+           (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
+           "Refactor"
+           (("r" lsp-rename "rename")
+            ("c" lsp-ui-sideline-apply-code-actions "code action")
+            ("o" lsp-organize-imports "organize imports"))
+           "View"
+           (("i" lsp-ui-imenu "imenu")
+            ("l" lsp-lens-mode "lens")
+            ("E" lsp-ui-flycheck-list "errors"))
+           "Debug"
+           (("D" dap-debug "start")
+            ("d" dap-hydra "hydra"))
+           "Workspace"
+           (("<backspace>" lsp-restart-workspace "restart")
+            ("<delete>" lsp-shutdown-workspace "shutdown")))))
+      (push major-mode panda--lsp-hydra-enabled-modes)))
+  (add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads))
 
 ;;;; Lisp
 (use-package lispyville
