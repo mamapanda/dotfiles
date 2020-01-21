@@ -426,9 +426,11 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
   "-" 'delete-trailing-whitespace
   "=" 'panda-format-buffer)
 
+(general-def minibuffer-local-map
+  "<escape>" 'minibuffer-keyboard-quit)
+
 (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
 (general-def evil-ex-completion-map
-  "<escape>" 'minibuffer-keyboard-quit
   "TAB" 'evil-ex-completion
   "C-x r i" 'evil-paste-from-register)
 
@@ -658,7 +660,8 @@ The changes are local to the current buffer."
   :defer t
   :general (panda-space "p" '(:keymap projectile-command-map))
   :config
-  (gsetq projectile-indexing-method 'alien)
+  (gsetq projectile-enable-caching t
+         projectile-indexing-method 'alien)
   (projectile-mode))
 
 ;;;; UI
@@ -955,7 +958,8 @@ This is adapted from `emms-info-track-description'."
 (use-package lsp-ui
   :after lsp
   :config
-  (gsetq lsp-ui-sideline-show-diagnostics nil))
+  (gsetq lsp-ui-peek-always-show t
+         lsp-ui-sideline-show-diagnostics nil))
 
 (use-package dap-mode
   :commands dap-debug dap-hydra
@@ -963,7 +967,6 @@ This is adapted from `emms-info-track-description'."
   (require 'dap-chrome)
   (require 'dap-firefox)
   (require 'dap-gdb-lldb)
-  (require 'dap-go)
   (require 'dap-python)
   (dap-mode 1)
   (dap-ui-mode 1))
