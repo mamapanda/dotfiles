@@ -363,6 +363,8 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 (cl-pushnew 'evil-markers-alist desktop-locals-to-save)
 
 ;; evil stores global markers in the default value of `evil-markers-alist'.
+;; FIXME: This isn't consistent.  Sometimes the marks aren't saved, while other
+;; times the marks point to the wrong location.
 (defvar panda--default-markers-alist nil)
 (cl-pushnew 'panda--default-markers-alist desktop-globals-to-save)
 (add-hook 'desktop-save-hook
@@ -859,7 +861,7 @@ This is adapted from `emms-info-track-description'."
          elfeed-search-filter "@1-month-ago +unread"))
 
 (use-package image-mode
-  :straight nil
+  :straight (:type built-in)
   :defer t
   :gfhook 'panda-configure-image-view)
 
@@ -1114,7 +1116,7 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Common Lisp
 (use-package lisp-mode
-  :straight nil
+  :straight (:type built-in)
   :defer t
   :gfhook '(company-mode
             lispyville-mode
@@ -1176,7 +1178,7 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Emacs Lisp
 (use-package elisp-mode
-  :straight nil
+  :straight (:type built-in)
   :defer t
   :gfhook ('emacs-lisp-mode-hook '(company-mode
                                    lispyville-mode
@@ -1309,7 +1311,7 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Org
 (use-package org
-  :straight nil
+  :straight (:type built-in)
   :gfhook 'panda-format-on-save-mode
   :general
   (panda-space
