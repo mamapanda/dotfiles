@@ -1084,7 +1084,8 @@ This is adapted from `emms-info-track-description'."
       :args clang-format-args)))
 
 (use-package ccls
-  :ghook ('(c-mode-hook c++-mode-hook) 'panda-ccls)
+  :ghook ('(c-mode-hook c++-mode-hook)
+          (lambda () (require 'ccls) (lsp)))
   :mode-hydra
   ((c-mode c++-mode)
    nil
@@ -1092,25 +1093,7 @@ This is adapted from `emms-info-track-description'."
     (("p" ccls-preprocess-file "preprocess file")
      ("m" ccls-member-hierarchy "member hierarchy")
      ("C" ccls-call-hierarchy "call hierarchy")
-     ("I" ccls-inheritance-hierarchy "inheritance hierarchy"))))
-  :config
-  ;; FIXME: It makes more sense to set this on a project-by-project
-  ;; basis, but we'd have to figure out how to apply dir-local
-  ;; variables before hooks are run.  Alternatively, we could try to
-  ;; find compile_commands.json somehow while not having a huge
-  ;; performance impact.
-  (defun panda-ccls ()
-    "Try to set some ccls variables, then call `lsp'."
-    (catch 'break
-      (when-let ((project-root (or (lsp-workspace-root buffer-file-name)
-                                   (locate-dominating-file "." "CMakeLists.txt"))))
-        (dolist (dir-name '("build" "debug" "release"))
-          (let ((compilation-dir (expand-file-name dir-name project-root)))
-            (when (file-directory-p compilation-dir)
-              (setq-local ccls-initialization-options
-                          `(:compilationDatabaseDirectory ,compilation-dir))
-              (throw 'break t))))))
-    (lsp)))
+     ("I" ccls-inheritance-hierarchy "inheritance hierarchy")))))
 
 (use-package highlight-doxygen
   :ghook ('(c-mode-hook c++-mode-hook) 'highlight-doxygen-mode)
