@@ -1,7 +1,8 @@
 sanitize tridactyllocal tridactylsync
 
-keymap ; :
-keymap : ;
+bind ; fillcmdline_notrail
+" keymap ; :  " stopped working
+" keymap : ;
 
 bind K tabprev
 bind J tabnext
