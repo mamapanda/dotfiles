@@ -936,9 +936,9 @@ This is adapted from `emms-info-track-description'."
   (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
 
 ;;;; Language Server
+;; TODO: use lsp-deferred
 (use-package lsp-mode
   :defer t
-  :commands lsp-register-client
   :config
   (gsetq lsp-auto-execute-action nil
          lsp-before-save-edits nil
@@ -1135,33 +1135,6 @@ This is adapted from `emms-info-track-description'."
   :config
   (slime-company-init))
 
-;;;; D
-(use-package d-mode
-  :defer t
-  :gfhook '(company-mode dfmt-on-save-mode flycheck-mode yas-minor-mode)
-  ;; :gfhook '(dfmt-on-save-mode lsp)
-  :config
-  ;; dls fails to report some errors, while serve-d doesn't even work.
-  (progn
-    (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection '("dls"))
-                      :major-modes '(d-mode)
-                      :server-id 'dls))
-    (add-to-list 'lsp-language-id-configuration '(d-mode . "d")))
-  (progn
-    (defvar dfmt-args '("--brace_style=otbs"
-                        "--space_after_cast=false"
-                        "--max_line_length=80")
-      "Arguments for dfmt.")
-    (reformatter-define dfmt
-      :program "dfmt"
-      :args dfmt-args)))
-
-(use-package company-dcd :ghook 'd-mode-hook)
-
-(use-package flycheck-dmd-dub
-  :ghook ('d-mode-hook 'flycheck-dmd-dub-set-variables))
-
 ;;;; Emacs Lisp
 (use-package elisp-mode
   :straight (:type built-in)
@@ -1208,14 +1181,6 @@ This is adapted from `emms-info-track-description'."
    nil
    ("Check"
     (("p" package-lint-current-buffer "package-lint")))))
-
-(use-package emr
-  :mode-hydra
-  ((emacs-lisp-mode lisp-interaction-mode)
-   nil
-   ("Refactor"
-    (("l" emr-el-extract-to-let "extract to let")
-     ("L" emr-el-inline-let-variable "inline let variable")))))
 
 ;;;; HTML / CSS
 (use-package web-mode
@@ -1280,11 +1245,6 @@ This is adapted from `emms-info-track-description'."
   (reformatter-define prettier-json
     :program "prettier"
     :args prettier-json-args))
-
-;;;; Kotlin
-(use-package kotlin-mode
-  :defer t
-  :gfhook '(lsp panda-format-on-save-mode))
 
 ;;;; Latex
 (use-package tex
@@ -1383,6 +1343,7 @@ This is adapted from `emms-info-track-description'."
   (gsetq ess-ask-for-ess-directory nil
          ess-use-flymake nil)
   (progn
+    (require 'lsp)
     (lsp-register-client
      (make-lsp-client :new-connection (lsp-stdio-connection
                                        '("R" "--slave" "-e" "languageserver::run()"))
@@ -1390,28 +1351,17 @@ This is adapted from `emms-info-track-description'."
                       :server-id 'R))
     (add-to-list 'lsp-language-id-configuration '(ess-r-mode . "r"))))
 
-;;;; Rust
-(use-package rust-mode
-  :defer t
-  :gfhook '(lsp rustfmt-on-save-mode)
-  :config
-  (defvar rustfmt-args nil
-    "Arguments for rustfmt.")
-  (reformatter-define rustfmt
-    :program "rustfmt"
-    :args rustfmt-args))
-
-(use-package cargo
-  :ghook ('rust-mode-hook 'cargo-minor-mode))
-
 ;;;; Other
 (use-package cmake-mode :defer t)
+(use-package d-mode :defer t)
 (use-package fish-mode :defer t)
 (use-package gitattributes-mode :defer t)
 (use-package gitconfig-mode :defer t)
 (use-package gitignore-mode :defer t)
 (use-package go-mode :defer t)
+(use-package kotlin-mode :defer t)
 (use-package markdown-mode :defer t)
+(use-package rust-mode :defer t)
 (use-package vimrc-mode :defer t)
 (use-package yaml-mode :defer t)
 
