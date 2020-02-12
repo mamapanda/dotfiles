@@ -318,7 +318,7 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
                    :bind t :keys "\^M" :linewise t)
 
 ;;;; Settings
-(gsetq auto-save-default nil
+(gsetq auto-save-default t
        blink-cursor-blinks 0
        c-default-style '((java-mode . "java")
                          (awk-mode . "awk")
