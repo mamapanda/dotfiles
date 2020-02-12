@@ -936,7 +936,6 @@ This is adapted from `emms-info-track-description'."
   (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
 
 ;;;; Language Server
-;; TODO: use lsp-deferred
 (use-package lsp-mode
   :defer t
   :config
@@ -1085,7 +1084,7 @@ This is adapted from `emms-info-track-description'."
 
 (use-package ccls
   :ghook ('(c-mode-hook c++-mode-hook)
-          (lambda () (require 'ccls) (lsp)))
+          (lambda () (require 'ccls) (lsp-deferred)))
   :mode-hydra
   ((c-mode c++-mode)
    nil
@@ -1185,7 +1184,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; HTML / CSS
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode))
-  :gfhook '(lsp prettier-html-on-save-mode)
+  :gfhook '(lsp-deferred prettier-html-on-save-mode)
   :init
   (gsetq web-mode-enable-auto-closing t
          web-mode-enable-auto-indentation t
@@ -1206,7 +1205,7 @@ This is adapted from `emms-info-track-description'."
 
 (use-package css-mode
   :defer t
-  :gfhook '(lsp prettier-css-on-save-mode)
+  :gfhook '(lsp-deferred prettier-css-on-save-mode)
   :config
   (defvar prettier-css-args '("--stdin" "--parser" "css" "--tab-width" "4")
     "Arguments for prettier with CSS.")
@@ -1220,13 +1219,13 @@ This is adapted from `emms-info-track-description'."
 ;;;; JavaScript / TypeScript
 (use-package js
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode))
+  :gfhook '(lsp-deferred prettier-ts-on-save-mode))
 
 (use-package rjsx-mode :defer t)
 
 (use-package typescript-mode
   :defer t
-  :gfhook '(lsp prettier-ts-on-save-mode))
+  :gfhook '(lsp-deferred prettier-ts-on-save-mode))
 
 (defvar prettier-ts-args '("--stdin" "--parser" "typescript" "--tab-width" "4")
   "Arguments for prettier with TypeScript.")
@@ -1302,7 +1301,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Python
 (use-package python
   :defer t
-  :gfhook '(black-on-save-mode lsp panda-set-python-locals)
+  :gfhook '(black-on-save-mode lsp-deferred panda-set-python-locals)
   :mode-hydra
   (python-mode
    ("Eval"
@@ -1327,7 +1326,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; R
 (use-package ess
   :defer t
-  :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp))
+  :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp-deferred))
   :mode-hydra
   (ess-r-mode
    nil
