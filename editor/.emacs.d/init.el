@@ -682,7 +682,8 @@ The changes are local to the current buffer."
          helm-mini-default-sources '(helm-source-buffers-list
                                      helm-source-projectile-files-list
                                      helm-source-recentf
-                                     helm-source-buffer-not-found))
+                                     helm-source-buffer-not-found)
+         helm-window-prefer-horizontal-split 'decide)
   (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
   (general-def helm-map "<escape>" 'helm-keyboard-quit)
   (with-eval-after-load 'projectile
@@ -1180,6 +1181,52 @@ This is adapted from `emms-info-track-description'."
    nil
    ("Check"
     (("p" package-lint-current-buffer "package-lint")))))
+
+;;;; Haskell
+(use-package haskell-mode
+  :defer t
+  :gfhook '(brittany-on-save-mode company-mode flycheck-mode)
+  :mode-hydra
+  (("Eval"
+    (("ef" haskell-process-load-file "file")
+     ("eo" haskell-interactive-switch "open repl"))
+    "Find"
+    (("i" haskell-navigate-imports "imports"))
+    "Compile"
+    (("c" haskell-compile "project"))))
+  :config
+  (gsetq haskell-ask-also-kill-buffers nil
+         haskell-compile-cabal-build-command "stack build"
+         haskell-process-type 'stack-ghci)
+  (defvar brittany-args '("--indent" "2" "--columns" "80")
+    "Arguments for brittany.")
+  (reformatter-define brittany
+    :program "brittany"
+    :args brittany-args))
+
+(use-package attrap
+  :mode-hydra
+  (haskell-mode nil ("Refactor" (("f" attrap-attrap "fix error")))))
+
+(use-package dante
+  :ghook 'haskell-mode-hook
+  :mode-hydra
+  (haskell-mode
+   nil
+   ("Eval"
+    (("ee" dante-eval-block "block"))
+    "View"
+    (("I" dante-info "info")
+     ("t" dante-type-at "type"))
+    "Dante Process"
+    (("<backspace>" dante-restart "restart")
+     ("<delete>" dante-destroy "shutdown"))))
+  :config
+  (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint)))
+
+(use-package helm-hoogle
+  :mode-hydra
+  (haskell-mode nil ("Find" (("h" helm-hoogle "hoogle")))))
 
 ;;;; HTML / CSS
 (use-package web-mode
