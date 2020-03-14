@@ -945,10 +945,10 @@ This is adapted from `emms-info-track-description'."
          lsp-enable-indentation nil
          lsp-enable-on-type-formatting nil
          lsp-prefer-flymake nil)
-  ;; LSP hooks onto xref, but these functions are more reliable.
   (general-def 'normal lsp-mode-map
     "gd" 'lsp-find-definition
-    "gD" 'lsp-find-references))
+    "gD" 'lsp-find-references
+    "K" 'lsp-describe-thing-at-point))
 
 (use-package company-lsp
   :after company lsp
@@ -958,7 +958,8 @@ This is adapted from `emms-info-track-description'."
 (use-package lsp-ui
   :after lsp
   :config
-  (gsetq lsp-ui-peek-always-show t
+  (gsetq lsp-ui-doc-position 'top
+         lsp-ui-peek-always-show t
          lsp-ui-sideline-show-diagnostics nil))
 
 (use-package dap-mode
@@ -1367,15 +1368,7 @@ This is adapted from `emms-info-track-description'."
      ("eo" R "open repl"))))
   :config
   (gsetq ess-ask-for-ess-directory nil
-         ess-use-flymake nil)
-  (progn
-    (require 'lsp)
-    (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection
-                                       '("R" "--slave" "-e" "languageserver::run()"))
-                      :major-modes '(ess-r-mode)
-                      :server-id 'R))
-    (add-to-list 'lsp-language-id-configuration '(ess-r-mode . "r"))))
+         ess-use-flymake nil))
 
 ;;;; Other
 (use-package cmake-mode :defer t)
