@@ -1061,12 +1061,8 @@ This is adapted from `emms-info-track-description'."
   (defun panda-set-asm-locals ()
     (gsetq-local indent-tabs-mode t)
     (gsetq-local tab-always-indent (default-value 'tab-always-indent)))
-  (progn
-    (defvar asmfmt-args nil
-      "Arguments for asmfmt.")
-    (reformatter-define asmfmt
-      :program "asmfmt"
-      :args asmfmt-args)))
+  (reformatter-define asmfmt
+    :program "asmfmt"))
 
 ;;;; C / C++
 (use-package cc-mode
@@ -1076,12 +1072,8 @@ This is adapted from `emms-info-track-description'."
   :config
   (defun panda-set-c-locals ()
     (c-set-offset 'innamespace 0))
-  (progn
-    (defvar clang-format-args nil
-      "Arguments for clang-format.")
-    (reformatter-define clang-format
-      :program "clang-format"
-      :args clang-format-args)))
+  (reformatter-define clang-format
+    :program "clang-format"))
 
 (use-package ccls
   :ghook ('(c-mode-hook c++-mode-hook)
@@ -1198,11 +1190,8 @@ This is adapted from `emms-info-track-description'."
   (gsetq haskell-ask-also-kill-buffers nil
          haskell-compile-cabal-build-command "stack build"
          haskell-process-type 'stack-ghci)
-  (defvar brittany-args '("--indent" "2" "--columns" "80")
-    "Arguments for brittany.")
   (reformatter-define brittany
-    :program "brittany"
-    :args brittany-args))
+    :program "brittany"))
 
 (use-package attrap
   :mode-hydra
@@ -1244,21 +1233,17 @@ This is adapted from `emms-info-track-description'."
          web-mode-script-padding 4
          web-mode-block-padding 4)
   :config
-  (defvar prettier-html-args '("--stdin" "--parser" "html")
-    "Arguments for prettier with HTML.")
   (reformatter-define prettier-html
     :program "prettier"
-    :args prettier-html-args))
+    :args '("--stdin" "--parser" "html")))
 
 (use-package css-mode
   :defer t
   :gfhook '(lsp-deferred prettier-css-on-save-mode)
   :config
-  (defvar prettier-css-args '("--stdin" "--parser" "css" "--tab-width" "4")
-    "Arguments for prettier with CSS.")
   (reformatter-define prettier-css
     :program "prettier"
-    :args prettier-css-args))
+    :args '("--stdin" "--parser" "css")))
 
 (use-package emmet-mode
   :ghook '(web-mode-hook css-mode-hook))
@@ -1274,23 +1259,18 @@ This is adapted from `emms-info-track-description'."
   :defer t
   :gfhook '(lsp-deferred prettier-ts-on-save-mode))
 
-(defvar prettier-ts-args '("--stdin" "--parser" "typescript" "--tab-width" "4")
-  "Arguments for prettier with TypeScript.")
-
 (reformatter-define prettier-ts
   :program "prettier"
-  :args prettier-ts-args)
+  :args '("--stdin" "--parser" "typescript"))
 
 ;;;; JSON
 (use-package json-mode
   :defer t
   :gfhook '(prettier-json-on-save-mode)
   :config
-  (defvar prettier-json-args '("--stdin" "--parser" "--json" "--tab-width" "4")
-    "Arguments for prettier with JSON.")
   (reformatter-define prettier-json
     :program "prettier"
-    :args prettier-json-args))
+    :args '("--stdin" "--parser" "json")))
 
 ;;;; Latex
 (use-package tex
@@ -1364,11 +1344,11 @@ This is adapted from `emms-info-track-description'."
     (gsetq-local yas-indent-line 'fixed)
     (gsetq-local yas-also-auto-indent-first-line nil))
   (progn
-    (defvar black-args '("-" "--quiet" "--line-length" "80")
+    (defvar black-args '("--line-length" "80")
       "Arguments for black.")
     (reformatter-define black
       :program "black"
-      :args black-args)))
+      :args (append '("-" "--quiet") black-args))))
 
 ;;;; R
 (use-package ess
