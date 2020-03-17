@@ -18,6 +18,8 @@ bspc config single_monocle     true
 
 bspc config focus_follows_pointer false
 
-bspc rule -a Emacs state=tiled
+bspc rule -a Emacs:emacs state=tiled private=on
+bspc rule -a firefox:Navigator private=on
+bspc rule -a Lxappearance:lxappearance state=floating
 
 ~/.config/polybar/launch.sh

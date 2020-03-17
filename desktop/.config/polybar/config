@@ -35,7 +35,7 @@ modules-right = memory cpu battery date
 [module/bspwm]
 type = internal/bspwm
 
-format = <label-state>
+format = <label-mode> <label-state>
 
 label-focused = %index%
 label-focused-background = ${colors.background-alt}
@@ -53,6 +53,16 @@ label-occupied-padding = 2
 label-empty = %index%
 label-empty-foreground = ${colors.background}
 label-empty-padding = 2
+
+label-monocle = 
+label-tiled = 擄
+label-fullscreen = 
+label-floating = 
+label-pseudotiled = 益
+label-locked = 
+label-sticky = 
+label-private = 
+label-marked = פֿ
 
 [module/xbacklight]
 type = internal/xbacklight
