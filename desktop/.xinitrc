@@ -19,7 +19,7 @@ case $session in
 
         amixer -q set Master mute
 
-        compton -b
+        picom -b
         nitrogen --restore
         redshift &
 
