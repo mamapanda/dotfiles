@@ -1,8 +1,3 @@
-# https://github.com/fish-shell/fish-shell/issues/4542
-for v in (set --show | string replace -rf '^\$([^:[]+).*: set in universal.*' '$1')
-    set -e $v
-end
-
 # disable annoying startup text
 set -g __fish_init_2_3_0
 set -g fish_greeting
