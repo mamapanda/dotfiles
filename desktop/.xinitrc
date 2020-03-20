@@ -25,7 +25,9 @@ case $session in
 
         clipit &
         xfce4-power-manager
-        xautolock -time 10 -locker "betterlockscreen -l" &
+
+        xautolock -time 10 -corners 00-- -locker "betterlockscreen -l" &
+        xsetroot -cursor_name left_ptr &
 
         setxkbmap -option 'ctrl:swapcaps'
         xcape -e 'Control_L=Escape'
