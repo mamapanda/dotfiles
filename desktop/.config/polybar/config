@@ -29,13 +29,13 @@ module-margin-left = 1
 module-margin-right = 1
 
 modules-left = wireless-network xbacklight alsa
-modules-center = bspwm
-modules-right = memory cpu battery date
+modules-center = bspwm-desktops
+modules-right = bspwm-info memory cpu battery date
 
-[module/bspwm]
+[module/bspwm-desktops]
 type = internal/bspwm
 
-format = <label-mode> <label-state>
+format = <label-state>
 
 label-focused = %index%
 label-focused-background = ${colors.background-alt}
@@ -54,6 +54,10 @@ label-empty = %index%
 label-empty-foreground = ${colors.background}
 label-empty-padding = 2
 
+[module/bspwm-info]
+type = internal/bspwm
+
+format = <label-mode>
 label-monocle = 
 label-tiled = 擄
 label-fullscreen = 
