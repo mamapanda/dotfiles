@@ -43,9 +43,9 @@
 
 (use-package general
   :config
-  (defalias 'gsetq 'general-setq)
-  (defalias 'gsetq-default 'general-setq-default)
-  (defalias 'gsetq-local 'general-setq-local))
+  (defalias 'gsetq #'general-setq)
+  (defalias 'gsetq-default #'general-setq-default)
+  (defalias 'gsetq-local #'general-setq-local))
 
 (use-package no-littering)
 
@@ -106,14 +106,6 @@ It should contain an alist literal for `panda-get-private-data'.")
 (use-package targets
   :straight (:type git :host github :repo "noctuid/targets.el")
   :config
-  (progn
-    (defun panda-show-reg-targets-fix (orig-fn)
-      "Advice to not error with `targets--reset-position'."
-      (let ((register-alist (cl-remove 'targets--reset-position
-                                       register-alist
-                                       :key #'car)))
-        (funcall orig-fn)))
-    (advice-add #'evil-show-registers :around #'panda-show-reg-targets-fix))
   (targets-setup t))
 
 ;;; Basic Configuration
@@ -159,33 +151,6 @@ It should contain an alist literal for `panda-get-private-data'.")
         (goto-char pos))
     (message "Buffer is not visiting a file")))
 
-;;;;; Hooks
-(defun panda--run-mode-hack-hook ()
-  "Run the current major mode's `hack-local-variables' hook."
-  (run-hooks (intern (format "%s-hack-hook" major-mode))))
-
-(add-hook 'hack-local-variables-hook #'panda--run-mode-hack-hook)
-
-;;;;; Macros
-(defmacro panda-add-hook-once (hook fn &optional append local)
-  "Same as `add-hook', but FN is removed from HOOK after being run."
-  (let ((hook-fn-name (gensym)))
-    `(progn
-       (defun ,hook-fn-name ()
-         (funcall ,fn)
-         (remove-hook ,hook (quote ,hook-fn-name) ,local))
-       (add-hook ,hook (quote ,hook-fn-name) ,append ,local))))
-
-(cl-defmacro panda-with-gui (&body body)
-  "Run BODY when a gui is available."
-  (declare (indent defun))
-  (if (daemonp)
-      `(add-to-list 'after-make-frame-functions
-                    (lambda (frame)
-                      (with-selected-frame frame
-                        ,@body)))
-    `(progn ,@body)))
-
 ;;;;; Minor Modes
 (define-minor-mode panda-format-on-save-mode
   "Indents a buffer and trims whitespace on save."
@@ -210,7 +175,7 @@ It should contain an alist literal for `panda-get-private-data'.")
   :type line
   (evil-range (point-min) (point-max)))
 
-(defalias 'panda-inner-buffer 'panda-outer-buffer)
+(defalias 'panda-inner-buffer #'panda-outer-buffer)
 
 ;; We could define a remote buffer object that prompts for a buffer
 ;; and switches to it, but I don't see myself using that outside of
@@ -376,63 +341,65 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 
 ;;;; Keybindings
 (general-def '(normal motion) override
-  ";" 'panda-static-evil-ex
-  ":" 'eval-expression
-  "," 'execute-extended-command
-  "Q" 'save-buffer)
+  ";" #'evil-ex
+  ":" #'eval-expression
+  "," #'execute-extended-command
+  "Q" #'save-buffer)
+
+(general-def [remap evil-ex] #'panda-static-evil-ex)
 
 (general-def 'normal
   "C-r" nil
   "g;" nil
   "g," nil
-  "gD" 'xref-find-references
-  "[e" 'previous-error
-  "]e" 'next-error)
+  "gD" #'xref-find-references
+  "[e" #'previous-error
+  "]e" #'next-error)
 
 (general-def 'insert
-  "<C-backspace>" 'evil-delete-backward-word
-  "C-x r i" 'evil-paste-from-register
-  "M-o" 'evil-execute-in-normal-state)
+  "<C-backspace>" #'evil-delete-backward-word
+  "C-x r i" #'evil-paste-from-register
+  "M-o" #'evil-execute-in-normal-state)
 
 (general-def 'motion
   "SPC" nil
   ";" nil
   "," nil
-  "`" 'evil-goto-mark-line
-  "'" 'evil-goto-mark
-  "gs" 'evil-repeat-find-char
-  "gS" 'evil-repeat-find-char-reverse
-  "M-h" 'beginning-of-defun
-  "M-l" 'end-of-defun
-  "H" 'backward-sexp
-  "L" 'forward-sexp)
+  "`" #'evil-goto-mark-line
+  "'" #'evil-goto-mark
+  "gs" #'evil-repeat-find-char
+  "gS" #'evil-repeat-find-char-reverse
+  "M-h" #'beginning-of-defun
+  "M-l" #'end-of-defun
+  "H" #'backward-sexp
+  "L" #'forward-sexp)
 
 (general-def 'outer
-  "e" 'panda-outer-buffer)
+  "e" #'panda-outer-buffer)
 
 (general-def 'inner
-  "e" 'panda-inner-buffer)
+  "e" #'panda-inner-buffer)
 
 (panda-space
-  "b" 'switch-to-buffer                 ; C-x b
-  "c" 'compile
-  "d" 'dired                            ; C-x d
-  "f" 'find-file                        ; C-x C-f
-  "h" 'help-command                     ; C-h
-  "o" 'occur                            ; M-s o
-  "t" 'bookmark-jump                    ; C-x r b
-  "T" 'bookmark-set                     ; C-x r m
+  "b" #'switch-to-buffer                 ; C-x b
+  "c" #'compile
+  "d" #'dired                            ; C-x d
+  "f" #'find-file                        ; C-x C-f
+  "h" #'help-command                     ; C-h
+  "o" #'occur                            ; M-s o
+  "t" #'bookmark-jump                    ; C-x r b
+  "T" #'bookmark-set                     ; C-x r m
   "%" (general-key "C-x C-q")           ; C-x C-q
-  "-" 'delete-trailing-whitespace
-  "=" 'panda-format-buffer)
+  "-" #'delete-trailing-whitespace
+  "=" #'panda-format-buffer)
 
 (general-def minibuffer-local-map
-  "<escape>" 'minibuffer-keyboard-quit)
+  "<escape>" #'minibuffer-keyboard-quit)
 
 (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
 (general-def evil-ex-completion-map
-  "TAB" 'evil-ex-completion
-  "C-x r i" 'evil-paste-from-register)
+  "TAB" #'evil-ex-completion
+  "C-x r i" #'evil-paste-from-register)
 
 (evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
 
@@ -440,11 +407,11 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 ;;;; Appearance
 (use-package doom-themes
   :config
-  (panda-with-gui (load-theme 'doom-vibrant t)))
+  (load-theme 'doom-vibrant t))
 
 (use-package display-line-numbers
   :demand t
-  :general (panda-space "l" 'panda-toggle-line-numbers)
+  :general (panda-space "l" #'panda-toggle-line-numbers)
   :config
   (progn
     (gsetq display-line-numbers-type 'visual)
@@ -470,8 +437,7 @@ The changes are local to the current buffer."
               (gsetq display-line-numbers current-display-line-numbers))))))
     (advice-add 'evil-ex :around #'panda--evil-ex-relative-lines))
   (progn
-    (panda-with-gui
-      (global-display-line-numbers-mode 1))
+    (global-display-line-numbers-mode 1)
     (column-number-mode 1)))
 
 (use-package doom-modeline
@@ -479,11 +445,10 @@ The changes are local to the current buffer."
   (gsetq doom-modeline-buffer-file-name-style 'relative-from-project
          doom-modeline-icon nil
          doom-modeline-unicode-fallback nil)
-  (panda-with-gui
-    (set-face-attribute 'doom-modeline-bar nil
-                        :background (face-attribute 'mode-line :background))
-    (set-face-attribute 'doom-modeline-inactive-bar nil
-                        :background (face-attribute 'mode-line-inactive :background)))
+  (set-face-attribute 'doom-modeline-bar nil
+                      :background (face-attribute 'mode-line :background))
+  (set-face-attribute 'doom-modeline-inactive-bar nil
+                      :background (face-attribute 'mode-line-inactive :background))
   (doom-modeline-mode 1))
 
 (use-package hl-todo
@@ -502,8 +467,8 @@ The changes are local to the current buffer."
 ;;;; Editing
 (use-package evil-args
   :general
-  ('inner "a" 'evil-inner-arg)
-  ('outer "a" 'evil-outer-arg))
+  ('inner "a" #'evil-inner-arg)
+  ('outer "a" #'evil-outer-arg))
 
 (use-package evil-exchange
   :config
@@ -527,20 +492,20 @@ The changes are local to the current buffer."
 
 (use-package evil-lion
   :general
-  ('normal "gl" 'evil-lion-left
-           "gL" 'evil-lion-right))
+  ('normal "gl" #'evil-lion-left
+           "gL" #'evil-lion-right))
 
 (use-package evil-nerd-commenter
   :general
-  ('normal "gc" 'evilnc-comment-operator
-           "gy" 'evilnc-copy-and-comment-operator)
-  ('inner "c" 'evilnc-inner-comment)
-  ('outer "c" 'evilnc-outer-commenter))
+  ('normal "gc" #'evilnc-comment-operator
+           "gy" #'evilnc-copy-and-comment-operator)
+  ('inner "c" #'evilnc-inner-comment)
+  ('outer "c" #'evilnc-outer-commenter))
 
 (use-package evil-numbers
   :general
-  ('normal "C-a" 'evil-numbers/inc-at-pt
-           "C-s" 'evil-numbers/dec-at-pt))
+  ('normal "C-a" #'evil-numbers/inc-at-pt
+           "C-s" #'evil-numbers/dec-at-pt))
 
 (use-package evil-owl
   :straight (evil-owl
@@ -568,13 +533,13 @@ The changes are local to the current buffer."
   (evil-owl-mode))
 
 (use-package evil-replace-with-register
-  :general ('normal "gR" 'evil-replace-with-register))
+  :general ('normal "gR" #'evil-replace-with-register))
 
 (use-package evil-surround
   :config
   (general-def 'visual evil-surround-mode-map
-    "s" 'evil-surround-region
-    "S" 'evil-Surround-region
+    "s" #'evil-surround-region
+    "S" #'evil-Surround-region
     "gS" nil)
   (global-evil-surround-mode 1))
 
@@ -591,29 +556,26 @@ The changes are local to the current buffer."
   (evil-traces-use-diff-faces)
   (evil-traces-mode))
 
-(use-package expand-region
-  :general ('visual "v" 'er/expand-region))
-
 (use-package undo-propose
-  :general ('normal "U" 'undo-propose))
+  :general ('normal "U" #'undo-propose))
 
 ;;;; Help
 (use-package helpful
   :general
-  (help-map "f" 'helpful-callable
-            "k" 'helpful-key
-            "v" 'helpful-variable))
+  (help-map "f" #'helpful-callable
+            "k" #'helpful-key
+            "v" #'helpful-variable))
 
 ;;;; Navigation
 (use-package avy
-  :general ('motion "C-SPC" 'avy-goto-char-timer)
+  :general ('motion "C-SPC" #'avy-goto-char-timer)
   :config
   (gsetq avy-all-windows nil
          avy-all-windows-alt t
          avy-background t))
 
 (use-package deadgrep
-  :general (panda-space "s" 'deadgrep)
+  :general (panda-space "s" #'deadgrep)
   :config
   (defun panda-deadgrep-project-root ()
     "Find the root directory of the current project."
@@ -635,12 +597,12 @@ The changes are local to the current buffer."
   (general-def 'motion evil-snipe-override-local-mode-map
     ";" nil
     "," nil
-    "gs" 'evil-snipe-repeat
-    "gS" 'evil-snipe-repeat-reverse)
+    "gs" #'evil-snipe-repeat
+    "gS" #'evil-snipe-repeat-reverse)
   (setf (cdr evil-snipe-parent-transient-map) nil)
   (general-def evil-snipe-parent-transient-map
-    "s" 'evil-snipe-repeat
-    "S" 'evil-snipe-repeat-reverse)
+    "s" #'evil-snipe-repeat
+    "S" #'evil-snipe-repeat-reverse)
   (evil-snipe-mode 1)
   (evil-snipe-override-mode 1))
 
@@ -649,10 +611,10 @@ The changes are local to the current buffer."
              :host github
              :repo "camdez/goto-last-change.el"
              :fork (:host nil :repo "git@github.com:mamapanda/goto-last-change.el.git"))
-  :general ('normal "g;" 'goto-last-change))
+  :general ('normal "g;" #'goto-last-change))
 
 (use-package imenu
-  :general (panda-space "i" 'imenu)
+  :general (panda-space "i" #'imenu)
   :config
   (gsetq imenu-auto-rescan t))
 
@@ -669,10 +631,10 @@ The changes are local to the current buffer."
   :demand t
   :general
   (general-def
-    [remap execute-extended-command] 'helm-M-x
-    [remap find-file] 'helm-find-files
-    [remap switch-to-buffer] 'helm-mini)
-  (panda-space "S" 'helm-grep-do-git-grep)
+    [remap execute-extended-command] #'helm-M-x
+    [remap find-file] #'helm-find-files
+    [remap switch-to-buffer] #'helm-mini)
+  (panda-space "S" #'helm-grep-do-git-grep)
   :config
   (gsetq helm-echo-input-in-header-line t
          ;; helm-ff-DEL-up-one-level-maybe t ; doesn't update the prompt
@@ -685,7 +647,7 @@ The changes are local to the current buffer."
                                      helm-source-buffer-not-found)
          helm-window-prefer-horizontal-split 'decide)
   (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
-  (general-def helm-map "<escape>" 'helm-keyboard-quit)
+  (general-def helm-map "<escape>" #'helm-keyboard-quit)
   (with-eval-after-load 'projectile
     (setq projectile-completion-system 'helm))
   (helm-mode 1))
@@ -694,7 +656,7 @@ The changes are local to the current buffer."
   :after company helm
   :general
   (general-def company-active-map
-    "M-h" 'helm-company)
+    "M-h" #'helm-company)
   :init
   (gsetq helm-company-fuzzy-match nil))
 
@@ -702,12 +664,12 @@ The changes are local to the current buffer."
   :after helm lsp
   :general
   (general-def lsp-mode-map
-    [remap lsp-ui-find-workspace-symbol] 'helm-lsp-workspace-symbol))
+    [remap lsp-ui-find-workspace-symbol] #'helm-lsp-workspace-symbol))
 
 (use-package helm-make
   :after helm
   :general
-  (panda-space "C" 'helm-make))
+  (panda-space "C" #'helm-make))
 
 (use-package helm-projectile
   :after helm
@@ -723,14 +685,14 @@ The changes are local to the current buffer."
   :demand t
   :general
   (panda-space
-    "<tab>" 'eyebrowse-last-window-config
-    "w" 'eyebrowse-switch-to-window-config
-    "W" 'eyebrowse-close-window-config
-    "e" 'panda-eyebrowse-create-window-config
-    "E" 'eyebrowse-rename-window-config)
+    "<tab>" #'eyebrowse-last-window-config
+    "w" #'eyebrowse-switch-to-window-config
+    "W" #'eyebrowse-close-window-config
+    "e" #'panda-eyebrowse-create-window-config
+    "E" #'eyebrowse-rename-window-config)
   ('normal eyebrowse-mode-map
-           "gt" 'eyebrowse-next-window-config
-           "gT" 'eyebrowse-prev-window-config)
+           "gt" #'eyebrowse-next-window-config
+           "gT" #'eyebrowse-prev-window-config)
   :init
   (defvar eyebrowse-mode-map (make-sparse-keymap))
   :config
@@ -768,8 +730,8 @@ The changes are local to the current buffer."
   :demand t
   :general
   (panda-space
-    "q" 'winner-undo
-    "Q" 'winner-redo)
+    "q" #'winner-undo
+    "Q" #'winner-redo)
   :config
   (winner-mode 1))
 
@@ -777,23 +739,23 @@ The changes are local to the current buffer."
 ;;;; File Manager
 (use-package image-dired
   :defer t
-  :gfhook ('image-dired-display-image-mode-hook 'panda-configure-image-view)
-  :general (panda-space "D" 'image-dired))
+  :gfhook ('image-dired-display-image-mode-hook '(panda-configure-image-view))
+  :general (panda-space "D" #'image-dired))
 
 (use-package dired-filter
   :defer t
   :general ('normal dired-mode-map "gf" '(:keymap dired-filter-map)))
 
 (use-package dired-open
-  :general ('normal dired-mode-map "<C-return>" 'dired-open-xdg))
+  :general ('normal dired-mode-map "<C-return>" #'dired-open-xdg))
 
 (use-package dired-subtree
   :general
   ('normal dired-mode-map
-           "zo" 'panda-dired-subtree-insert
-           "zc" 'panda-dired-subtree-remove
-           "za" 'dired-subtree-toggle
-           "<tab>" 'dired-subtree-cycle)
+           "zo" #'panda-dired-subtree-insert
+           "zc" #'panda-dired-subtree-remove
+           "za" #'dired-subtree-toggle
+           "<tab>" #'dired-subtree-cycle)
   :config
   (defun panda-dired-subtree-insert ()
     "Like `dired-subtree-insert', but doesn't move point."
@@ -810,13 +772,13 @@ The changes are local to the current buffer."
 (use-package dired-ranger
   :general
   ('normal dired-mode-map
-           "gc" 'dired-ranger-copy
-           "gm" 'dired-ranger-move
-           "gp" 'dired-ranger-paste))
+           "gc" #'dired-ranger-copy
+           "gm" #'dired-ranger-move
+           "gp" #'dired-ranger-paste))
 
 ;;;; Git
 (use-package magit
-  :general (panda-space "g" 'magit-status)
+  :general (panda-space "g" #'magit-status)
   :config
   (gsetq magit-auto-revert-mode nil))
 
@@ -831,30 +793,7 @@ The changes are local to the current buffer."
 (use-package evil-magit :after magit)
 
 (use-package git-timemachine
-  :general (panda-space "G" 'git-timemachine))
-
-;;;; Music
-(use-package emms
-  :straight nil ; yay -S emms-git
-  :general (panda-space "m" 'emms)
-  :config
-  (require 'emms-setup)
-  (require 'emms-info-libtag)
-  (emms-all)
-  (defun panda-emms-track-description (track)
-    "Return a description of TRACK.
-This is adapted from `emms-info-track-description'."
-    (let ((artist (emms-track-get track 'info-artist))
-          (title (emms-track-get track 'info-title)))
-      (cond ((and artist title) (concat title " - " artist))
-            (title title)
-            (t (emms-track-simple-description track)))))
-  (gsetq emms-info-functions '(emms-info-libtag)
-         emms-player-list '(emms-player-vlc)
-         emms-repeat-playlist t
-         emms-source-file-default-directory "~/Music"
-         emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
-         emms-track-description-function 'panda-emms-track-description))
+  :general (panda-space "G" #'git-timemachine))
 
 ;;;; Readers
 (use-package elfeed
@@ -865,19 +804,19 @@ This is adapted from `emms-info-track-description'."
          elfeed-search-filter "@1-month-ago +unread"))
 
 (use-package image-mode
-  :straight (:type built-in)
+  :straight nil
   :defer t
-  :gfhook 'panda-configure-image-view)
+  :gfhook '(panda-configure-image-view))
 
 (use-package nov
   :mode ("\\.epub$" . nov-mode)
-  :gfhook 'visual-line-mode
+  :gfhook '(visual-line-mode)
   :config
   (gsetq nov-text-width most-positive-fixnum))
 
 (use-package pdf-tools
   :mode ("\\.pdf$" . pdf-view-mode)
-  :gfhook ('pdf-view-mode-hook 'panda-configure-image-view)
+  :gfhook ('pdf-view-mode-hook '(panda-configure-image-view))
   :config
   (gsetq-default pdf-view-display-size 'fit-page)
   (pdf-tools-install))
@@ -885,7 +824,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Shell
 (use-package eshell
   :general
-  (panda-space "<return>" 'eshell)
+  (panda-space "<return>" #'eshell)
   :config
   (gsetq eshell-hist-ignoredups t
          eshell-history-size 1024))
@@ -895,9 +834,6 @@ This is adapted from `emms-info-track-description'."
 
 (use-package fish-completion
   :ghook 'eshell-mode-hook)
-
-;;;; System
-(use-package disk-usage :defer t)
 
 ;;; Mode-Specific Configuration
 ;;;; Completion / Linting
@@ -915,10 +851,10 @@ This is adapted from `emms-info-track-description'."
   :config
   (gsetq flycheck-display-errors-delay 0.5)
   (general-def 'normal flycheck-mode-map
-    "[e" 'flycheck-previous-error
-    "]e" 'flycheck-next-error)
-  (evil-declare-motion 'flycheck-previous-error)
-  (evil-declare-motion 'flycheck-next-error))
+    "[e" #'flycheck-previous-error
+    "]e" #'flycheck-next-error)
+  (evil-declare-motion #'flycheck-previous-error)
+  (evil-declare-motion #'flycheck-next-error))
 
 (use-package flycheck-posframe
   :ghook 'flycheck-mode-hook
@@ -946,9 +882,9 @@ This is adapted from `emms-info-track-description'."
          lsp-enable-on-type-formatting nil
          lsp-prefer-flymake nil)
   (general-def 'normal lsp-mode-map
-    "gd" 'lsp-find-definition
-    "gD" 'lsp-find-references
-    "K" 'lsp-describe-thing-at-point))
+    "gd" #'lsp-find-definition
+    "gD" #'lsp-find-references
+    "K" #'lsp-describe-thing-at-point))
 
 (use-package company-lsp
   :after company lsp
@@ -1023,9 +959,9 @@ This is adapted from `emms-info-track-description'."
   :ghook 'lispyville-mode-hook
   :config
   (lispy-set-key-theme '(lispy special))
-  (lispy-define-key lispy-mode-map-special "<" 'lispy-slurp-or-barf-left)
-  (lispy-define-key lispy-mode-map-special ">" 'lispy-slurp-or-barf-right)
-  (general-def lispy-mode-map-lispy "\"" 'lispy-doublequote))
+  (lispy-define-key lispy-mode-map-special "<" #'lispy-slurp-or-barf-left)
+  (lispy-define-key lispy-mode-map-special ">" #'lispy-slurp-or-barf-right)
+  (general-def lispy-mode-map-lispy "\"" #'lispy-doublequote))
 
 ;;;; Snippets
 (use-package yasnippet
@@ -1050,7 +986,7 @@ This is adapted from `emms-info-track-description'."
   (gsetq outshine-org-style-global-cycling-at-bob-p t)
   (general-def 'normal outshine-mode-map
     "<tab>" (lookup-key outshine-mode-map (kbd "TAB"))
-    "<backtab>" 'outshine-cycle-buffer))
+    "<backtab>" #'outshine-cycle-buffer))
 
 ;;; Languages
 ;;;; Assembly
@@ -1089,13 +1025,13 @@ This is adapted from `emms-info-track-description'."
      ("I" ccls-inheritance-hierarchy "inheritance hierarchy")))))
 
 (use-package highlight-doxygen
-  :ghook ('(c-mode-hook c++-mode-hook) 'highlight-doxygen-mode)
+  :ghook ('(c-mode-hook c++-mode-hook) '(highlight-doxygen-mode))
   :config
   (custom-set-faces '(highlight-doxygen-comment ((t nil)))))
 
 ;;;; Common Lisp
 (use-package lisp-mode
-  :straight (:type built-in)
+  :straight nil
   :defer t
   :gfhook '(company-mode
             lispyville-mode
@@ -1130,7 +1066,7 @@ This is adapted from `emms-info-track-description'."
 
 ;;;; Emacs Lisp
 (use-package elisp-mode
-  :straight (:type built-in)
+  :straight nil
   :defer t
   :gfhook ('emacs-lisp-mode-hook '(company-mode
                                    lispyville-mode
@@ -1285,7 +1221,7 @@ This is adapted from `emms-info-track-description'."
 ;;;; Org
 (use-package org
   :straight (:type built-in)
-  :gfhook 'panda-format-on-save-mode
+  :gfhook '(panda-format-on-save-mode)
   :general
   (panda-space
     "a" 'org-agenda

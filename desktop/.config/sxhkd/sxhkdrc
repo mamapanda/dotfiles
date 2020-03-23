@@ -81,12 +81,15 @@ super + alt + r
     pkill -USR1 -x sxhkd
 
 #
-# Special Keys
+# System
 #
-{XF86MonBrightnessUp,XF86MonBrightnessDown}
+super + {_,shift + }Delete
+    shutdown {_,-r }now
+
+XF86MonBrightness{Up,Down}
     xbacklight -{inc,dec} 10
 
-{XF86AudioRaiseVolume,XF86AudioLowerVolume,XF86AudioMute}
+XF86Audio{RaiseVolume,LowerVolume,Mute}
     amixer -q set Master {5%+,5%-,toggle}
 
 #
@@ -94,9 +97,6 @@ super + alt + r
 #
 super + @space
 	rofi -show drun
-
-super + {_,shift + }Delete
-    shutdown {_,-r }now
 
 super + Return
 	kitty
