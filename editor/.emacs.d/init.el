@@ -1,4 +1,5 @@
-;;; Init.el Setup  -*- lexical-binding: t -*-
+;; -*- lexical-binding: t; -*-
+;;; Setup
 ;;;; Startup Optimizations
 (defvar panda--pre-init-file-name-handler-alist file-name-handler-alist
   "The value of `file-name-handler-alist' before init.el was loaded.")
@@ -71,6 +72,7 @@ It should contain an alist literal for `panda-get-private-data'.")
     (alist-get key data)))
 
 ;;; Evil
+;;;; Base Packages
 ;; Prevent goto-chg and undo-tree from being installed.
 (cl-pushnew 'goto-chg straight-built-in-pseudo-packages)
 (cl-pushnew 'undo-tree straight-built-in-pseudo-packages)
@@ -103,73 +105,149 @@ It should contain an alist literal for `panda-get-private-data'.")
   (delete 'outline evil-collection-mode-list)
   (evil-collection-init))
 
+;;;; Basic Keybindings
+(general-def '(normal motion) override
+  ";" #'evil-ex
+  ":" #'eval-expression
+  "," #'execute-extended-command)
+
+(general-def '(normal motion) override
+  "Q" #'save-buffer)
+
+(general-def 'motion
+  "`" #'evil-goto-mark-line
+  "'" #'evil-goto-mark)
+
+(general-def 'motion
+  "gs" #'evil-repeat-find-char
+  "gS" #'evil-repeat-find-char-reverse)
+
+(general-def 'normal
+  "gD" #'xref-find-references
+  "[e" #'previous-error
+  "]e" #'next-error)
+
+(general-def 'motion
+  "M-h" #'beginning-of-defun
+  "M-l" #'end-of-defun
+  "H" #'backward-sexp
+  "L" #'forward-sexp)
+
+(general-def minibuffer-local-map
+  "<escape>" #'minibuffer-keyboard-quit)
+
+(panda-space
+  "b" #'switch-to-buffer                ; C-x b
+  "c" #'compile
+  "d" #'dired                           ; C-x d
+  "f" #'find-file                       ; C-x C-f
+  "h" #'help-command                    ; C-h
+  "o" #'occur                           ; M-s o
+  "t" #'bookmark-jump                   ; C-x r b
+  "T" #'bookmark-set                    ; C-x r m
+  "%" (general-key "C-x C-q")           ; C-x C-q
+  "-" #'delete-trailing-whitespace)
+
+(general-def 'insert
+  "<C-backspace>" #'evil-delete-backward-word
+  "C-x r i" #'evil-paste-from-register
+  "M-o" #'evil-execute-in-normal-state)
+
+(setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
+(general-def evil-ex-completion-map
+  "TAB" #'evil-ex-completion
+  "C-x r i" #'evil-paste-from-register)
+
+;;;; undo-tree Replacement
+(general-def 'normal
+  "C-r" nil
+  "g;" nil
+  "g," nil)
+
+(use-package goto-last-change
+  :straight (goto-last-change
+             :host github
+             :repo "camdez/goto-last-change.el"
+             :fork (:host nil :repo "git@github.com:mamapanda/goto-last-change.el.git"))
+  :general ('normal "g;" #'goto-last-change))
+
+(use-package undo-propose
+  :general ('normal "U" #'undo-propose))
+
+;;;; Motions
+(use-package evil-matchit
+  :config
+  (global-evil-matchit-mode 1))
+
+(use-package evil-snipe
+  :config
+  (gsetq evil-snipe-repeat-keys t
+         evil-snipe-smart-case t
+         evil-snipe-scope 'visible
+         evil-snipe-repeat-scope 'visible
+         evil-snipe-tab-increment t)
+  (general-def 'motion evil-snipe-override-local-mode-map
+    ";" nil
+    "," nil
+    "gs" #'evil-snipe-repeat
+    "gS" #'evil-snipe-repeat-reverse)
+  (setf (cdr evil-snipe-parent-transient-map) nil)
+  (general-def evil-snipe-parent-transient-map
+    "s" #'evil-snipe-repeat
+    "S" #'evil-snipe-repeat-reverse)
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
+
+;;;; Operators
+(use-package evil-exchange
+  :config
+  (evil-exchange-install))
+
+(use-package evil-lion
+  :general
+  ('normal "gl" #'evil-lion-left
+           "gL" #'evil-lion-right))
+
+(use-package evil-nerd-commenter
+  :general
+  ('normal "gc" #'evilnc-comment-operator
+           "gy" #'evilnc-copy-and-comment-operator)
+  ('inner "c" #'evilnc-inner-comment)
+  ('outer "c" #'evilnc-outer-commenter))
+
+(use-package evil-numbers
+  :general
+  ('normal "C-a" #'evil-numbers/inc-at-pt
+           "C-s" #'evil-numbers/dec-at-pt))
+
+(use-package evil-replace-with-register
+  :general ('normal "gR" #'evil-replace-with-register))
+
+(use-package evil-surround
+  :config
+  (general-def 'visual evil-surround-mode-map
+    "s" #'evil-surround-region
+    "S" #'evil-Surround-region
+    "gS" nil)
+  (global-evil-surround-mode 1))
+
+;;;; Text Objects
+;;;;; Packages
+(use-package evil-args
+  :general
+  ('inner "a" #'evil-inner-arg)
+  ('outer "a" #'evil-outer-arg))
+
+(use-package evil-indent-plus
+  :config
+  (evil-indent-plus-default-bindings))
+
 (use-package targets
   :straight (:type git :host github :repo "noctuid/targets.el")
   :config
   (targets-setup t))
 
-;;; Basic Configuration
-;;;; Definitions
-;;;;; Defuns
-(defun panda-format-buffer ()
-  "Indent the entire buffer and delete trailing whitespace."
-  (interactive)
-  (let ((inhibit-message t))
-    (indent-region (point-min) (point-max))
-    (delete-trailing-whitespace)))
-
-(defun panda-kill-this-buffer ()
-  "Kill the current buffer."
-  (interactive)
-  (kill-buffer (current-buffer)))
-
-(defun panda-reload-file ()
-  "Reload the current file, preserving point."
-  (interactive)
-  (if buffer-file-name
-      (let ((pos (point)))
-        (find-alternate-file buffer-file-name)
-        (goto-char pos))
-    (message "Buffer is not visiting a file")))
-
-(defun panda-configure-image-view ()
-  "Configure settings for viewing an image."
-  (display-line-numbers-mode -1)
-  (gsetq-local evil-default-cursor (list nil)))
-
-(defun panda-static-evil-ex (&optional initial-input)
-  "`evil-ex' that doesn't move point."
-  (interactive)
-  (save-excursion (call-interactively #'evil-ex)))
-
-(defun panda-sudo-reload-file ()
-  "Reload the current file with root privileges, preserving point."
-  (interactive)
-  (if buffer-file-name
-      (let ((pos (point)))
-        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
-        (goto-char pos))
-    (message "Buffer is not visiting a file")))
-
-;;;;; Minor Modes
-(define-minor-mode panda-format-on-save-mode
-  "Indents a buffer and trims whitespace on save."
-  :init-value nil
-  :lighter "panda-format"
-  (if panda-format-on-save-mode
-      (add-hook 'before-save-hook #'panda-format-buffer nil t)
-    (remove-hook 'before-save-hook #'panda-format-buffer t)))
-
-(define-minor-mode panda-trim-on-save-mode
-  "Trims whitespace on save."
-  :init-value nil
-  :lighter "panda-trim"
-  (if panda-trim-on-save-mode
-      (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
-    (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
-
-;;;;; Text Objects
-;;;;;; Buffer
+;;;;; Buffer
 (evil-define-text-object panda-outer-buffer (count beg end type)
   "Select the whole buffer."
   :type line
@@ -181,7 +259,10 @@ It should contain an alist literal for `panda-get-private-data'.")
 ;; and switches to it, but I don't see myself using that outside of
 ;; cases already covered by :read.
 
-;;;;;; Defun
+(general-def 'outer "e" #'panda-outer-buffer)
+(general-def 'inner "e" #'panda-inner-buffer)
+
+;;;;; Defun
 (defvar-local panda-inner-defun-bounds '("{" . "}")
   "Variable to determine the bounds of an inner defun.
 The value can be a pair of regexps to determine the start and end,
@@ -249,7 +330,7 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 
 (targets-define-to defun 'defun nil object :linewise t :bind t :keys "d")
 
-;;;;;; Whitespace
+;;;;; Whitespace
 (defun forward-panda-whitespace (count)
   "Move forward COUNT horizontal whitespace blocks."
   (evil-forward-chars "[:blank:]" count))
@@ -263,7 +344,7 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 
 (targets-define-to whitespace 'panda-whitespace nil object :bind t :keys " ")
 
-;;;;;; Whitespace Line
+;;;;; Whitespace Line
 ;; The remote text object doesn't pick up a block at the beginning of
 ;; the buffer, even though the regular/last objects work just fine.
 (defun forward-panda-whitespace-line (count)
@@ -282,7 +363,96 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 (targets-define-to whitespace-line 'panda-whitespace-line nil object
                    :bind t :keys "\^M" :linewise t)
 
-;;;; Settings
+;;;;; Ex
+(defun panda-static-evil-ex (&optional initial-input)
+  "`evil-ex' that doesn't move point."
+  (interactive)
+  (save-excursion (call-interactively #'evil-ex)))
+
+(general-def [remap evil-ex] #'panda-static-evil-ex)
+
+(defun panda-kill-this-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (kill-buffer (current-buffer)))
+
+(evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
+
+(defun panda-reload-file ()
+  "Reload the current file, preserving point."
+  (interactive)
+  (if buffer-file-name
+      (let ((pos (point)))
+        (find-alternate-file buffer-file-name)
+        (goto-char pos))
+    (message "Buffer is not visiting a file")))
+
+(evil-ex-define-cmd "reload" #'panda-reload-file)
+
+(defun panda-sudo-reload-file ()
+  "Reload the current file with root privileges, preserving point."
+  (interactive)
+  (if buffer-file-name
+      (let ((pos (point)))
+        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
+        (goto-char pos))
+    (message "Buffer is not visiting a file")))
+
+(evil-ex-define-cmd "sudoreload" #'panda-sudo-reload-file)
+
+;;;; Visual Aids
+(use-package evil-goggles
+  :config
+  (gsetq evil-goggles-pulse nil)
+  (defun panda-evil-goggles-add (cmd based-on-cmd)
+    "Register CMD with evil-goggles using BASED-ON-CMD's configuration."
+    (when-let ((cmd-config (alist-get based-on-cmd evil-goggles--commands)))
+      (add-to-list 'evil-goggles--commands (cons cmd cmd-config))
+      (when (bound-and-true-p evil-goggles-mode)
+        (evil-goggles-mode 1))))
+  (evil-goggles-use-diff-refine-faces)
+  (evil-goggles-mode 1))
+
+(use-package evil-owl
+  :straight (evil-owl
+             :host nil
+             :repo "git@github.com:mamapanda/evil-owl.git"
+             :local-repo "~/code/emacs-lisp/evil-owl")
+  :custom-face
+  (evil-owl-group-name ((t (
+                            :inherit font-lock-function-name-face
+                            :weight bold
+                            :underline t))))
+  (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
+  :config
+  (gsetq evil-owl-display-method 'posframe
+         evil-owl-global-mark-format " %m: [l: %-5l, c: %-5c] %b\n  %s"
+         evil-owl-local-mark-format " %m: [l: %-5l, c: %-5c]\n  %s"
+         evil-owl-register-char-limit 50
+         evil-owl-idle-delay 0.2)
+  (gsetq evil-owl-extra-posframe-args
+         `(
+           :poshandler posframe-poshandler-point-bottom-left-corner
+           :width 50
+           :height 20
+           :internal-border-width 2))
+  (evil-owl-mode))
+
+(use-package evil-traces
+  :straight (evil-traces
+             :host nil
+             :repo "git@github.com:mamapanda/evil-traces.git"
+             :local-repo "~/code/emacs-lisp/evil-traces")
+  :config
+  (defun panda-no-ex-range-and-arg-p ()
+    "Return non-nil if both `evil-ex-range' and `evil-ex-argument' are nil."
+    (and (null evil-ex-range) (null evil-ex-argument)))
+  (gsetq evil-traces-suspend-function #'panda-no-ex-range-and-arg-p)
+  (evil-traces-use-diff-faces)
+  (evil-traces-mode))
+
+;;; Built-in Settings
+;;;; Variables
 (gsetq auto-save-default t
        blink-cursor-blinks 0
        c-default-style '((java-mode . "java")
@@ -317,9 +487,10 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
                tab-width 4
                truncate-lines nil)
 
-(blink-cursor-mode)
+;;;; Minor Modes
+(blink-cursor-mode 1)
 (delete-selection-mode 1)
-(desktop-save-mode)
+(desktop-save-mode 1)
 (electric-pair-mode 1)
 (global-auto-revert-mode t)
 (recentf-mode 1)
@@ -338,70 +509,6 @@ and CLOSE-REGEXP match the delimiters of the inner defun."
 (add-hook 'desktop-after-read-hook
           (lambda ()
             (setf (default-value 'evil-markers-alist) panda--default-markers-alist)))
-
-;;;; Keybindings
-(general-def '(normal motion) override
-  ";" #'evil-ex
-  ":" #'eval-expression
-  "," #'execute-extended-command
-  "Q" #'save-buffer)
-
-(general-def [remap evil-ex] #'panda-static-evil-ex)
-
-(general-def 'normal
-  "C-r" nil
-  "g;" nil
-  "g," nil
-  "gD" #'xref-find-references
-  "[e" #'previous-error
-  "]e" #'next-error)
-
-(general-def 'insert
-  "<C-backspace>" #'evil-delete-backward-word
-  "C-x r i" #'evil-paste-from-register
-  "M-o" #'evil-execute-in-normal-state)
-
-(general-def 'motion
-  "SPC" nil
-  ";" nil
-  "," nil
-  "`" #'evil-goto-mark-line
-  "'" #'evil-goto-mark
-  "gs" #'evil-repeat-find-char
-  "gS" #'evil-repeat-find-char-reverse
-  "M-h" #'beginning-of-defun
-  "M-l" #'end-of-defun
-  "H" #'backward-sexp
-  "L" #'forward-sexp)
-
-(general-def 'outer
-  "e" #'panda-outer-buffer)
-
-(general-def 'inner
-  "e" #'panda-inner-buffer)
-
-(panda-space
-  "b" #'switch-to-buffer                 ; C-x b
-  "c" #'compile
-  "d" #'dired                            ; C-x d
-  "f" #'find-file                        ; C-x C-f
-  "h" #'help-command                     ; C-h
-  "o" #'occur                            ; M-s o
-  "t" #'bookmark-jump                    ; C-x r b
-  "T" #'bookmark-set                     ; C-x r m
-  "%" (general-key "C-x C-q")           ; C-x C-q
-  "-" #'delete-trailing-whitespace
-  "=" #'panda-format-buffer)
-
-(general-def minibuffer-local-map
-  "<escape>" #'minibuffer-keyboard-quit)
-
-(setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
-(general-def evil-ex-completion-map
-  "TAB" #'evil-ex-completion
-  "C-x r i" #'evil-paste-from-register)
-
-(evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
 
 ;;; Global Packages
 ;;;; Appearance
@@ -464,101 +571,6 @@ The changes are local to the current buffer."
 (use-package rainbow-delimiters
   :ghook 'prog-mode-hook)
 
-;;;; Editing
-(use-package evil-args
-  :general
-  ('inner "a" #'evil-inner-arg)
-  ('outer "a" #'evil-outer-arg))
-
-(use-package evil-exchange
-  :config
-  (evil-exchange-install))
-
-(use-package evil-indent-plus
-  :config
-  (evil-indent-plus-default-bindings))
-
-(use-package evil-goggles
-  :config
-  (gsetq evil-goggles-pulse nil)
-  (defun panda-evil-goggles-add (cmd based-on-cmd)
-    "Register CMD with evil-goggles using BASED-ON-CMD's configuration."
-    (when-let ((cmd-config (alist-get based-on-cmd evil-goggles--commands)))
-      (add-to-list 'evil-goggles--commands (cons cmd cmd-config))
-      (when (bound-and-true-p evil-goggles-mode)
-        (evil-goggles-mode 1))))
-  (evil-goggles-use-diff-refine-faces)
-  (evil-goggles-mode 1))
-
-(use-package evil-lion
-  :general
-  ('normal "gl" #'evil-lion-left
-           "gL" #'evil-lion-right))
-
-(use-package evil-nerd-commenter
-  :general
-  ('normal "gc" #'evilnc-comment-operator
-           "gy" #'evilnc-copy-and-comment-operator)
-  ('inner "c" #'evilnc-inner-comment)
-  ('outer "c" #'evilnc-outer-commenter))
-
-(use-package evil-numbers
-  :general
-  ('normal "C-a" #'evil-numbers/inc-at-pt
-           "C-s" #'evil-numbers/dec-at-pt))
-
-(use-package evil-owl
-  :straight (evil-owl
-             :host nil
-             :repo "git@github.com:mamapanda/evil-owl.git"
-             :local-repo "~/code/emacs-lisp/evil-owl")
-  :custom-face
-  (evil-owl-group-name ((t (
-                            :inherit font-lock-function-name-face
-                            :weight bold
-                            :underline t))))
-  (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
-  :config
-  (gsetq evil-owl-display-method 'posframe
-         evil-owl-global-mark-format " %m: [l: %-5l, c: %-5c] %b\n  %s"
-         evil-owl-local-mark-format " %m: [l: %-5l, c: %-5c]\n  %s"
-         evil-owl-register-char-limit 50
-         evil-owl-idle-delay 0.2)
-  (gsetq evil-owl-extra-posframe-args
-         `(
-           :poshandler posframe-poshandler-point-bottom-left-corner
-           :width 50
-           :height 20
-           :internal-border-width 2))
-  (evil-owl-mode))
-
-(use-package evil-replace-with-register
-  :general ('normal "gR" #'evil-replace-with-register))
-
-(use-package evil-surround
-  :config
-  (general-def 'visual evil-surround-mode-map
-    "s" #'evil-surround-region
-    "S" #'evil-Surround-region
-    "gS" nil)
-  (global-evil-surround-mode 1))
-
-(use-package evil-traces
-  :straight (evil-traces
-             :host nil
-             :repo "git@github.com:mamapanda/evil-traces.git"
-             :local-repo "~/code/emacs-lisp/evil-traces")
-  :config
-  (defun panda-no-ex-range-and-arg-p ()
-    "Return non-nil if both `evil-ex-range' and `evil-ex-argument' are nil."
-    (and (null evil-ex-range) (null evil-ex-argument)))
-  (gsetq evil-traces-suspend-function #'panda-no-ex-range-and-arg-p)
-  (evil-traces-use-diff-faces)
-  (evil-traces-mode))
-
-(use-package undo-propose
-  :general ('normal "U" #'undo-propose))
-
 ;;;; Help
 (use-package helpful
   :general
@@ -582,36 +594,6 @@ The changes are local to the current buffer."
     (require 'projectile)
     (or (projectile-project-root) default-directory))
   (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root))
-
-(use-package evil-matchit
-  :config
-  (global-evil-matchit-mode 1))
-
-(use-package evil-snipe
-  :config
-  (gsetq evil-snipe-repeat-keys t
-         evil-snipe-smart-case t
-         evil-snipe-scope 'visible
-         evil-snipe-repeat-scope 'visible
-         evil-snipe-tab-increment t)
-  (general-def 'motion evil-snipe-override-local-mode-map
-    ";" nil
-    "," nil
-    "gs" #'evil-snipe-repeat
-    "gS" #'evil-snipe-repeat-reverse)
-  (setf (cdr evil-snipe-parent-transient-map) nil)
-  (general-def evil-snipe-parent-transient-map
-    "s" #'evil-snipe-repeat
-    "S" #'evil-snipe-repeat-reverse)
-  (evil-snipe-mode 1)
-  (evil-snipe-override-mode 1))
-
-(use-package goto-last-change
-  :straight (goto-last-change
-             :host github
-             :repo "camdez/goto-last-change.el"
-             :fork (:host nil :repo "git@github.com:mamapanda/goto-last-change.el.git"))
-  :general ('normal "g;" #'goto-last-change))
 
 (use-package imenu
   :general (panda-space "i" #'imenu)
@@ -739,7 +721,6 @@ The changes are local to the current buffer."
 ;;;; File Manager
 (use-package image-dired
   :defer t
-  :gfhook ('image-dired-display-image-mode-hook '(panda-configure-image-view))
   :general (panda-space "D" #'image-dired))
 
 (use-package dired-filter
@@ -796,17 +777,20 @@ The changes are local to the current buffer."
   :general (panda-space "G" #'git-timemachine))
 
 ;;;; Readers
+(defun panda-configure-image-view ()
+  "Configure settings for viewing an image."
+  (display-line-numbers-mode -1)
+  (gsetq-local evil-default-cursor (list nil)))
+
+(add-hook 'image-mode-hook #'panda-configure-image-view)
+(add-hook 'image-dired-display-image-mode-hook #'panda-configure-image-view)
+
 (use-package elfeed
   :defer t
   :config
   (gsetq elfeed-feeds (panda-get-private-data 'elfeed-feeds)
          elfeed-search-title-max-width 100
          elfeed-search-filter "@1-month-ago +unread"))
-
-(use-package image-mode
-  :straight nil
-  :defer t
-  :gfhook '(panda-configure-image-view))
 
 (use-package nov
   :mode ("\\.epub$" . nov-mode)
@@ -836,7 +820,7 @@ The changes are local to the current buffer."
   :ghook 'eshell-mode-hook)
 
 ;;; Mode-Specific Configuration
-;;;; Completion / Linting
+;;;; Completion
 (use-package company
   :defer t
   :config
@@ -846,22 +830,32 @@ The changes are local to the current buffer."
          company-minimum-prefix-length 2
          company-tooltip-align-annotations t))
 
-(use-package flycheck
-  :defer t
-  :config
-  (gsetq flycheck-display-errors-delay 0.5)
-  (general-def 'normal flycheck-mode-map
-    "[e" #'flycheck-previous-error
-    "]e" #'flycheck-next-error)
-  (evil-declare-motion #'flycheck-previous-error)
-  (evil-declare-motion #'flycheck-next-error))
-
-(use-package flycheck-posframe
-  :ghook 'flycheck-mode-hook
-  :config
-  (flycheck-posframe-configure-pretty-defaults))
-
 ;;;; Formatting
+(defun panda-format-buffer ()
+  "Indent the entire buffer and delete trailing whitespace."
+  (interactive)
+  (let ((inhibit-message t))
+    (indent-region (point-min) (point-max))
+    (delete-trailing-whitespace)))
+
+(panda-space "=" #'panda-format-buffer)
+
+(define-minor-mode panda-format-on-save-mode
+  "Indents a buffer and trims whitespace on save."
+  :init-value nil
+  :lighter "panda-format"
+  (if panda-format-on-save-mode
+      (add-hook 'before-save-hook #'panda-format-buffer nil t)
+    (remove-hook 'before-save-hook #'panda-format-buffer t)))
+
+(define-minor-mode panda-trim-on-save-mode
+  "Trims whitespace on save."
+  :init-value nil
+  :lighter "panda-trim"
+  (if panda-trim-on-save-mode
+      (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+    (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
+
 (use-package reformatter)
 
 ;;;; Keybindings
@@ -934,6 +928,22 @@ The changes are local to the current buffer."
             ("<delete>" lsp-shutdown-workspace "shutdown")))))
       (push major-mode panda--lsp-hydra-enabled-modes)))
   (add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads))
+
+;;;; Linting
+(use-package flycheck
+  :defer t
+  :config
+  (gsetq flycheck-display-errors-delay 0.5)
+  (general-def 'normal flycheck-mode-map
+    "[e" #'flycheck-previous-error
+    "]e" #'flycheck-next-error)
+  (evil-declare-motion #'flycheck-previous-error)
+  (evil-declare-motion #'flycheck-next-error))
+
+(use-package flycheck-posframe
+  :ghook 'flycheck-mode-hook
+  :config
+  (flycheck-posframe-configure-pretty-defaults))
 
 ;;;; Lisp
 (use-package lispyville
