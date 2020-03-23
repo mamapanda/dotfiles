@@ -1,0 +1,1645 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Daniel Phan
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+
+* Table of Contents                                                     :TOC:
+- [[#setup][Setup]]
+  - [[#lexical-binding][Lexical Binding]]
+  - [[#startup-optimizations][Startup Optimizations]]
+  - [[#package-management][Package Management]]
+  - [[#early-load-packages][Early Load Packages]]
+  - [[#custom-file][Custom File]]
+  - [[#sensitive-data][Sensitive Data]]
+- [[#evil][Evil]]
+  - [[#base-packages][Base Packages]]
+  - [[#basic-keybindings][Basic Keybindings]]
+  - [[#undo-tree-replacement][~undo-tree~ Replacement]]
+  - [[#motions][Motions]]
+  - [[#operators][Operators]]
+  - [[#text-objects][Text Objects]]
+  - [[#ex][Ex]]
+  - [[#visual-aids][Visual Aids]]
+  - [[#other][Other]]
+- [[#built-in-settings][Built-in Settings]]
+  - [[#variables][Variables]]
+  - [[#minor-modes][Minor Modes]]
+- [[#global-packages][Global Packages]]
+  - [[#appearance][Appearance]]
+  - [[#help][Help]]
+  - [[#navigation][Navigation]]
+  - [[#ui][UI]]
+  - [[#windows][Windows]]
+- [[#tools][Tools]]
+  - [[#file-manager][File Manager]]
+  - [[#git][Git]]
+  - [[#readers][Readers]]
+  - [[#shell][Shell]]
+- [[#mode-specific-configuration][Mode-specific Configuration]]
+  - [[#completion][Completion]]
+  - [[#formatting][Formatting]]
+  - [[#keybindings][Keybindings]]
+  - [[#language-server][Language Server]]
+  - [[#linting][Linting]]
+  - [[#lisp][Lisp]]
+  - [[#snippets][Snippets]]
+  - [[#view--layout][View / Layout]]
+- [[#languages][Languages]]
+  - [[#assembly][Assembly]]
+  - [[#c--c][C / C++]]
+  - [[#common-lisp][Common Lisp]]
+  - [[#emacs-lisp][Emacs Lisp]]
+  - [[#haskell][Haskell]]
+  - [[#html--css][HTML / CSS]]
+  - [[#javascript--typescript][JavaScript / TypeScript]]
+  - [[#json][JSON]]
+  - [[#latex][Latex]]
+  - [[#org][Org]]
+  - [[#python][Python]]
+  - [[#r][R]]
+  - [[#other-1][Other]]
+- [[#end-init][End Init]]
+
+* Setup
+** Lexical Binding
+   #+BEGIN_SRC emacs-lisp
+     ;; -*- lexical-binding: t; -*-
+   #+END_SRC
+
+** Startup Optimizations
+   These optimizations are from [[https://github.com/hlissner/doom-emacs][Doom Emacs]].  On Emacs 26.3, it decreases my init
+   time from 1.3s to 0.9s.  This hasn't really mattered that much ever since I
+   enabled ~desktop.el~ though.
+
+   #+BEGIN_SRC emacs-lisp
+     (defvar panda--pre-init-file-name-handler-alist file-name-handler-alist
+       "The value of `file-name-handler-alist' before init.el was loaded.")
+
+     (defvar panda--pre-init-gc-cons-threshold gc-cons-threshold
+       "The value of `gc-cons-threshold' before init.el was loaded.")
+
+     (defun panda--restore-init-optimization-variables ()
+       "Restore variables that were modified for init time optimization."
+       (setq file-name-handler-alist panda--pre-init-file-name-handler-alist
+             gc-cons-threshold panda--pre-init-gc-cons-threshold))
+
+     (setq file-name-handler-alist nil
+           gc-cons-threshold 64000000)
+
+     (add-hook 'after-init-hook #'panda--restore-init-optimization-variables)
+   #+END_SRC
+
+** Package Management
+   Unlike ~package.el~, ~straight.el~ has a lockfile feature to ensure
+   near-perfect reproducibility, which is pretty nice for configuration
+   stability.  I grabbed the bootstrap code from ~straight.el~'s [[https://github.com/raxod502/straight.el#getting-started][readme]].
+
+   #+BEGIN_SRC emacs-lisp
+     (setq package-enable-at-startup nil
+           straight-check-for-modifications '(check-on-save find-when-checking))
+
+     (defvar bootstrap-version)
+     (let ((bootstrap-file
+            (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+           (bootstrap-version 5))
+       (unless (file-exists-p bootstrap-file)
+         (with-current-buffer
+             (url-retrieve-synchronously
+              "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+              'silent 'inhibit-cookies)
+           (goto-char (point-max))
+           (eval-print-last-sexp)))
+       (load bootstrap-file nil 'nomessage))
+   #+END_SRC
+
+   Also, ~use-package~ for convenience.
+
+   #+BEGIN_SRC emacs-lisp
+     (straight-use-package 'use-package)
+     (require 'use-package)
+     (setq straight-use-package-by-default t)
+   #+END_SRC
+
+** Early Load Packages
+   These are packages to load at the very beginning, since they're used
+   throughout my configuration.  I don't use ~hydra~ anymore outside of
+   ~major-mode-hydra~, but I figured I'd leave it in this section in case
+   that changes in the future.
+
+   #+BEGIN_SRC emacs-lisp
+     (require 'cl-lib)
+
+     (use-package general
+       :config
+       (defalias 'gsetq #'general-setq)
+       (defalias 'gsetq-default #'general-setq-default)
+       (defalias 'gsetq-local #'general-setq-local))
+
+     (use-package no-littering)
+
+     (use-package hydra
+       :config
+       (gsetq hydra-look-for-remap t))
+   #+END_SRC
+
+** Custom File
+   Set ~custom-file~ to avoid clutter.
+
+   *TODO:* I should probably find a way to only save specific variables
+   (e.g. ~safe-local-variable-values~), as a couple of times, I've removed some
+   configuration to restore a variable's default value only for the
+   ~custom-file~ value to take effect.
+
+   #+BEGIN_SRC emacs-lisp
+     (gsetq custom-file (no-littering-expand-var-file-name "custom.el"))
+     (when (file-exists-p custom-file)
+       (load custom-file))
+   #+END_SRC
+
+** Sensitive Data
+   *TODO:* It's probably more convenient to use ~setq~ instead of storing the
+   data as an alist.
+
+   #+BEGIN_SRC emacs-lisp
+     (defvar panda-private-file (no-littering-expand-etc-file-name "private.el")
+       "File for private/sensitive configuration values.
+     It should contain an alist literal for `panda-get-private-data'.")
+
+     (defun panda-get-private-data (key)
+       "Get the private configuration value corresponding to KEY."
+       (let ((data (with-temp-buffer
+                     (insert-file-contents panda-private-file)
+                     (read (buffer-string)))))
+         (alist-get key data)))
+   #+END_SRC
+
+* Evil
+** Base Packages
+   Prevent ~goto-chg~ and ~undo-tree~ from even being installed, as ~undo-tree~
+   is pretty buggy.  Of course, this is a hack, as they're not built-in
+   packages.  I could instead disable ~goto-chg~ and ~undo-tree~ after ~evil~ is
+   loaded, but I'd rather the packages not be installed in the first place.
+
+   #+BEGIN_SRC emacs-lisp
+     (cl-pushnew 'goto-chg straight-built-in-pseudo-packages)
+     (cl-pushnew 'undo-tree straight-built-in-pseudo-packages)
+   #+END_SRC
+
+   Here is ~evil~ itself, along with ~evil-collection~ to set up more
+   keybindings.  I opted not to use ~evil-collection~'s ~company~ keybindings
+   because I prefer the defaults.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil
+       :init
+       (gsetq evil-respect-visual-line-mode t
+              evil-want-keybinding nil)
+       :config
+       (gsetq evil-disable-insert-state-bindings t
+              evil-jumps-cross-buffers nil
+              evil-move-beyond-eol t
+              evil-toggle-key "C-s-+"
+              evil-want-C-d-scroll t
+              evil-want-C-u-scroll t
+              evil-want-Y-yank-to-eol t)
+       (gsetq-default evil-symbol-word-search t)
+       (general-create-definer panda-space
+         :states '(normal operator motion visual)
+         :keymaps 'override
+         :prefix "SPC"
+         :prefix-map 'panda-space-map)
+       (add-hook 'prog-mode-hook #'hs-minor-mode)
+       (evil-mode 1))
+
+     (use-package evil-collection
+       :config
+       (gsetq evil-collection-key-blacklist '("SPC"))
+       (delete 'company evil-collection-mode-list)
+       (delete 'outline evil-collection-mode-list)
+       (evil-collection-init))
+   #+END_SRC
+
+** Basic Keybindings
+   These are ~evil~ keybindings that don't depend on any other configuration.
+
+   I rarely use the default ~;~ and ~​,​~ behavior thanks to ~evil-snipe~, so I've
+   bound more useful commands to those keys.  The default ~;~ and ~​,​~ are still
+   accessible via ~gs~ and ~gS~.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-def '(normal motion) override
+       ";" #'evil-ex
+       ":" #'eval-expression
+       "," #'execute-extended-command)
+
+     (general-def 'motion
+       "gs" #'evil-repeat-find-char
+       "gS" #'evil-repeat-find-char-reverse)
+   #+END_SRC
+
+   I save pretty often out of habit, so might as well bind ~save-buffer~ to an
+   easy-to-reach key.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-def '(normal motion) override
+       "Q" #'save-buffer)
+   #+END_SRC
+
+   Swap ~`~ and ~​'​~ because I never use the default ~​'​~.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-def 'motion
+       "`" #'evil-goto-mark-line
+       "'" #'evil-goto-mark)
+   #+END_SRC
+
+   Additional navigation commands from Emacs.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-def 'normal
+       "gD" #'xref-find-references
+       "[e" #'previous-error
+       "]e" #'next-error)
+
+     (general-def 'motion
+       "M-h" #'beginning-of-defun
+       "M-l" #'end-of-defun
+       "H" #'backward-sexp
+       "L" #'forward-sexp)
+   #+END_SRC
+
+   ~<escape>~ has to be bound to ~minibuffer-keyboard-quit~ in the minibuffer.
+   Otherwise, in some cases, it has to be pressed multiple times due to ~C-g~
+   being the standard Emacs quit key.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-def minibuffer-local-map
+       "<escape>" #'minibuffer-keyboard-quit)
+   #+END_SRC
+
+   Leader bindings.  Most of these already have default Emacs bindings, but it's
+   more convenient to not have to press any modifiers.  For ~%~, using
+   ~general-key~ with ~C-x C-q~ allows that particular binding to also work with
+   ~occur~ and ~dired~.
+
+   #+BEGIN_SRC emacs-lisp
+     (panda-space
+       "b" #'switch-to-buffer                ; C-x b
+       "c" #'compile
+       "f" #'find-file                       ; C-x C-f
+       "h" #'help-command                    ; C-h
+       "o" #'occur                           ; M-s o
+       "t" #'bookmark-jump                   ; C-x r b
+       "T" #'bookmark-set                    ; C-x r m
+       "%" (general-key "C-x C-q")           ; C-x C-q
+       "-" #'delete-trailing-whitespace)
+   #+END_SRC
+
+   I've disabled the insert state bindings in favor of using Emacs keys in
+   insert mode.  These are the insert state commands I'd like to keep.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-def 'insert
+       "<C-backspace>" #'evil-delete-backward-word
+       "C-x r i" #'evil-paste-from-register
+       "M-o" #'evil-execute-in-normal-state)
+   #+END_SRC
+
+   ~evil-ex~ uses keys different from all other minibuffer commands I use
+   (e.g. ~C-n~ instead of ~M-n~), which can be pretty confusing.  I've changed
+   it to match.
+
+   #+BEGIN_SRC emacs-lisp
+     (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
+     (general-def evil-ex-completion-map
+       "TAB" #'evil-ex-completion
+       "C-x r i" #'evil-paste-from-register)
+   #+END_SRC
+
+** ~undo-tree~ Replacement
+   I use my own fork of ~goto-last-change~ because there's a bug with
+   ~yasnippet~, and the maintainer hasn't merged my PR.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-unbind 'normal "C-r" "g;" "g,")
+
+     (use-package goto-last-change
+       :straight (goto-last-change
+                  :host github
+                  :repo "camdez/goto-last-change.el"
+                  :fork (:host nil :repo "git@github.com:mamapanda/goto-last-change.el.git"))
+       :general ('normal "g;" #'goto-last-change))
+
+     (use-package undo-propose
+       :general ('normal "U" #'undo-propose))
+   #+END_SRC
+
+** Motions
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil-matchit
+       :config
+       (global-evil-matchit-mode 1))
+
+     (use-package evil-snipe
+       :config
+       (gsetq evil-snipe-repeat-keys t
+              evil-snipe-smart-case t
+              evil-snipe-scope 'visible
+              evil-snipe-repeat-scope 'visible
+              evil-snipe-tab-increment t)
+       (general-def 'motion evil-snipe-override-local-mode-map
+         ";" nil
+         "," nil
+         "gs" #'evil-snipe-repeat
+         "gS" #'evil-snipe-repeat-reverse)
+       (setf (cdr evil-snipe-parent-transient-map) nil)
+       (general-def evil-snipe-parent-transient-map
+         "s" #'evil-snipe-repeat
+         "S" #'evil-snipe-repeat-reverse)
+       (evil-snipe-mode 1)
+       (evil-snipe-override-mode 1))
+   #+END_SRC
+
+** Operators
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil-exchange
+       :config
+       (evil-exchange-install))
+
+     (use-package evil-lion
+       :general
+       ('normal "gl" #'evil-lion-left
+                "gL" #'evil-lion-right))
+
+     (use-package evil-nerd-commenter
+       :general
+       ('normal "gc" #'evilnc-comment-operator
+                "gy" #'evilnc-copy-and-comment-operator)
+       ('inner "c" #'evilnc-inner-comment)
+       ('outer "c" #'evilnc-outer-commenter))
+
+     (use-package evil-replace-with-register
+       :general ('normal "gR" #'evil-replace-with-register))
+
+     (use-package evil-surround
+       :config
+       (general-def 'visual evil-surround-mode-map
+         "s" #'evil-surround-region
+         "S" #'evil-Surround-region
+         "gS" nil)
+       (global-evil-surround-mode 1))
+   #+END_SRC
+
+** Text Objects
+*** Packages
+    At the moment, the author of ~targets.el~ is working on a rewrite called
+    ~things.el~.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package evil-args
+        :general
+        ('inner "a" #'evil-inner-arg)
+        ('outer "a" #'evil-outer-arg))
+
+      (use-package evil-indent-plus
+        :config
+        (evil-indent-plus-default-bindings))
+
+      (use-package targets
+        :straight (:type git :host github :repo "noctuid/targets.el")
+        :config
+        (targets-setup t))
+    #+END_SRC
+
+*** Buffer
+    I could define a remote buffer object that prompts for a buffer, but I don't
+    see myself using that outside of cases already covered by ~:read~.
+
+    #+BEGIN_SRC emacs-lisp
+      (evil-define-text-object panda-outer-buffer (count beg end type)
+        "Select the whole buffer."
+        :type line
+        (evil-range (point-min) (point-max)))
+
+      (defalias 'panda-inner-buffer #'panda-outer-buffer)
+
+      (general-def 'outer "e" #'panda-outer-buffer)
+      (general-def 'inner "e" #'panda-inner-buffer)
+    #+END_SRC
+
+*** Defun
+    The outer version of this text object selects a whole function definition,
+    while the inner version selects the body (e.g. inside the braces in C).
+
+    #+BEGIN_SRC emacs-lisp
+      (defvar-local panda-inner-defun-bounds '("{" . "}")
+        "Variable to determine the bounds of an inner defun.
+      The value can be a pair of regexps to determine the start and end,
+      exclusive of the matched expressions.  It can also be a function, in
+      which case the return value will be used.")
+
+      (defun panda--in-sexp-p  (pos)
+        "Check if POS is inside a sexp."
+        (save-excursion
+          (goto-char pos)
+          (condition-case nil
+              (progn
+                (up-list 1 t t)
+                t)
+            (scan-error nil))))
+
+      (defun panda--inner-defun-bounds (defun-begin defun-end open-regexp close-regexp)
+        "Find the beginning and end of an inner defun.
+      DEFUN-BEGIN and DEFUN-END are the bounds of the defun.  OPEN-REGEXP
+      and CLOSE-REGEXP match the delimiters of the inner defun."
+        ;; Some default parameter values (e.g. "{") can conflict with the open regexp.
+        ;; However, they're usually nested in some sort of sexp, while the intended
+        ;; match usually isn't.  For the close regexp, I can't think of a single
+        ;; conflict case, since it's usually also the function's end.
+        (save-excursion
+          (save-match-data
+            (let ((begin (progn
+                           (goto-char defun-begin)
+                           (re-search-forward open-regexp defun-end)
+                           (while (save-restriction
+                                    (narrow-to-region defun-begin defun-end)
+                                    (panda--in-sexp-p (match-beginning 0)))
+                             (re-search-forward open-regexp defun-end))
+                           (skip-chars-forward "[:blank:]")
+                           (when (eolp)
+                             (forward-char))
+                           (point)))
+                  (end (progn
+                         (goto-char defun-end)
+                         (re-search-backward close-regexp defun-begin)
+                         (skip-chars-backward "[:blank:]")
+                         (when (bolp)
+                           (backward-char))
+                         (point))))
+              (cons begin end)))))
+
+      (defun panda--shrink-inner-defun (range)
+        "Shrink RANGE to that of an inner defun."
+        (cl-destructuring-bind (begin . end)
+            (cond
+             ((consp panda-inner-defun-bounds)
+              (panda--inner-defun-bounds (evil-range-beginning range)
+                                         (evil-range-end range)
+                                         (car panda-inner-defun-bounds)
+                                         (cdr panda-inner-defun-bounds)))
+             ((functionp panda-inner-defun-bounds)
+              (funcall panda-inner-defun-bounds
+                       (evil-range-beginning range)
+                       (evil-range-end range))))
+          (evil-range begin end
+                      (and (= (char-before begin) (char-after end) ?\n) 'line))))
+
+      (put 'defun 'targets-no-extend t)     ; seems like defun doesn't work otherwise
+      (put 'defun 'targets-shrink-inner-op #'panda--shrink-inner-defun)
+
+      (targets-define-to defun 'defun nil object :linewise t :bind t :keys "d")
+    #+END_SRC
+
+*** Whitespace
+    I got a little tired of pressing ~M-SPC~.
+
+    #+BEGIN_SRC emacs-lisp
+      (defun forward-panda-whitespace (count)
+        "Move forward COUNT horizontal whitespace blocks."
+        (evil-forward-chars "[:blank:]" count))
+
+      (defun panda--shrink-inner-whitespace (range)
+        "Shrink RANGE to not include the first whitespace character."
+        (evil-set-range-beginning range (1+ (evil-range-beginning range))))
+
+      (put 'panda-whitespace 'targets-no-extend t) ; doesn't make sense to extend
+      (put 'panda-whitespace 'targets-shrink-inner-op #'panda--shrink-inner-whitespace)
+
+      (targets-define-to whitespace 'panda-whitespace nil object :bind t :keys " ")
+    #+END_SRC
+
+*** Whitespace Line
+    I forgot why I wrote this.  At the moment, the remote text object doesn't
+    pick up whitespace lines at the very beginning of a buffer, even though the
+    regular/last objects work just fine.
+
+    #+BEGIN_SRC emacs-lisp
+      (defun forward-panda-whitespace-line (count)
+        "Move forward COUNT whitespace-only lines."
+        (condition-case nil
+            (evil-forward-not-thing 'evil-paragraph count)
+          (wrong-type-argument))) ; might happen at the end of the buffer
+
+      (defun panda--shrink-inner-whitespace-line (range)
+        "Shrink RANGE to not include the trailing newline."
+        (evil-set-range-end range (1- (evil-range-end range))))
+
+      (put 'panda-whitespace-line 'targets-no-extend t) ; doesn't make sense to extend
+      (put 'panda-whitespace-line 'targets-shrink-inner-op #'panda--shrink-inner-whitespace-line)
+
+      (targets-define-to whitespace-line 'panda-whitespace-line nil object
+                         :bind t :keys "\^M" :linewise t)
+    #+END_SRC
+
+** Ex
+   #+BEGIN_SRC emacs-lisp
+     (defun panda-static-evil-ex (&optional initial-input)
+       "`evil-ex' that doesn't move point."
+       (interactive)
+       (save-excursion (call-interactively #'evil-ex)))
+
+     (general-def [remap evil-ex] #'panda-static-evil-ex)
+
+     (defun panda-kill-this-buffer ()
+       "Kill the current buffer."
+       (interactive)
+       (kill-buffer (current-buffer)))
+
+     (evil-ex-define-cmd "bk[ill]" #'panda-kill-this-buffer)
+
+     (defun panda-reload-file ()
+       "Reload the current file, preserving point."
+       (interactive)
+       (if buffer-file-name
+           (let ((pos (point)))
+             (find-alternate-file buffer-file-name)
+             (goto-char pos))
+         (message "Buffer is not visiting a file")))
+
+     (evil-ex-define-cmd "reload" #'panda-reload-file)
+
+     (defun panda-sudo-reload-file ()
+       "Reload the current file with root privileges, preserving point."
+       (interactive)
+       (if buffer-file-name
+           (let ((pos (point)))
+             (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
+             (goto-char pos))
+         (message "Buffer is not visiting a file")))
+
+     (evil-ex-define-cmd "sudoreload" #'panda-sudo-reload-file)
+   #+END_SRC
+
+** Visual Aids
+   Feedback from ~evil-goggles~ and ~evil-traces~ lets me know that I executed
+   the correct command.  Also, 99% of the time, I can't remember which
+   marks/registers contain what, so ~evil-owl~ is really useful.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil-goggles
+       :config
+       (gsetq evil-goggles-pulse nil)
+       (defun panda-evil-goggles-add (cmd based-on-cmd)
+         "Register CMD with evil-goggles using BASED-ON-CMD's configuration."
+         (when-let ((cmd-config (alist-get based-on-cmd evil-goggles--commands)))
+           (add-to-list 'evil-goggles--commands (cons cmd cmd-config))
+           (when (bound-and-true-p evil-goggles-mode)
+             (evil-goggles-mode 1))))
+       (evil-goggles-use-diff-refine-faces)
+       (evil-goggles-mode 1))
+
+     (use-package evil-owl
+       :straight (evil-owl
+                  :host nil
+                  :repo "git@github.com:mamapanda/evil-owl.git"
+                  :local-repo "~/code/emacs-lisp/evil-owl")
+       :custom-face
+       (evil-owl-group-name ((t (
+                                 :inherit font-lock-function-name-face
+                                 :weight bold
+                                 :underline t))))
+       (evil-owl-entry-name ((t (:inherit font-lock-function-name-face))))
+       :config
+       (gsetq evil-owl-display-method 'posframe
+              evil-owl-global-mark-format " %m: [l: %-5l, c: %-5c] %b\n  %s"
+              evil-owl-local-mark-format " %m: [l: %-5l, c: %-5c]\n  %s"
+              evil-owl-register-char-limit 50
+              evil-owl-idle-delay 0.2)
+       (gsetq evil-owl-extra-posframe-args
+              `(
+                :poshandler posframe-poshandler-point-bottom-left-corner
+                :width 50
+                :height 20
+                :internal-border-width 2))
+       (evil-owl-mode))
+
+     (use-package evil-traces
+       :straight (evil-traces
+                  :host nil
+                  :repo "git@github.com:mamapanda/evil-traces.git"
+                  :local-repo "~/code/emacs-lisp/evil-traces")
+       :config
+       (defun panda-no-ex-range-and-arg-p ()
+         "Return non-nil if both `evil-ex-range' and `evil-ex-argument' are nil."
+         (and (null evil-ex-range) (null evil-ex-argument)))
+       (gsetq evil-traces-suspend-function #'panda-no-ex-range-and-arg-p)
+       (evil-traces-use-diff-faces)
+       (evil-traces-mode))
+   #+END_SRC
+
+** Other
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil-numbers
+       :general
+       ('normal "C-a" #'evil-numbers/inc-at-pt
+                "C-s" #'evil-numbers/dec-at-pt))
+   #+END_SRC
+
+* Built-in Settings
+** Variables
+   #+BEGIN_SRC emacs-lisp
+     (gsetq auto-save-default t
+            blink-cursor-blinks 0
+            c-default-style '((java-mode . "java")
+                              (awk-mode . "awk")
+                              (other . "stroustrup"))
+            default-frame-alist '((fullscreen . maximized)
+                                  (font . "Consolas-11")
+                                  (menu-bar-lines . 0)
+                                  (tool-bar-lines . 0)
+                                  (vertical-scroll-bars . nil))
+            delete-by-moving-to-trash t
+            disabled-command-function nil
+            enable-recursive-minibuffers t
+            inhibit-compacting-font-caches t
+            inhibit-startup-screen t
+            make-backup-files nil
+            recentf-max-saved-items 100
+            require-final-newline t
+            ring-bell-function 'ignore
+            save-abbrevs nil
+            tramp-default-method "ssh"
+            undo-limit 1000000
+            use-dialog-box nil
+            vc-follow-symlinks t
+            visible-bell nil)
+
+     (gsetq-default bidi-display-reordering nil
+                    buffer-file-coding-system 'utf-8
+                    c-basic-offset 4
+                    fill-column 80
+                    indent-tabs-mode nil
+                    tab-width 4
+                    truncate-lines nil)
+   #+END_SRC
+
+** Minor Modes
+   #+BEGIN_SRC emacs-lisp
+     (blink-cursor-mode)
+     (delete-selection-mode)
+     (desktop-save-mode)
+     (electric-pair-mode)
+     (global-auto-revert-mode)
+     (recentf-mode)
+     (show-paren-mode)
+   #+END_SRC
+
+   Evil's markers aren't saved with ~desktop.el~ by default.  I tried to fix it,
+   but my solution isn't consistent.  Sometimes, the marks aren't saved or point
+   to the wrong locations.
+
+   #+BEGIN_SRC emacs-lisp
+     (cl-pushnew 'evil-markers-alist desktop-locals-to-save)
+
+     (defvar panda--default-markers-alist nil)
+     (cl-pushnew 'panda--default-markers-alist desktop-globals-to-save)
+     (add-hook 'desktop-save-hook
+               (lambda ()
+                 (setq panda--default-markers-alist (default-value 'evil-markers-alist))))
+     (add-hook 'desktop-after-read-hook
+               (lambda ()
+                 (setf (default-value 'evil-markers-alist) panda--default-markers-alist)))
+   #+END_SRC
+
+* Global Packages
+** Appearance
+   #+BEGIN_SRC emacs-lisp
+     (use-package doom-themes
+       :config
+       (load-theme 'doom-vibrant t))
+
+     (use-package display-line-numbers
+       :demand t
+       :general (panda-space "l" #'panda-toggle-line-numbers)
+       :config
+       (progn
+         (gsetq display-line-numbers-type 'visual)
+         (defun panda-toggle-line-numbers ()
+           "Toggle between `display-line-numbers-type' and absolute line numbers.
+     The changes are local to the current buffer."
+           (interactive)
+           (gsetq display-line-numbers
+                  (if (eq display-line-numbers display-line-numbers-type)
+                      t
+                    display-line-numbers-type))))
+       (progn
+         (defun panda--evil-ex-relative-lines (old-fn &optional initial-input)
+           "Enable relative line numbers for `evil-ex'."
+           (let ((current-display-line-numbers display-line-numbers)
+                 (buffer (current-buffer)))
+             (unwind-protect
+                 (progn
+                   (gsetq display-line-numbers 'relative)
+                   (funcall old-fn initial-input))
+               (when (buffer-live-p buffer)
+                 (with-current-buffer buffer
+                   (gsetq display-line-numbers current-display-line-numbers))))))
+         (advice-add 'evil-ex :around #'panda--evil-ex-relative-lines))
+       (progn
+         (global-display-line-numbers-mode 1)
+         (column-number-mode 1)))
+
+     (use-package doom-modeline
+       :config
+       (gsetq doom-modeline-buffer-file-name-style 'relative-from-project
+              doom-modeline-icon nil
+              doom-modeline-unicode-fallback nil)
+       (set-face-attribute 'doom-modeline-bar nil
+                           :background (face-attribute 'mode-line :background))
+       (set-face-attribute 'doom-modeline-inactive-bar nil
+                           :background (face-attribute 'mode-line-inactive :background))
+       (doom-modeline-mode 1))
+
+     (use-package hl-todo
+       :config
+       (global-hl-todo-mode))
+
+     (use-package posframe
+       :defer t
+       :config
+       (gsetq posframe-mouse-banish nil)
+       (set-face-background 'internal-border (face-foreground 'font-lock-comment-face)))
+
+     (use-package rainbow-delimiters
+       :ghook 'prog-mode-hook)
+   #+END_SRC
+
+** Help
+   #+BEGIN_SRC emacs-lisp
+     (use-package helpful
+       :general
+       (help-map "f" #'helpful-callable
+                 "k" #'helpful-key
+                 "v" #'helpful-variable))
+   #+END_SRC
+
+** Navigation
+   #+BEGIN_SRC emacs-lisp
+     (use-package avy
+       :general ('motion "C-SPC" #'avy-goto-char-timer)
+       :config
+       (gsetq avy-all-windows nil
+              avy-all-windows-alt t
+              avy-background t))
+
+     (use-package deadgrep
+       :general (panda-space "s" #'deadgrep)
+       :config
+       (defun panda-deadgrep-project-root ()
+         "Find the root directory of the current project."
+         (require 'projectile)
+         (or (projectile-project-root) default-directory))
+       (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root))
+
+     (use-package imenu
+       :general (panda-space "i" #'imenu)
+       :config
+       (gsetq imenu-auto-rescan t))
+
+     (use-package projectile
+       :defer t
+       :general (panda-space "p" '(:keymap projectile-command-map))
+       :config
+       (gsetq projectile-enable-caching t
+              projectile-indexing-method 'alien)
+       (projectile-mode))
+   #+END_SRC
+
+** UI
+   I used to use ~ivy~ but prefer ~helm~ now, mostly because splitting the
+   current window looks nicer than using the minibuffer to me.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package helm
+       :demand t
+       :general
+       (general-def
+         [remap execute-extended-command] #'helm-M-x
+         [remap find-file] #'helm-find-files
+         [remap switch-to-buffer] #'helm-mini)
+       (panda-space "S" #'helm-grep-do-git-grep)
+       :config
+       (gsetq helm-echo-input-in-header-line t
+              ;; helm-ff-DEL-up-one-level-maybe t ; doesn't update the prompt
+              helm-ff-fuzzy-matching nil
+              helm-ff-skip-boring-files t
+              helm-split-window-inside-p t
+              helm-mini-default-sources '(helm-source-buffers-list
+                                          helm-source-projectile-files-list
+                                          helm-source-recentf
+                                          helm-source-buffer-not-found)
+              helm-window-prefer-horizontal-split 'decide)
+       (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
+       (general-def helm-map "<escape>" #'helm-keyboard-quit)
+       (with-eval-after-load 'projectile
+         (setq projectile-completion-system 'helm))
+       (helm-mode 1))
+
+     (use-package helm-company
+       :after company helm
+       :general
+       (general-def company-active-map
+         "M-h" #'helm-company)
+       :init
+       (gsetq helm-company-fuzzy-match nil))
+
+     (use-package helm-lsp
+       :after helm lsp
+       :general
+       (general-def lsp-mode-map
+         [remap lsp-ui-find-workspace-symbol] #'helm-lsp-workspace-symbol))
+
+     (use-package helm-make
+       :after helm
+       :general
+       (panda-space "C" #'helm-make))
+
+     (use-package helm-projectile
+       :after helm
+       :init
+       (gsetq helm-projectile-fuzzy-match nil)
+       :config
+       (helm-projectile-toggle 1))
+
+     (use-package helm-xref :after helm xref)
+   #+END_SRC
+
+** Windows
+   I've changed ~doom-modeline~'s eyebrowse segment to my own segment to show
+   more information about non-current workspaces.  For example, if there are
+   workspaces named config (number 1), scratch (number 3), and homework (number
+   4), with config being current, then the segment will display
+   ~1:config|3s|4h~.  I always name my workspaces, so there's no issue with
+   missing names.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package eyebrowse
+       :demand t
+       :general
+       (panda-space
+         "<tab>" #'eyebrowse-last-window-config
+         "w" #'eyebrowse-switch-to-window-config
+         "W" #'eyebrowse-close-window-config
+         "e" #'panda-eyebrowse-create-window-config
+         "E" #'eyebrowse-rename-window-config)
+       ('normal eyebrowse-mode-map
+                "gt" #'eyebrowse-next-window-config
+                "gT" #'eyebrowse-prev-window-config)
+       :init
+       (defvar eyebrowse-mode-map (make-sparse-keymap))
+       :config
+       (gsetq eyebrowse-new-workspace t)
+       (defun panda-eyebrowse-create-window-config (tag)
+         (interactive "sWindow Config Tag: ")
+         (eyebrowse-create-window-config)
+         (let ((created-config (eyebrowse--get 'current-slot)))
+           (eyebrowse-rename-window-config created-config tag)))
+       (with-eval-after-load 'doom-modeline
+         (doom-modeline-def-segment workspace-name
+           "Custom workspace segment for doom-modeline."
+           (when eyebrowse-mode
+             (assq-delete-all 'eyebrowse-mode mode-line-misc-info)
+             (let ((segment-face (if (doom-modeline--active)
+                                     'doom-modeline-buffer-path
+                                   'mode-line-inactive))
+                   (current-face (if (doom-modeline--active)
+                                     'doom-modeline-buffer-file
+                                   'mode-line-inactive)))
+               (format
+                " %s "
+                (mapconcat
+                 (lambda (window-config)
+                   (let ((slot (cl-first window-config))
+                         (tag (cl-third window-config)))
+                     (if (= slot (eyebrowse--get 'current-slot))
+                         (propertize (format "%d:%s" slot tag) 'face current-face)
+                       (propertize (format "%d%.1s" slot tag) 'face segment-face))))
+                 (eyebrowse--get 'window-configs)
+                 (propertize "|" 'face segment-face)))))))
+       (eyebrowse-mode 1))
+   #+END_SRC
+
+   ~winner-undo~ is useful for hiding popup windows without having to navigate
+   to them.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package winner
+       :demand t
+       :general
+       (panda-space
+         "q" #'winner-undo
+         "Q" #'winner-redo)
+       :config
+       (winner-mode 1))
+   #+END_SRC
+
+* Tools
+** File Manager
+   ~dired~ is a pretty good file manager in my opinion, especially with Fuco1's
+   [[https://github.com/Fuco1/dired-hacks/][dired-hacks]].
+
+   #+BEGIN_SRC emacs-lisp
+     (panda-space
+       "d" #'dired
+       "D" #'image-dired)
+
+     (use-package dired-filter
+       :defer t
+       :general ('normal dired-mode-map "gf" '(:keymap dired-filter-map)))
+
+     (use-package dired-open
+       :general ('normal dired-mode-map "<C-return>" #'dired-open-xdg))
+
+     (use-package dired-subtree
+       :general
+       ('normal dired-mode-map
+                "zo" #'panda-dired-subtree-insert
+                "zc" #'panda-dired-subtree-remove
+                "za" #'dired-subtree-toggle
+                "<tab>" #'dired-subtree-cycle)
+       :config
+       (defun panda-dired-subtree-insert ()
+         "Like `dired-subtree-insert', but doesn't move point."
+         (interactive)
+         (save-excursion
+           (dired-subtree-insert)))
+       (defun panda-dired-subtree-remove ()
+         "Like `dired-subtree-remove', but removes the current node's children."
+         (interactive)
+         (when (dired-subtree--is-expanded-p)
+           (dired-next-line 1)
+           (dired-subtree-remove))))
+
+     (use-package dired-ranger
+       :general
+       ('normal dired-mode-map
+                "gc" #'dired-ranger-copy
+                "gm" #'dired-ranger-move
+                "gp" #'dired-ranger-paste))
+   #+END_SRC
+
+** Git
+   #+BEGIN_SRC emacs-lisp
+     (use-package magit
+       :general (panda-space "g" #'magit-status)
+       :config
+       (gsetq magit-auto-revert-mode nil))
+
+     (use-package magit-todos
+       :after magit
+       :config
+       (gsetq magit-todos-rg-extra-args '("--hidden" "--glob" "!.git/"))
+       (magit-todos-mode))
+
+     (use-package forge :after magit)
+
+     (use-package evil-magit :after magit)
+
+     (use-package git-timemachine
+       :general (panda-space "G" #'git-timemachine))
+   #+END_SRC
+
+** Readers
+   #+BEGIN_SRC emacs-lisp
+     (defun panda-configure-image-view ()
+       "Configure settings for viewing an image."
+       (display-line-numbers-mode -1)
+       (gsetq-local evil-default-cursor (list nil)))
+
+     (add-hook 'image-mode-hook #'panda-configure-image-view)
+     (add-hook 'image-dired-display-image-mode-hook #'panda-configure-image-view)
+
+     (use-package elfeed
+       :defer t
+       :config
+       (gsetq elfeed-feeds (panda-get-private-data 'elfeed-feeds)
+              elfeed-search-title-max-width 100
+              elfeed-search-filter "@1-month-ago +unread"))
+
+     (use-package nov
+       :mode ("\\.epub$" . nov-mode)
+       :gfhook '(visual-line-mode)
+       :config
+       (gsetq nov-text-width most-positive-fixnum))
+
+     (use-package pdf-tools
+       :mode ("\\.pdf$" . pdf-view-mode)
+       :gfhook ('pdf-view-mode-hook '(panda-configure-image-view))
+       :config
+       (gsetq-default pdf-view-display-size 'fit-page)
+       (pdf-tools-install))
+   #+END_SRC
+
+** Shell
+   #+BEGIN_SRC emacs-lisp
+     (use-package eshell
+       :general
+       (panda-space "<return>" #'eshell)
+       :config
+       (gsetq eshell-hist-ignoredups t
+              eshell-history-size 1024))
+
+     (use-package esh-autosuggest
+       :ghook 'eshell-mode-hook)
+
+     (use-package fish-completion
+       :ghook 'eshell-mode-hook)
+   #+END_SRC
+
+* Mode-specific Configuration
+** Completion
+   #+BEGIN_SRC emacs-lisp
+     (use-package company
+       :defer t
+       :config
+       (gsetq company-backends (delete 'company-dabbrev company-backends)
+              company-dabbrev-code-modes nil
+              company-idle-delay 0.2
+              company-minimum-prefix-length 2
+              company-tooltip-align-annotations t))
+   #+END_SRC
+
+** Formatting
+   I like having my code auto-formatted on save so I don't have to think about
+   code style at all.  It's one less thing to worry about when programming.
+
+   For languages with formatters I like, I use ~reformatter~.  There are other
+   packages that already provide good integration, such as ~clang-format~, but I
+   prefer ~reformatter~'s simplicity.  When possible, I use external
+   configuration files so that options apply outside of Emacs as well.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package reformatter)
+   #+END_SRC
+
+   For other languages, I have two simple minor modes.
+
+   #+BEGIN_SRC emacs-lisp
+     (defun panda-format-buffer ()
+       "Indent the entire buffer and delete trailing whitespace."
+       (interactive)
+       (let ((inhibit-message t))
+         (indent-region (point-min) (point-max))
+         (delete-trailing-whitespace)))
+
+     (panda-space "=" #'panda-format-buffer)
+
+     (define-minor-mode panda-format-on-save-mode
+       "Indents a buffer and trims whitespace on save."
+       :init-value nil
+       :lighter "panda-format"
+       (if panda-format-on-save-mode
+           (add-hook 'before-save-hook #'panda-format-buffer nil t)
+         (remove-hook 'before-save-hook #'panda-format-buffer t)))
+
+     (define-minor-mode panda-trim-on-save-mode
+       "Trims whitespace on save."
+       :init-value nil
+       :lighter "panda-trim"
+       (if panda-trim-on-save-mode
+           (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+         (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
+   #+END_SRC
+
+** Keybindings
+   I bind all major-mode-specific commands through ~major-mode-hydra~, since I
+   sometimes forget a command's keybinding or even name.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package major-mode-hydra
+       :demand t
+       :general
+       ('(normal visual) "\\" 'major-mode-hydra)
+       :config
+       (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
+   #+END_SRC
+
+** Language Server
+   ~lsp-ui~'s sideline diagnostics are disabled in favor of ~flycheck-posframe~
+   to keep the error UI consistent across all languages.  LSP formatting is also
+   disabled in favor of ~reformatter~.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package lsp-mode
+       :defer t
+       :config
+       (gsetq lsp-auto-execute-action nil
+              lsp-before-save-edits nil
+              lsp-enable-indentation nil
+              lsp-enable-on-type-formatting nil
+              lsp-prefer-flymake nil)
+       (general-def 'normal lsp-mode-map
+         "gd" #'lsp-find-definition
+         "gD" #'lsp-find-references
+         "K" #'lsp-describe-thing-at-point))
+
+     (use-package company-lsp
+       :after company lsp
+       :config
+       (gsetq company-lsp-cache-candidates 'auto))
+
+     (use-package lsp-ui
+       :after lsp
+       :config
+       (gsetq lsp-ui-doc-position 'top
+              lsp-ui-peek-always-show t
+              lsp-ui-sideline-show-diagnostics nil))
+
+     (use-package dap-mode
+       :commands dap-debug dap-hydra
+       :config
+       (require 'dap-chrome)
+       (require 'dap-firefox)
+       (require 'dap-gdb-lldb)
+       (require 'dap-python)
+       (dap-mode 1)
+       (dap-ui-mode 1))
+
+     (with-eval-after-load 'major-mode-hydra
+       (defvar panda--lsp-hydra-enabled-modes nil
+         "Major modes that already have lsp hydra heads.")
+       (defun panda--add-lsp-hydra-heads ()
+         "Add `lsp' command heads to the current major mode's `major-mode-hydra'."
+         (unless (memq major-mode panda--lsp-hydra-enabled-modes)
+           (eval
+            `(major-mode-hydra-define+ ,major-mode nil
+               ("Find"
+                (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
+                "Refactor"
+                (("r" lsp-rename "rename")
+                 ("c" lsp-ui-sideline-apply-code-actions "code action")
+                 ("o" lsp-organize-imports "organize imports"))
+                "View"
+                (("i" lsp-ui-imenu "imenu")
+                 ("l" lsp-lens-mode "lens")
+                 ("E" lsp-ui-flycheck-list "errors"))
+                "Debug"
+                (("D" dap-debug "start")
+                 ("d" dap-hydra "hydra"))
+                "Workspace"
+                (("<backspace>" lsp-restart-workspace "restart")
+                 ("<delete>" lsp-shutdown-workspace "shutdown")))))
+           (push major-mode panda--lsp-hydra-enabled-modes)))
+       (add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads))
+   #+END_SRC
+
+** Linting
+   #+BEGIN_SRC emacs-lisp
+     (use-package flycheck
+       :defer t
+       :config
+       (gsetq flycheck-display-errors-delay 0.5)
+       (general-def 'normal flycheck-mode-map
+         "[e" #'flycheck-previous-error
+         "]e" #'flycheck-next-error)
+       (evil-declare-motion #'flycheck-previous-error)
+       (evil-declare-motion #'flycheck-next-error))
+
+     (use-package flycheck-posframe
+       :ghook 'flycheck-mode-hook
+       :config
+       (flycheck-posframe-configure-pretty-defaults))
+   #+END_SRC
+
+** Lisp
+   #+BEGIN_SRC emacs-lisp
+     (use-package lispyville
+       :defer t
+       :config
+       (lispyville-set-key-theme '(c-w
+                                   commentary
+                                   operators
+                                   prettify
+                                   slurp/barf-cp))
+       (general-unbind 'motion lispyville-mode-map "{" "}")
+       (with-eval-after-load 'evil-goggles
+         (panda-evil-goggles-add #'lispyville-yank #'evil-yank)
+         (panda-evil-goggles-add #'lispyville-delete #'evil-delete)
+         (panda-evil-goggles-add #'lispyville-change #'evil-change)
+         (panda-evil-goggles-add #'lispyville-yank-line #'evil-yank-line)
+         (panda-evil-goggles-add #'lispyville-delete-line #'evil-delete-line)
+         (panda-evil-goggles-add #'lispyville-change-line #'evil-change-line)
+         (panda-evil-goggles-add #'lispyville-change-whole-line #'evil-change-whole-line)
+         (panda-evil-goggles-add #'lispyville-join #'evil-join)))
+
+     (use-package lispy
+       :ghook 'lispyville-mode-hook
+       :config
+       (lispy-set-key-theme '(lispy special))
+       (lispy-define-key lispy-mode-map-special "<" #'lispy-slurp-or-barf-left)
+       (lispy-define-key lispy-mode-map-special ">" #'lispy-slurp-or-barf-right)
+       (general-def lispy-mode-map-lispy "\"" #'lispy-doublequote))
+   #+END_SRC
+
+** Snippets
+   ~company~'s tab key can conflict with ~yasnippet~.  The fix is from [[https://stackoverflow.com/questions/2087225/about-the-fix-for-the-interference-between-company-mode-and-yasnippet][Stack
+   Overflow]].
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package yasnippet
+       :config
+       (gsetq yas-triggers-in-field t
+              yas-indent-line 'auto
+              yas-also-auto-indent-first-line t)
+       (yas-reload-all)
+       (with-eval-after-load 'company
+         (defun panda--company-yas-tab-advice (old-func &rest args)
+           (unless (and yas-minor-mode (yas-expand))
+             (call-interactively old-func args)))
+         (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
+           (advice-add company-tab-func :around #'panda--company-yas-tab-advice))))
+   #+END_SRC
+
+** View / Layout
+   #+BEGIN_SRC emacs-lisp
+     (use-package olivetti :defer t)
+
+     (use-package outshine
+       :defer t
+       :config
+       (gsetq outshine-org-style-global-cycling-at-bob-p t)
+       (general-def 'normal outshine-mode-map
+         "<tab>" (lookup-key outshine-mode-map (kbd "TAB"))
+         "<backtab>" #'outshine-cycle-buffer))
+   #+END_SRC
+
+* Languages
+  Some configuration may be out of date due to me not using the language much.
+
+** Assembly
+   #+BEGIN_SRC emacs-lisp
+     (use-package asm-mode
+       :defer t
+       :gfhook '(asmfmt-on-save-mode panda-set-asm-locals yas-minor-mode)
+       :config
+       (gsetq asm-comment-char ?#)
+       (defun panda-set-asm-locals ()
+         (gsetq-local indent-tabs-mode t)
+         (gsetq-local tab-always-indent t))
+       (reformatter-define asmfmt
+         :program "asmfmt"))
+   #+END_SRC
+
+** C / C++
+   #+BEGIN_SRC emacs-lisp
+     (use-package cc-mode
+       :defer t
+       :gfhook ('(c-mode-hook c++-mode-hook)
+                '(clang-format-on-save-mode panda-set-c-locals yas-minor-mode))
+       :config
+       (defun panda-set-c-locals ()
+         (c-set-offset 'innamespace 0))
+       (reformatter-define clang-format
+         :program "clang-format"))
+
+     (use-package ccls
+       :ghook ('(c-mode-hook c++-mode-hook)
+               (lambda () (require 'ccls) (lsp-deferred)))
+       :mode-hydra
+       ((c-mode c++-mode)
+        nil
+        ("View"
+         (("p" ccls-preprocess-file "preprocess file")
+          ("m" ccls-member-hierarchy "member hierarchy")
+          ("C" ccls-call-hierarchy "call hierarchy")
+          ("I" ccls-inheritance-hierarchy "inheritance hierarchy")))))
+
+     (use-package highlight-doxygen
+       :ghook ('(c-mode-hook c++-mode-hook) '(highlight-doxygen-mode))
+       :config
+       (custom-set-faces '(highlight-doxygen-comment ((t nil)))))
+   #+END_SRC
+
+** Common Lisp
+   #+BEGIN_SRC emacs-lisp
+     (use-package lisp-mode
+       :straight nil
+       :defer t
+       :gfhook '(company-mode
+                 lispyville-mode
+                 panda-format-on-save-mode
+                 panda-set-lisp-locals)
+       :config
+       (defun panda-set-lisp-locals ()
+         (setq panda-inner-defun-bounds '("(" . ")"))))
+
+     (use-package slime
+       :defer t
+       :mode-hydra
+       (lisp-mode
+        nil
+        ("Eval"
+         (("eb" slime-eval-buffer "buffer")
+          ("ed" slime-eval-defun "defun")
+          ("ee" slime-eval-last-expression "expression")
+          ("er" slime-eval-region "region")
+          ("eo" slime "open repl"))
+         "Debug"
+         (("m" macrostep-expand "macrostep"))))
+       :config
+       (gsetq inferior-lisp-program "sbcl"
+              slime-contribs '(slime-fancy))
+       (slime-setup))
+
+     (use-package slime-company
+       :after slime
+       :config
+       (slime-company-init))
+   #+END_SRC
+
+** Emacs Lisp
+   #+BEGIN_SRC emacs-lisp
+     (use-package elisp-mode
+       :straight nil
+       :defer t
+       :gfhook ('emacs-lisp-mode-hook '(company-mode
+                                        lispyville-mode
+                                        panda-format-on-save-mode
+                                        panda-set-elisp-locals
+                                        yas-minor-mode))
+       :mode-hydra
+       ((emacs-lisp-mode lisp-interaction-mode)
+        nil
+        ("Eval"
+         (("eb" eval-buffer "buffer")
+          ("ed" eval-defun "defun")
+          ("ee" eval-last-sexp "expression")
+          ("er" eval-region "region")
+          ("eo" ielm "open repl"))
+         "Compile"
+         (("c" byte-compile-file "file"))
+         "Check"
+         (("C" checkdoc "checkdoc"))
+         "Debug"
+         (("E" toggle-debug-on-error "on error")
+          ("q" toggle-debug-on-quit "on quit")
+          ("d" debug-on-entry "on entry")
+          ("D" cancel-debug-on-entry "cancel on entry"))
+         "Test"
+         (("t" ert "run"))))
+       :config
+       (defun panda-set-elisp-locals ()
+         (setq panda-inner-defun-bounds '("(" . ")"))))
+
+     (use-package macrostep
+       :mode-hydra
+       ((emacs-lisp-mode lisp-interaction-mode)
+        nil
+        ("Debug"
+         (("m" macrostep-expand "macrostep")))))
+
+     (use-package package-lint
+       :mode-hydra
+       ((emacs-lisp-mode lisp-interaction-mode)
+        nil
+        ("Check"
+         (("p" package-lint-current-buffer "package-lint")))))
+   #+END_SRC
+
+** Haskell
+   I would use HIE or ghcide, but I'm too lazy to install them.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package haskell-mode
+       :defer t
+       :gfhook '(brittany-on-save-mode company-mode flycheck-mode)
+       :mode-hydra
+       (("Eval"
+         (("ef" haskell-process-load-file "file")
+          ("eo" haskell-interactive-switch "open repl"))
+         "Find"
+         (("i" haskell-navigate-imports "imports"))
+         "Compile"
+         (("c" haskell-compile "project"))))
+       :config
+       (gsetq haskell-ask-also-kill-buffers nil
+              haskell-compile-cabal-build-command "stack build"
+              haskell-process-type 'stack-ghci)
+       (reformatter-define brittany
+         :program "brittany"))
+
+     (use-package attrap
+       :mode-hydra
+       (haskell-mode nil ("Refactor" (("f" attrap-attrap "fix error")))))
+
+     (use-package dante
+       :ghook 'haskell-mode-hook
+       :mode-hydra
+       (haskell-mode
+        nil
+        ("Eval"
+         (("ee" dante-eval-block "block"))
+         "View"
+         (("I" dante-info "info")
+          ("t" dante-type-at "type"))
+         "Dante Process"
+         (("<backspace>" dante-restart "restart")
+          ("<delete>" dante-destroy "shutdown"))))
+       :config
+       (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint)))
+
+     (use-package helm-hoogle
+       :mode-hydra
+       (haskell-mode nil ("Find" (("h" helm-hoogle "hoogle")))))
+   #+END_SRC
+
+** HTML / CSS
+   #+BEGIN_SRC emacs-lisp
+     (use-package web-mode
+       :mode (("\\.html?\\'" . web-mode))
+       :gfhook '(lsp-deferred prettier-html-on-save-mode)
+       :init
+       (gsetq web-mode-enable-auto-closing t
+              web-mode-enable-auto-indentation t
+              web-mode-enable-auto-opening t
+              web-mode-enable-auto-pairing t
+              web-mode-enable-auto-quoting t
+              web-mode-enable-css-colorization t
+              web-mode-markup-indent-offset 2
+              web-mode-style-padding 4
+              web-mode-script-padding 4
+              web-mode-block-padding 4)
+       :config
+       (reformatter-define prettier-html
+         :program "prettier"
+         :args '("--stdin" "--parser" "html")))
+
+     (use-package css-mode
+       :defer t
+       :gfhook '(lsp-deferred prettier-css-on-save-mode)
+       :config
+       (reformatter-define prettier-css
+         :program "prettier"
+         :args '("--stdin" "--parser" "css")))
+
+     (use-package emmet-mode
+       :ghook '(web-mode-hook css-mode-hook))
+   #+END_SRC
+
+** JavaScript / TypeScript
+   #+BEGIN_SRC emacs-lisp
+     (use-package js
+       :defer t
+       :gfhook '(lsp-deferred prettier-ts-on-save-mode))
+
+     (use-package rjsx-mode :defer t)
+
+     (use-package typescript-mode
+       :defer t
+       :gfhook '(lsp-deferred prettier-ts-on-save-mode))
+
+     (reformatter-define prettier-ts
+       :program "prettier"
+       :args '("--stdin" "--parser" "typescript"))
+   #+END_SRC
+
+** JSON
+   ~json-mode~ inherits from ~js-mode~.  That's something to be careful about.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package json-mode
+       :defer t
+       :gfhook '(prettier-json-on-save-mode)
+       :config
+       (reformatter-define prettier-json
+         :program "prettier"
+         :args '("--stdin" "--parser" "json")))
+   #+END_SRC
+
+** Latex
+   #+BEGIN_SRC emacs-lisp
+     (use-package tex
+       :straight auctex
+       :defer t
+       :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode))
+       :config
+       (gsetq TeX-auto-save t
+              TeX-parse-self t))
+   #+END_SRC
+
+** Org
+   #+BEGIN_SRC emacs-lisp
+     (use-package org
+       :straight (:type built-in)
+       :gfhook '(panda-format-on-save-mode)
+       :general
+       (panda-space
+         "a" 'org-agenda
+         "A" 'org-capture)
+       :config
+       (gsetq org-directory "~/org")
+       (gsetq org-agenda-custom-commands
+              '(("n" "Agenda and unscheduled TODOs"
+                 ((agenda "")
+                  (alltodo "" ((org-agenda-overriding-header "Unscheduled TODOs:")
+                               (org-agenda-skip-function
+                                '(org-agenda-skip-entry-if 'timestamp)))))))
+              org-agenda-files (list (expand-file-name "agenda" org-directory))
+              org-capture-templates '(("d" "Deadline TODO" entry (file "agenda/refile.org")
+                                       "* TODO %?\n  DEADLINE: %t")
+                                      ("s" "Scheduled TODO" entry (file "agenda/refile.org")
+                                       "* TODO %?\n  SCHEDULED: %t")
+                                      ("t" "TODO" entry (file "agenda/refile.org")
+                                       "* TODO %?"))
+              org-catch-invisible-edits 'error
+              org-src-fontify-natively t
+              org-src-tab-acts-natively t))
+
+     (use-package toc-org
+       :ghook 'org-mode-hook)
+
+     (use-package org-bullets
+       :ghook 'org-mode-hook)
+
+     (use-package helm-org-rifle :defer t)
+
+     (use-package evil-org
+       :demand :after org
+       :ghook 'org-mode-hook
+       :config
+       (evil-org-set-key-theme '(additional calendar insert navigation))
+       (require 'evil-org-agenda)
+       (evil-org-agenda-set-keys))
+   #+END_SRC
+
+** Python
+   *TODO:* Look into Microsoft's language server.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package python
+       :defer t
+       :gfhook '(black-on-save-mode lsp-deferred panda-set-python-locals)
+       :mode-hydra
+       (python-mode
+        ("Eval"
+         (("eb" python-shell-send-buffer "buffer")
+          ("ed" python-shell-send-defun "defun")
+          ("ef" python-shell-send-file "file")
+          ("er" python-shell-send-region "region")
+          ("eo" run-python "open repl"))))
+       :config
+       (gsetq python-indent-offset 4)
+       (defun panda-set-python-locals ()
+         (setq panda-inner-defun-bounds '(":" . ""))
+         (gsetq-local yas-indent-line 'fixed)
+         (gsetq-local yas-also-auto-indent-first-line nil))
+       (progn
+         (defvar black-args '("--line-length" "80")
+           "Arguments for black.")
+         (reformatter-define black
+           :program "black"
+           :args (append '("-" "--quiet") black-args))))
+   #+END_SRC
+
+** R
+   #+BEGIN_SRC emacs-lisp
+     (use-package ess
+       :defer t
+       :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp-deferred))
+       :mode-hydra
+       (ess-r-mode
+        nil
+        ("Eval"
+         (("eb" ess-eval-buffer "buffer")
+          ("ed" ess-eval-function "function")
+          ("ef" ess-load-file "file")
+          ("el" ess-eval-line "line")
+          ("ep" ess-eval-paragraph "paragraph")
+          ("er" ess-eval-region "region")
+          ("eo" R "open repl"))))
+       :config
+       (gsetq ess-ask-for-ess-directory nil
+              ess-use-flymake nil))
+   #+END_SRC
+
+** Other
+   These are languages I only need syntax highlighting for.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package cmake-mode :defer t)
+     (use-package d-mode :defer t)
+     (use-package fish-mode :defer t)
+     (use-package gitattributes-mode :defer t)
+     (use-package gitconfig-mode :defer t)
+     (use-package gitignore-mode :defer t)
+     (use-package go-mode :defer t)
+     (use-package kotlin-mode :defer t)
+     (use-package markdown-mode :defer t)
+     (use-package rust-mode :defer t)
+     (use-package vimrc-mode :defer t)
+     (use-package yaml-mode :defer t)
+   #+END_SRC
+
+* End Init
+  #+BEGIN_SRC emacs-lisp
+    (provide 'init)
+  #+END_SRC

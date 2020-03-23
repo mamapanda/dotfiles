@@ -1,8 +1,9 @@
-/elpa/
-/etc/custom.el
-/etc/private.el
-/quelpa/
-/straight/build/
-/straight/repos/
-/straight/build-cache.el
-/var/
+var/
+elpa/
+quelpa/
+straight/build/
+straight/repos/
+straight/build-cache.el
+
+init.el
+etc/private.el
