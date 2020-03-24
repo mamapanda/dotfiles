@@ -205,8 +205,7 @@
        (general-create-definer panda-space
          :states '(normal operator motion visual)
          :keymaps 'override
-         :prefix "SPC"
-         :prefix-map 'panda-space-map)
+         :prefix "SPC")
        (add-hook 'prog-mode-hook #'hs-minor-mode)
        (evil-mode 1))
 
@@ -255,12 +254,10 @@
    Additional navigation commands from Emacs.
 
    #+BEGIN_SRC emacs-lisp
-     (general-def 'normal
+     (general-def 'motion
        "gD" #'xref-find-references
        "[e" #'previous-error
-       "]e" #'next-error)
-
-     (general-def 'motion
+       "]e" #'next-error
        "M-h" #'beginning-of-defun
        "M-l" #'end-of-defun
        "H" #'backward-sexp
@@ -310,6 +307,7 @@
 
    #+BEGIN_SRC emacs-lisp
      (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
+
      (general-def evil-ex-completion-map
        "TAB" #'evil-ex-completion
        "C-x r i" #'evil-paste-from-register)
@@ -340,21 +338,24 @@
        (global-evil-matchit-mode 1))
 
      (use-package evil-snipe
+       :demand t
+       :general
+       ('motion evil-snipe-override-local-mode-map
+                ";" nil
+                "," nil
+                "gs" #'evil-snipe-repeat
+                "gS" #'evil-snipe-repeat-reverse)
+       (evil-snipe-parent-transient-map
+        ";" nil
+        "," nil
+        "s" #'evil-snipe-repeat
+        "S" #'evil-snipe-repeat-reverse)
        :config
        (gsetq evil-snipe-repeat-keys t
               evil-snipe-smart-case t
               evil-snipe-scope 'visible
               evil-snipe-repeat-scope 'visible
               evil-snipe-tab-increment t)
-       (general-def 'motion evil-snipe-override-local-mode-map
-         ";" nil
-         "," nil
-         "gs" #'evil-snipe-repeat
-         "gS" #'evil-snipe-repeat-reverse)
-       (setf (cdr evil-snipe-parent-transient-map) nil)
-       (general-def evil-snipe-parent-transient-map
-         "s" #'evil-snipe-repeat
-         "S" #'evil-snipe-repeat-reverse)
        (evil-snipe-mode 1)
        (evil-snipe-override-mode 1))
    #+END_SRC
@@ -379,7 +380,12 @@
 
      (use-package evil-replace-with-register
        :general ('normal "gR" #'evil-replace-with-register))
+   #+END_SRC
 
+   ~evil-surround-mode-map~ has to be modified after ~evil-surround~ is loaded,
+   since ~evil-surround~ sets its default keybindings with freestanding code.
+
+   #+BEGIN_SRC emacs-lisp
      (use-package evil-surround
        :config
        (general-def 'visual evil-surround-mode-map
@@ -822,11 +828,11 @@
      (use-package helm
        :demand t
        :general
-       (general-def
-         [remap execute-extended-command] #'helm-M-x
-         [remap find-file] #'helm-find-files
-         [remap switch-to-buffer] #'helm-mini)
+       ([remap execute-extended-command] #'helm-M-x
+        [remap find-file] #'helm-find-files
+        [remap switch-to-buffer] #'helm-mini)
        (panda-space "S" #'helm-grep-do-git-grep)
+       (helm-map "<escape>" #'helm-keyboard-quit)
        :config
        (gsetq helm-echo-input-in-header-line t
               ;; helm-ff-DEL-up-one-level-maybe t ; doesn't update the prompt
@@ -839,7 +845,6 @@
                                           helm-source-buffer-not-found)
               helm-window-prefer-horizontal-split 'decide)
        (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
-       (general-def helm-map "<escape>" #'helm-keyboard-quit)
        (with-eval-after-load 'projectile
          (setq projectile-completion-system 'helm))
        (helm-mode 1))
@@ -847,16 +852,14 @@
      (use-package helm-company
        :after company helm
        :general
-       (general-def company-active-map
-         "M-h" #'helm-company)
+       (company-active-map "M-h" #'helm-company)
        :init
        (gsetq helm-company-fuzzy-match nil))
 
      (use-package helm-lsp
-       :after helm lsp
+       :after helm lsp-ui
        :general
-       (general-def lsp-mode-map
-         [remap lsp-ui-find-workspace-symbol] #'helm-lsp-workspace-symbol))
+       (lsp-ui-mode-map [remap lsp-ui-find-workspace-symbol] #'helm-lsp-workspace-symbol))
 
      (use-package helm-make
        :after helm
@@ -1131,24 +1134,22 @@
    #+BEGIN_SRC emacs-lisp
      (use-package lsp-mode
        :defer t
+       :general
+       ('normal lsp-mode-map "K" #'lsp-describe-thing-at-point)
        :config
        (gsetq lsp-auto-execute-action nil
               lsp-before-save-edits nil
               lsp-enable-indentation nil
               lsp-enable-on-type-formatting nil
-              lsp-prefer-flymake nil)
-       (general-def 'normal lsp-mode-map
-         "gd" #'lsp-find-definition
-         "gD" #'lsp-find-references
-         "K" #'lsp-describe-thing-at-point))
+              lsp-prefer-flymake nil))
 
      (use-package company-lsp
-       :after company lsp
+       :after company lsp-mode
        :config
        (gsetq company-lsp-cache-candidates 'auto))
 
      (use-package lsp-ui
-       :after lsp
+       :after lsp-mode
        :config
        (gsetq lsp-ui-doc-position 'top
               lsp-ui-peek-always-show t
@@ -1196,11 +1197,12 @@
    #+BEGIN_SRC emacs-lisp
      (use-package flycheck
        :defer t
+       :general
+       (flycheck-mode-map
+        [remap previous-error] #'flycheck-previous-error
+        [remap next-error] #'flycheck-next-error)
        :config
        (gsetq flycheck-display-errors-delay 0.5)
-       (general-def 'normal flycheck-mode-map
-         "[e" #'flycheck-previous-error
-         "]e" #'flycheck-next-error)
        (evil-declare-motion #'flycheck-previous-error)
        (evil-declare-motion #'flycheck-next-error))
 
@@ -1265,11 +1267,12 @@
 
      (use-package outshine
        :defer t
+       :general
+       ('normal outshine-mode-map
+                "<tab>" #'outshine-cycle
+                "<backtab>" #'outshine-cycle-buffer)
        :config
-       (gsetq outshine-org-style-global-cycling-at-bob-p t)
-       (general-def 'normal outshine-mode-map
-         "<tab>" (lookup-key outshine-mode-map (kbd "TAB"))
-         "<backtab>" #'outshine-cycle-buffer))
+       (gsetq outshine-org-style-global-cycling-at-bob-p t))
    #+END_SRC
 
 * Languages
