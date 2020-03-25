@@ -156,20 +156,10 @@
    #+END_SRC
 
 ** Sensitive Data
-   *TODO:* It's probably more convenient to use ~setq~ instead of storing the
-   data as an alist.
+   ~private.el~ just sets some variables that I don't want to share.
 
    #+BEGIN_SRC emacs-lisp
-     (defvar panda-private-file (no-littering-expand-etc-file-name "private.el")
-       "File for private/sensitive configuration values.
-     It should contain an alist literal for `panda-get-private-data'.")
-
-     (defun panda-get-private-data (key)
-       "Get the private configuration value corresponding to KEY."
-       (let ((data (with-temp-buffer
-                     (insert-file-contents panda-private-file)
-                     (read (buffer-string)))))
-         (alist-get key data)))
+     (load-file (no-littering-expand-etc-file-name "private.el"))
    #+END_SRC
 
 * Evil
@@ -1024,8 +1014,7 @@
      (use-package elfeed
        :defer t
        :config
-       (gsetq elfeed-feeds (panda-get-private-data 'elfeed-feeds)
-              elfeed-search-title-max-width 100
+       (gsetq elfeed-search-title-max-width 100
               elfeed-search-filter "@1-month-ago +unread"))
 
      (use-package nov
