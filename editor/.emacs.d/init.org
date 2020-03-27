@@ -57,7 +57,6 @@
   - [[#python][Python]]
   - [[#r][R]]
   - [[#other-1][Other]]
-- [[#end-init][End Init]]
 
 * Setup
 ** Lexical Binding
@@ -1631,8 +1630,3 @@
      (use-package vimrc-mode :defer t)
      (use-package yaml-mode :defer t)
    #+END_SRC
-
-* End Init
-  #+BEGIN_SRC emacs-lisp
-    (provide 'init)
-  #+END_SRC
