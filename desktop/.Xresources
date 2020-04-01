@@ -40,8 +40,6 @@ Xcursor.size:  0
 *color7:      WHITE
 *color15:     WHITE
 
-i3wm.font:            Droid Sans 11
-
 rofi.modi:            window,run,combi,drun
 rofi.font:            Droid Sans 12
 rofi.show-icons:      true

@@ -143,7 +143,7 @@
 ** Custom File
    Set ~custom-file~ to avoid clutter.
 
-   *TODO:* I should probably find a way to only save specific variables
+   TODO: I should probably find a way to only save specific variables
    (e.g. ~safe-local-variable-values~), as a couple of times, I've removed some
    configuration to restore a variable's default value only for the
    ~custom-file~ value to take effect.
@@ -833,7 +833,7 @@
               helm-window-prefer-horizontal-split 'decide)
        (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
        (with-eval-after-load 'projectile
-         (setq projectile-completion-system 'helm))
+         (gsetq projectile-completion-system 'helm))
        (helm-mode 1))
 
      (use-package helm-company
@@ -1322,7 +1322,7 @@
                  panda-set-lisp-locals)
        :config
        (defun panda-set-lisp-locals ()
-         (setq panda-inner-defun-bounds '("(" . ")"))))
+         (gsetq panda-inner-defun-bounds '("(" . ")"))))
 
      (use-package slime
        :defer t
@@ -1380,7 +1380,7 @@
          (("t" ert "run"))))
        :config
        (defun panda-set-elisp-locals ()
-         (setq panda-inner-defun-bounds '("(" . ")"))))
+         (gsetq panda-inner-defun-bounds '("(" . ")"))))
 
      (use-package macrostep
        :mode-hydra
@@ -1564,7 +1564,7 @@
    #+END_SRC
 
 ** Python
-   *TODO:* Look into Microsoft's language server.
+   TODO: Look into Microsoft's language server.
 
    #+BEGIN_SRC emacs-lisp
      (use-package python
@@ -1581,7 +1581,7 @@
        :config
        (gsetq python-indent-offset 4)
        (defun panda-set-python-locals ()
-         (setq panda-inner-defun-bounds '(":" . ""))
+         (gsetq panda-inner-defun-bounds '(":" . ""))
          (gsetq-local yas-indent-line 'fixed)
          (gsetq-local yas-also-auto-indent-first-line nil))
        (progn
@@ -1599,7 +1599,6 @@
        :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp-deferred))
        :mode-hydra
        (ess-r-mode
-        nil
         ("Eval"
          (("eb" ess-eval-buffer "buffer")
           ("ed" ess-eval-function "function")

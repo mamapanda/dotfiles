@@ -13,8 +13,7 @@ session=${1:-bspwm}
 
 case $session in
     bspwm)
-        /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-        # ~/.dropbox-dist/dropboxd
+        lxpolkit &
         fcitx -d -r
 
         amixer -q set Master mute
@@ -24,7 +23,7 @@ case $session in
         redshift &
 
         clipit &
-        xfce4-power-manager
+        # xfce4-power-manager
 
         xautolock -time 10 -corners 00-- -locker "betterlockscreen -l" &
         xsetroot -cursor_name left_ptr &
