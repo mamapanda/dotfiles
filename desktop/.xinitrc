@@ -19,8 +19,8 @@ case $session in
         amixer -q set Master mute
 
         picom -b
-        nitrogen --restore
         redshift &
+        wallpaper restore
 
         clipit &
         # xfce4-power-manager

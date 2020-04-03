@@ -102,10 +102,10 @@ super + Return
 	kitty
 
 {_,super + ,super + alt + }Print
-    scrot {_,-u,-s} -e 'mv $f ~/Pictures/Screenshots'
+    screenshot {_,focused,selection}
 
 super + comma
-    firefox
+    $BROWSER
 
 super + {_,shift + }period
     emacs{_, --no-desktop}

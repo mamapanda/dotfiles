@@ -1,5 +1,5 @@
-export BROWSER=/usr/bin/firefox
-export EDITOR=/usr/bin/vi
+export BROWSER=firefox
+export EDITOR=em
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
@@ -12,4 +12,4 @@ export XMODIFIERS="@im=fcitx"
 
 export FZF_DEFAULT_OPTS="--exact"
 
-export PATH="$PATH:$HOME/.local/bin:$HOME/.npm/bin:$HOME/go/bin:$HOME/.gem/ruby/2.6.0/bin"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.npm/bin:$HOME/go/bin:$HOME/bin"

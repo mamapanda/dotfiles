@@ -1,0 +1,48 @@
+#!/usr/bin/bash
+
+# For stuff that doesn't directly support Xresources
+
+case $1 in
+    kitty)
+        echo "\
+# automatically generated from Xresources
+
+# cursor
+cursor               $(xrquery kitty.cursorColor)
+cursor_text_color    background
+
+# colors
+foreground           $(xrquery kitty.foreground)
+background           $(xrquery kitty.background)
+selection_foreground $(xrquery kitty.background)
+selection_background $(xrquery kitty.foreground)
+# black
+color0               $(xrquery kitty.color0)
+color8               $(xrquery kitty.color8)
+# red
+color1               $(xrquery kitty.color1)
+color9               $(xrquery kitty.color9)
+# green
+color2               $(xrquery kitty.color2)
+color10              $(xrquery kitty.color10)
+# yellow
+color3               $(xrquery kitty.color3)
+color11              $(xrquery kitty.color11)
+# blue
+color4               $(xrquery kitty.color4)
+color12              $(xrquery kitty.color12)
+# magenta
+color5               $(xrquery kitty.color5)
+color13              $(xrquery kitty.color13)
+# cyan
+color6               $(xrquery kitty.color6)
+color14              $(xrquery kitty.color14)
+# white
+color7               $(xrquery kitty.color7)
+color15              $(xrquery kitty.color15)"
+        ;;
+    *)
+        echo "Unsupported option: '$1'"
+        exit 1
+        ;;
+esac

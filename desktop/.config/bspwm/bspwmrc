@@ -2,10 +2,10 @@
 
 bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
-bspc config normal_border_color   "#242730"
-bspc config focused_border_color  "#51afef"
-bspc config active_border_color   "#242730"
-bspc config presel_feedback_color "#51afef"
+bspc config normal_border_color   $(xrquery bspwm.normal-color)
+bspc config focused_border_color  $(xrquery bspwm.focused-color)
+bspc config active_border_color   $(xrquery bspwm.active-color)
+bspc config presel_feedback_color $(xrquery bspwm.presel-color)
 
 bspc config automatic_scheme longest_side
 bspc config border_width     1
