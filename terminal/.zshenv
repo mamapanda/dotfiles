@@ -12,4 +12,11 @@ export XMODIFIERS="@im=fcitx"
 
 export FZF_DEFAULT_OPTS="--exact"
 
-export PATH="$PATH:$HOME/.local/bin:$HOME/.npm/bin:$HOME/go/bin:$HOME/bin"
+typeset -U PATH path
+path+=(
+    "$HOME/.local/bin"
+    "$HOME/.npm/bin"
+    "$HOME/go/bin"
+    "$HOME/bin"
+)
+export PATH

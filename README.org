@@ -1,10 +1,3 @@
 #+TITLE: Dotfiles
 
 This repository contains my personal dotfiles setup, managed with GNU Stow.
-
-- *WM:* bspwm
-- *Bar:* polybar
-- *Terminal:* kitty
-- *Shell:* fish
-- *Editor:* Emacs
-- *Color Scheme:* ~doom-vibrant~ from [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]

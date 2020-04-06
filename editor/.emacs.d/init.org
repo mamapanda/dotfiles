@@ -1042,9 +1042,6 @@
 
      (use-package esh-autosuggest
        :ghook 'eshell-mode-hook)
-
-     (use-package fish-completion
-       :ghook 'eshell-mode-hook)
    #+END_SRC
 
 * Mode-specific Configuration
