@@ -18,9 +18,9 @@ line-size = 4
 background = ${colors.background}
 foreground = ${colors.foreground}
 
-font-0 = Droid Sans Mono:style=regular:pixelsize=11
-font-1 = Droid Sans Fallback:style=regular:pixelsize=11
-font-2 = Iosevka Nerd Font:style=regular:antialias=true
+font-0 = Droid Sans Mono:pixelsize=11
+font-1 = Droid Sans Mono Nerd Font:antialias=true:pixelsize=12.5
+font-2 = Droid Sans:postscriptname=Droid Sans Fallback:pixelsize=11
 
 padding-left = 2
 padding-right = 2
