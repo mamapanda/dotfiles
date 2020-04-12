@@ -1,0 +1,10 @@
+set output_plugin=alsa
+set dsp.alsa.device=default
+set mixer.alsa.device=default
+set mixer.alsa.channel=Master
+
+colorscheme cyan
+
+set color_titleline_fg=black
+set color_win_sel_fg=black
+set color_win_title_fg=black

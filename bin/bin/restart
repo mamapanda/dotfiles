@@ -1,0 +1,10 @@
+#!/bin/bash
+# adapted from https://wiki.archlinux.org/index.php/Polybar#Running_with_WM
+
+killall -q "$1"
+
+while pgrep -u $UID -x "$1" > /dev/null; do
+    sleep 1
+done
+
+exec "$@"

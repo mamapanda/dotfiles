@@ -1,0 +1,25 @@
+# -*- mode: conf; -*-
+
+[global]
+follow = mouse
+geometry = "500x5-10+10"
+shrink = true
+transparency = 0
+separator_height = 1
+padding = 8
+horizontal_padding = 8
+frame_width = 1
+separator_color = frame
+idle_threshold = 60
+font = Droid Sans Mono 10
+markup = full
+format = "<b>%s</b>\n%b"
+word_wrap = true
+dmenu = rofi -dmenu -p dunst
+browser = firefox
+
+[shortcuts]
+close = mod4+minus
+close_all = mod4+shift+minus
+history = mod4+equal
+context = mod4+shift+equal

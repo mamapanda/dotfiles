@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+color() {
+    xrquery "i3lock.$1" | sed "s/#\(.*\)/\1ff/"
+}
+
+i3lock \
+    --blur=8 \
+    --insidevercolor="$(color background)" \
+    --insidewrongcolor="$(color background)" \
+    --insidecolor="$(color background)" \
+    --ringvercolor="$(color verify-color)" \
+    --ringwrongcolor="$(color error-color)" \
+    --ringcolor="$(color ring-color)" \
+    --line-uses-inside \
+    --keyhlcolor="$(color key-hl-color)" \
+    --bshlcolor="$(color error-color)" \
+    --separatorcolor="$(color background)" \
+    --verifcolor="$(color verify-color)" \
+    --wrongcolor="$(color error-color)"

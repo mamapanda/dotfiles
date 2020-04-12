@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+name=$(basename "$1")
+resolution=$(identify -format "%wx%h" "$1")
+
+echo "$name ($resolution)"

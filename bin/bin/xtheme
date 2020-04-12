@@ -3,8 +3,31 @@
 # For stuff that doesn't directly support Xresources
 
 case $1 in
+    dunst)
+        cat <<EOF
+# automatically generated from Xresources
+
+[urgency_low]
+background = "$(xrquery dunst.background)"
+foreground = "$(xrquery dunst.foreground)"
+frame_color = "$(xrquery dunst.trivial-color)"
+timeout = $(xrquery dunst.trivial-timeout)
+
+[urgency_normal]
+background = "$(xrquery dunst.background)"
+foreground = "$(xrquery dunst.foreground)"
+frame_color = "$(xrquery dunst.normal-color)"
+timeout = $(xrquery dunst.normal-timeout)
+
+[urgency_critical]
+background = "$(xrquery dunst.background)"
+foreground = "$(xrquery dunst.foreground)"
+frame_color = "$(xrquery dunst.critical-color)"
+timeout = $(xrquery dunst.critical-timeout)
+EOF
+        ;;
     kitty)
-        echo "\
+        cat <<EOF
 # automatically generated from Xresources
 
 # cursor
@@ -39,7 +62,32 @@ color6               $(xrquery kitty.color6)
 color14              $(xrquery kitty.color14)
 # white
 color7               $(xrquery kitty.color7)
-color15              $(xrquery kitty.color15)"
+color15              $(xrquery kitty.color15)
+EOF
+        ;;
+    zathura)
+        cat <<EOF
+# automatically generated from Xresources
+
+set completion-bg "$(xrquery zathura.background)"
+set completion-fg "$(xrquery zathura.foreground)"
+set completion-group-bg "$(xrquery zathura.background-alt)"
+set completion-group-fg "$(xrquery zathura.foreground)"
+set completion-highlight-bg "$(xrquery zathura.foreground)"
+set completion-highlight-fg "$(xrquery zathura.background)"
+set default-bg "$(xrquery zathura.background)"
+set default-fg "$(xrquery zathura.foreground)"
+set inputbar-bg "$(xrquery zathura.background)"
+set inputbar-fg "$(xrquery zathura.foreground)"
+set notification-bg "$(xrquery zathura.background)"
+set notification-fg "$(xrquery zathura.foreground)"
+set notification-error-bg "$(xrquery zathura.background)"
+set notification-error-fg "$(xrquery zathura.error-color)"
+set notification-warning-bg "$(xrquery zathura.background)"
+set notification-warning-fg "$(xrquery zathura.warning-color)"
+set statusbar-bg "$(xrquery zathura.background-alt)"
+set statusbar-fg "$(xrquery zathura.foreground)"
+EOF
         ;;
     *)
         echo "Unsupported option: '$1'"

@@ -23,4 +23,4 @@ bspc rule -a firefox:Navigator private=on
 bspc rule -a Lxappearance state=floating
 bspc rule -a Zathura state=tiled
 
-~/.config/polybar/launch.sh
+restart polybar main &

@@ -24,6 +24,7 @@ alias grep="grep --color=auto -i"
 alias la="ls -a"
 alias ll="ls -l"
 alias ls="ls --color=auto"
+alias sxiv="sxiv -a -o"
 
 alias -g D="&!"
 alias -g G="| grep"

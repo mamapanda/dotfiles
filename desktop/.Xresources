@@ -11,6 +11,8 @@ Xcursor.size:  0
 
 #include ".Xresources.d/doom-vibrant.conf"
 
+! TODO: look into dark vs light colors
+
 *background:  BACKGROUND
 *foreground:  FOREGROUND
 *fading:      8
@@ -39,6 +41,23 @@ Xcursor.size:  0
 !! white dark/light
 *color7:      WHITE
 *color15:     WHITE
+
+bspwm.normal-color:  BACKGROUND
+bspwm.focused-color: BLUE
+bspwm.active-color:  BACKGROUND
+bspwm.presel-color:  BLUE
+
+dunst.trivial-color:    GREEN
+dunst.trivial-timeout:  10
+dunst.normal-color:     BLUE
+dunst.normal-timeout:   10
+dunst.critical-color:   RED
+dunst.critical-timeout: 0
+
+i3lock.ring-color:   BLUE
+i3lock.key-hl-color: #dceffb
+i3lock.verify-color: MAGENTA
+i3lock.error-color:  RED
 
 rofi.modi:            window,run,combi,drun
 rofi.font:            Droid Sans 12

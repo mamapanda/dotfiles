@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+
+case $1 in
+    c) while read -r file; do xclip -selection clipboard -target image/png "$file"; done ;;
+    C) xclip -selection clipboard ;;
+    g) tr '\n' '\0' | xargs -0 gimp ;;
+    t) images="$(cat)" kitty ;;
+    w) wallpaper try "$(head -n1)" ;;
+    W) wallpaper set "$(head -n1)" ;;
+esac

@@ -22,10 +22,13 @@ case $session in
         redshift &
         wallpaper restore
 
+        cat ~/.config/dunst/dunstrc <(xtheme dunst) > /tmp/dunstrc
+        restart dunst -config /tmp/dunstrc &
+
         clipit &
         # xfce4-power-manager
 
-        xautolock -time 10 -corners 00-- -locker "betterlockscreen -l" &
+        xautolock -time 10 -corners 0-0- -locker lockscreen &
         xsetroot -cursor_name left_ptr &
 
         setxkbmap -option 'ctrl:swapcaps'

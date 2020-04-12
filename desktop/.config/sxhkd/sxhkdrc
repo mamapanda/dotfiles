@@ -112,3 +112,6 @@ super + {_,shift + }period
 
 super + slash
     thunar
+
+XF86Audio{Prev,Play,Next}
+    cmus-remote -{r,u,n}
