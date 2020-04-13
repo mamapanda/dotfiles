@@ -9,12 +9,23 @@ Xft.lcdfilter: lcddefault
 Xcursor.theme: xcursor-breeze
 Xcursor.size:  0
 
-#include ".Xresources.d/doom-vibrant.conf"
+! based on the doom-vibrant Emacs theme
+#define BACKGROUND #242730
+#define FOREGROUND #bbc2cf
+#define BLACK      #242730
+#define RED        #ff665c
+#define GREEN      #7bc275
+#define YELLOW     #fcce7b
+#define BLUE       #51afef
+#define MAGENTA    #c57bdb
+#define CYAN       #5cefff
+#define WHITE      #bbc2cf
 
 ! TODO: look into dark vs light colors
 
 *background:  BACKGROUND
 *foreground:  FOREGROUND
+*cursorColor: BLUE
 *fading:      8
 *fadeColor:   black
 !! black dark/light
@@ -59,9 +70,24 @@ i3lock.key-hl-color: #dceffb
 i3lock.verify-color: MAGENTA
 i3lock.error-color:  RED
 
+!                  bg          border      separator
+rofi.color-window: BACKGROUND, BLUE,       BLUE
+!                  bg          fg          alt-bg      hl-bg   hl-fg
+rofi.color-active: BACKGROUND, YELLOW,     BACKGROUND, YELLOW, BACKGROUND
+rofi.color-normal: BACKGROUND, FOREGROUND, BACKGROUND, BLUE,   BACKGROUND
+rofi.color-urgent: BACKGROUND, RED,        BACKGROUND, RED,    BACKGROUND
+
 rofi.modi:            window,run,combi,drun
 rofi.font:            Droid Sans 12
 rofi.show-icons:      true
 rofi.terminal:        kitty
 rofi.hide-scrollbar:  true
 rofi.disable-history: false
+
+polybar.background-alt: #3d4451
+polybar.primary-color:  BLUE
+polybar.alert-color:    RED
+
+zathura.background-alt: #0e0f13
+zathura.warning-color:  YELLOW
+zathura.error-color:    RED
