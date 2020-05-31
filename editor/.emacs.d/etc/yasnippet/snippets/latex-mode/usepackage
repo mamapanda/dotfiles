@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: usepackage
+# key: up
+# --
+\usepackage{${1:amsmath}}

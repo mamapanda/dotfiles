@@ -48,11 +48,13 @@
   - [[#c--c][C / C++]]
   - [[#common-lisp][Common Lisp]]
   - [[#emacs-lisp][Emacs Lisp]]
+  - [[#go][Go]]
   - [[#haskell][Haskell]]
   - [[#html--css][HTML / CSS]]
   - [[#javascript--typescript][JavaScript / TypeScript]]
   - [[#json][JSON]]
   - [[#latex][Latex]]
+  - [[#matlab][Matlab]]
   - [[#org][Org]]
   - [[#python][Python]]
   - [[#r][R]]
@@ -143,11 +145,6 @@
 ** Custom File
    Set ~custom-file~ to avoid clutter.
 
-   TODO: I should probably find a way to only save specific variables
-   (e.g. ~safe-local-variable-values~), as a couple of times, I've removed some
-   configuration to restore a variable's default value only for the
-   ~custom-file~ value to take effect.
-
    #+BEGIN_SRC emacs-lisp
      (gsetq custom-file (no-littering-expand-var-file-name "custom.el"))
      (when (file-exists-p custom-file)
@@ -209,27 +206,14 @@
 ** Basic Keybindings
    These are ~evil~ keybindings that don't depend on any other configuration.
 
-   I rarely use the default ~;~ and ~​,​~ behavior thanks to ~evil-snipe~, so I've
-   bound more useful commands to those keys.  The default ~;~ and ~​,​~ are still
-   accessible via ~gs~ and ~gS~.
+   The default ~s~ and ~S~ aren't that useful in my opinion, and ~s~ is slightly
+   easier to press than ~evil-ex~'s default binding of ~:~.
 
    #+BEGIN_SRC emacs-lisp
      (general-def '(normal motion) override
-       ";" #'evil-ex
-       ":" #'eval-expression
-       "," #'execute-extended-command)
-
-     (general-def 'motion
-       "gs" #'evil-repeat-find-char
-       "gS" #'evil-repeat-find-char-reverse)
-   #+END_SRC
-
-   I save pretty often out of habit, so might as well bind ~save-buffer~ to an
-   easy-to-reach key.
-
-   #+BEGIN_SRC emacs-lisp
-     (general-def '(normal motion) override
-       "Q" #'save-buffer)
+       "s" #'evil-ex
+       "S" #'execute-extended-command
+       ":" #'eval-expression)
    #+END_SRC
 
    Swap ~`~ and ~​'​~ because I never use the default ~​'​~.
@@ -288,9 +272,8 @@
        "M-o" #'evil-execute-in-normal-state)
    #+END_SRC
 
-   ~evil-ex~ uses keys different from all other minibuffer commands I use
-   (e.g. ~C-n~ instead of ~M-n~), which can be pretty confusing.  I've changed
-   it to match.
+   ~evil-ex~ uses keys different from most other minibuffer commands (e.g. ~C-n~
+   instead of ~M-n~), which can be pretty confusing.  I've changed it to match.
 
    #+BEGIN_SRC emacs-lisp
      (setf (cdr evil-ex-completion-map) (cdr (copy-keymap minibuffer-local-map)))
@@ -327,23 +310,16 @@
      (use-package evil-snipe
        :demand t
        :general
-       ('motion evil-snipe-override-local-mode-map
-                ";" nil
-                "," nil
-                "gs" #'evil-snipe-repeat
-                "gS" #'evil-snipe-repeat-reverse)
-       (evil-snipe-parent-transient-map
-        ";" nil
-        "," nil
-        "s" #'evil-snipe-repeat
-        "S" #'evil-snipe-repeat-reverse)
+       ('(normal motion) evil-snipe-override-local-mode-map
+        "f" #'evil-snipe-s
+        "F" #'evil-snipe-S
+        "t" #'evil-snipe-x
+        "T" #'evil-snipe-X)
        :config
-       (gsetq evil-snipe-repeat-keys t
-              evil-snipe-smart-case t
+       (gsetq evil-snipe-smart-case t
               evil-snipe-scope 'visible
               evil-snipe-repeat-scope 'visible
               evil-snipe-tab-increment t)
-       (evil-snipe-mode 1)
        (evil-snipe-override-mode 1))
    #+END_SRC
 
@@ -369,16 +345,21 @@
        :general ('normal "gR" #'evil-replace-with-register))
    #+END_SRC
 
-   ~evil-surround-mode-map~ has to be modified after ~evil-surround~ is loaded,
-   since ~evil-surround~ sets its default keybindings with freestanding code.
+   Custom keybindings for the following packages need to be configured /after/
+   the packages are loaded.
 
    #+BEGIN_SRC emacs-lisp
+     (use-package evil-string-inflection
+       :config
+       (general-def 'normal
+         "g~" #'evil-invert-case
+         "g`" #'evil-operator-string-inflection))
+
      (use-package evil-surround
        :config
        (general-def 'visual evil-surround-mode-map
-         "s" #'evil-surround-region
-         "S" #'evil-Surround-region
-         "gS" nil)
+         "gs" #'evil-surround-region
+         "gS" #'evil-Surround-region)
        (global-evil-surround-mode 1))
    #+END_SRC
 
@@ -396,6 +377,11 @@
       (use-package evil-indent-plus
         :config
         (evil-indent-plus-default-bindings))
+
+      (use-package evil-textobj-column
+        :general
+        ('(inner outer) "k" #'evil-textobj-column-word)
+        ('(inner outer) "K" #'evil-textobj-column-WORD))
 
       (use-package targets
         :straight (:type git :host github :repo "noctuid/targets.el")
@@ -490,6 +476,11 @@
       (put 'defun 'targets-shrink-inner-op #'panda--shrink-inner-defun)
 
       (targets-define-to defun 'defun nil object :linewise t :bind t :keys "d")
+    #+END_SRC
+
+*** Dollar
+    #+BEGIN_SRC emacs-lisp
+      (targets-define-to dollar "$" nil quote :bind t :keys "$")
     #+END_SRC
 
 *** Whitespace
@@ -656,7 +647,7 @@
             inhibit-compacting-font-caches t
             inhibit-startup-screen t
             make-backup-files nil
-            recentf-max-saved-items 100
+            recentf-max-saved-items 500
             require-final-newline t
             ring-bell-function 'ignore
             save-abbrevs nil
@@ -778,7 +769,7 @@
 ** Navigation
    #+BEGIN_SRC emacs-lisp
      (use-package avy
-       :general ('motion "C-SPC" #'avy-goto-char-timer)
+       :general ('motion "g/" #'avy-goto-char-timer)
        :config
        (gsetq avy-all-windows nil
               avy-all-windows-alt t
@@ -819,6 +810,7 @@
         [remap find-file] #'helm-find-files
         [remap switch-to-buffer] #'helm-mini)
        (panda-space "S" #'helm-grep-do-git-grep)
+       ('normal "g?" #'helm-occur)
        (helm-map "<escape>" #'helm-keyboard-quit)
        :config
        (gsetq helm-echo-input-in-header-line t
@@ -938,12 +930,17 @@
    [[https://github.com/Fuco1/dired-hacks/][dired-hacks]].
 
    #+BEGIN_SRC emacs-lisp
-     (defun panda-image-dired-here ()
-       "Run `image-dired' in the default directory."
-       (interactive)
-       (image-dired default-directory))
+     (panda-space
+       "j" #'dired-jump
+       "J" #'dired-jump-other-window)
 
-     (general-def 'normal dired-mode-map "C-t h" #'panda-image-dired-here)
+     (use-package image-dired
+       :general (normal dired-mode-map "C-t h" #'panda-image-dired-here)
+       :config
+       (defun panda-image-dired-here ()
+         "Run `image-dired' in the default directory."
+         (interactive)
+         (image-dired default-directory)))
 
      (use-package dired-filter
        :defer t
@@ -1394,6 +1391,18 @@
          (("p" package-lint-current-buffer "package-lint")))))
    #+END_SRC
 
+** Go
+   #+BEGIN_SRC emacs-lisp
+     (use-package go-mode
+       :defer t
+       :gfhook '(gofmt-on-save-mode lsp-deferred panda-set-go-locals)
+       :config
+       (defun panda-set-go-locals ()
+         (gsetq indent-tabs-mode t))
+       (reformatter-define gofmt
+         :program "gofmt"))
+   #+END_SRC
+
 ** Haskell
    I would use HIE or ghcide, but I'm too lazy to install them.
 
@@ -1509,10 +1518,24 @@
      (use-package tex
        :straight auctex
        :defer t
-       :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode))
+       :gfhook ('LaTeX-mode-hook '(lsp-deferred
+                                   panda-format-on-save-mode
+                                   yas-minor-mode))
        :config
        (gsetq TeX-auto-save t
               TeX-parse-self t))
+   #+END_SRC
+
+** Matlab
+   #+BEGIN_SRC emacs-lisp
+     (use-package matlab-mode
+       :defer t
+       :gfhook '(panda-format-on-save-mode)
+       :mode-hydra
+       (("Eval"
+         (("ec" matlab-shell-run-cell "cell")
+          ("el" matlab-shell-run-region-or-line "line or region")
+          ("eo" matlab-shell "open repl")))))
    #+END_SRC
 
 ** Org
@@ -1527,18 +1550,21 @@
        :config
        (gsetq org-directory "~/org")
        (gsetq org-agenda-custom-commands
-              '(("n" "Agenda and unscheduled TODOs"
-                 ((agenda "")
-                  (alltodo "" ((org-agenda-overriding-header "Unscheduled TODOs:")
+              '(("n" "Agenda and unscheduled tasks"
+                 ((agenda "" ((org-agenda-span 1)))
+                  (alltodo "" ((org-agenda-overriding-header "Unscheduled Tasks:")
                                (org-agenda-skip-function
                                 '(org-agenda-skip-entry-if 'timestamp)))))))
               org-agenda-files (list (expand-file-name "agenda" org-directory))
-              org-capture-templates '(("d" "Deadline TODO" entry (file "agenda/refile.org")
-                                       "* TODO %?\n  DEADLINE: %t")
-                                      ("s" "Scheduled TODO" entry (file "agenda/refile.org")
-                                       "* TODO %?\n  SCHEDULED: %t")
-                                      ("t" "TODO" entry (file "agenda/refile.org")
-                                       "* TODO %?"))
+              org-capture-templates
+              '(("d" "Deadline" entry (file "agenda/refile.org")
+                 "* TODO %?\n  DEADLINE: %t")
+                ("s" "Scheduled Task" entry (file "agenda/refile.org")
+                 "* TODO %?\n  SCHEDULED: %t")
+                ("S" "Scheduled Task (Next Day)" entry (file "agenda/refile.org")
+                 "* TODO %?\n  SCHEDULED: <%(org-read-date nil nil \"+1\")>")
+                ("t" "Undated Task" entry (file "agenda/refile.org")
+                 "* TODO %?"))
               org-catch-invisible-edits 'error
               org-src-fontify-natively t
               org-src-tab-acts-natively t))
@@ -1548,6 +1574,13 @@
 
      (use-package org-bullets
        :ghook 'org-mode-hook)
+
+     (use-package org-projectile
+       :after org
+       :config
+       (gsetq org-projectile-projects-file (expand-file-name "projects.org" org-directory)
+              org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+       (add-to-list 'org-capture-templates (org-projectile-project-todo-entry) t #'equal))
 
      (use-package helm-org-rifle :defer t)
 
@@ -1561,8 +1594,6 @@
    #+END_SRC
 
 ** Python
-   TODO: Look into Microsoft's language server.
-
    #+BEGIN_SRC emacs-lisp
      (use-package python
        :defer t
@@ -1593,7 +1624,11 @@
    #+BEGIN_SRC emacs-lisp
      (use-package ess
        :defer t
-       :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode lsp-deferred))
+       :gfhook ('ess-r-mode-hook '(company-mode
+                                   panda-format-on-save-mode
+                                   yas-minor-mode))
+       :general
+       ('normal ess-r-mode-map "K" #'ess-help)
        :mode-hydra
        (ess-r-mode
         ("Eval"
@@ -1605,8 +1640,16 @@
           ("er" ess-eval-region "region")
           ("eo" R "open repl"))))
        :config
-       (gsetq ess-ask-for-ess-directory nil
-              ess-use-flymake nil))
+       (gsetq ess-ask-for-ess-directory nil))
+
+     (use-package poly-R
+       :defer t
+       :gfhook ('poly-markdown+r-mode-hook '(markdown-toggle-math)))
+
+     (use-package ess-smart-equals
+       :after ess
+       :config
+       (ess-smart-equals-activate))
    #+END_SRC
 
 ** Other
@@ -1614,12 +1657,12 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package cmake-mode :defer t)
+     (use-package csv-mode :defer t)
      (use-package d-mode :defer t)
      (use-package fish-mode :defer t)
      (use-package gitattributes-mode :defer t)
      (use-package gitconfig-mode :defer t)
      (use-package gitignore-mode :defer t)
-     (use-package go-mode :defer t)
      (use-package kotlin-mode :defer t)
      (use-package markdown-mode :defer t)
      (use-package rust-mode :defer t)

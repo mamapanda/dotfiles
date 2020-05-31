@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: lapply
+# key: la
+# --
+lapply(${1:1:10}, ${2:function(${3:i}) ${4:{
+    $5
+}}})

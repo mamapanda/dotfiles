@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: else-if
+# key: ei
+# --
+else if (${1:FALSE}) {
+    $0
+}
