@@ -72,7 +72,7 @@ EOF
 set completion-bg "$(xrquery zathura.background)"
 set completion-fg "$(xrquery zathura.foreground)"
 set completion-group-bg "$(xrquery zathura.background-alt)"
-set completion-group-fg "$(xrquery zathura.foreground)"
+set completion-group-fg "$(xrquery zathura.foreground-alt)"
 set completion-highlight-bg "$(xrquery zathura.foreground)"
 set completion-highlight-fg "$(xrquery zathura.background)"
 set default-bg "$(xrquery zathura.background)"
@@ -86,7 +86,7 @@ set notification-error-fg "$(xrquery zathura.error-color)"
 set notification-warning-bg "$(xrquery zathura.background)"
 set notification-warning-fg "$(xrquery zathura.warning-color)"
 set statusbar-bg "$(xrquery zathura.background-alt)"
-set statusbar-fg "$(xrquery zathura.foreground)"
+set statusbar-fg "$(xrquery zathura.foreground-alt)"
 EOF
         ;;
     *)

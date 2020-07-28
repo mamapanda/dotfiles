@@ -96,7 +96,7 @@ XF86Audio{RaiseVolume,LowerVolume,Mute}
 # Applications
 #
 super + @space
-	rofi -show drun
+	rofi -show drun -show-icons
 
 super + Return
 	kitty

@@ -10,47 +10,47 @@ Xcursor.theme: xcursor-breeze
 Xcursor.size:  0
 
 ! based on the doom-vibrant Emacs theme
-#define BACKGROUND #242730
-#define FOREGROUND #bbc2cf
-#define BLACK      #242730
-#define RED        #ff665c
-#define GREEN      #7bc275
-#define YELLOW     #fcce7b
-#define BLUE       #51afef
-#define MAGENTA    #c57bdb
-#define CYAN       #5cefff
-#define WHITE      #bbc2cf
+#define BLACK   #242730
+#define RED     #ff665c
+#define GREEN   #7bc275
+#define YELLOW  #fcce7b
+#define BLUE    #51afef
+#define MAGENTA #c57bdb
+#define CYAN    #5cefff
+#define WHITE   #bbc2cf
 
-! TODO: look into dark vs light colors
+#define DARK_GRAY     #454b5c
+#define LIGHT_RED     #ffaea9
+#define LIGHT_GREEN   #aed9aa
+#define LIGHT_YELLOW  #feeacb
+#define LIGHT_BLUE    #97cff5
+#define LIGHT_MAGENTA #dfb7eb
+#define LIGHT_CYAN    #a9f7ff
+#define LIGHT_GRAY    #8e9aaf
+
+#define BACKGROUND BLACK
+#define FOREGROUND WHITE
 
 *background:  BACKGROUND
 *foreground:  FOREGROUND
 *cursorColor: BLUE
 *fading:      8
 *fadeColor:   black
-!! black dark/light
 *color0:      BLACK
-*color8:      BLACK
-!! red dark/light
 *color1:      RED
-*color9:      RED
-!! green dark/light
 *color2:      GREEN
-*color10:     GREEN
-!! yellow dark/light
 *color3:      YELLOW
-*color11:     YELLOW
-!! blue dark/light
 *color4:      BLUE
-*color12:     BLUE
-!! magenta dark/light
 *color5:      MAGENTA
-*color13:     MAGENTA
-!! cyan dark/light
 *color6:      CYAN
-*color14:     CYAN
-!! white dark/light
-*color7:      WHITE
+*color7:      LIGHT_GRAY
+*color8:      DARK_GRAY
+*color9:      LIGHT_RED
+*color10:     LIGHT_GREEN
+*color11:     LIGHT_YELLOW
+*color12:     LIGHT_BLUE
+*color13:     LIGHT_MAGENTA
+*color14:     LIGHT_CYAN
 *color15:     WHITE
 
 bspwm.normal-color:  BACKGROUND
@@ -79,7 +79,6 @@ rofi.color-urgent: BACKGROUND, RED,        BACKGROUND, RED,    BACKGROUND
 
 rofi.modi:            window,run,combi,drun
 rofi.font:            Droid Sans 12
-rofi.show-icons:      true
 rofi.terminal:        kitty
 rofi.hide-scrollbar:  true
 rofi.disable-history: false
@@ -88,6 +87,8 @@ polybar.background-alt: #3d4451
 polybar.primary-color:  BLUE
 polybar.alert-color:    RED
 
+zathura.foreground:     BLUE
+zathura.foreground-alt: LIGHT_BLUE
 zathura.background-alt: #0e0f13
 zathura.warning-color:  YELLOW
 zathura.error-color:    RED

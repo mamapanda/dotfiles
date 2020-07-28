@@ -2,6 +2,7 @@ map [normal] ; focus_inputbar :
 
 set abort-clear-search true
 set selection-clipboard clipboard
+set show-recent 30
 set statusbar-basename true
 
 set font "Consolas 11"
