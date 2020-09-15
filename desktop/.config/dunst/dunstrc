@@ -21,5 +21,5 @@ browser = firefox
 [shortcuts]
 close = mod4+minus
 close_all = mod4+shift+minus
-history = mod4+equal
-context = mod4+shift+equal
+context = mod4+equal
+history = mod4+shift+equal
