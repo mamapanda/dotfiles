@@ -18,7 +18,7 @@ case $session in
 
         amixer -q set Master mute
 
-        picom -b
+        picom -b --experimental-backends
         redshift &
         wallpaper restore
 
