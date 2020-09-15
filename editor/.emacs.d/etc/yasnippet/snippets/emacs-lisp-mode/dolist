@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: dolist
-# key: dl
-# --
-(dolist (${1:x} ${2:(number-sequence 1 10)})
-  $0)

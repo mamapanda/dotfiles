@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
-# name: else
-# key: e
+# name: else { ... }
+# key: else
 # --
 else {
-    $0
+    `%`$0
 }

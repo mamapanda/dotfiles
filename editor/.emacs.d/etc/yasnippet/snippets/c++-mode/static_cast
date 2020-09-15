@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: static_cast
-# key: sc
+# name: static_cast<...>(...)
+# key: scast
 # --
-static_cast<${1:int}>(${2:0})
+static_cast<${1:int}>(${2:`(or % 0)`})

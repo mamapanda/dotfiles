@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: begin pmatrix
-# key: bpm
-# --
-\begin{pmatrix}
-  $0
-\end{pmatrix}

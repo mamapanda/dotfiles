@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: dynamic_cast
-# key: dc
+# name: dynamic_cast<...>(...)
+# key: dcast
 # --
-dynamic_cast<${1:int&}>(${2:0});
+dynamic_cast<${1:int&}>(${2:`(or % 0)`});

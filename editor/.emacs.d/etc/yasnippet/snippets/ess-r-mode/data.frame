@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: data.frame
-# key: df
-# --
-data.frame($1)

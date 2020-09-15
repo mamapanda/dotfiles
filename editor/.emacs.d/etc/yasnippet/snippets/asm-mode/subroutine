@@ -7,7 +7,7 @@ ${1:subroutine}:
     push %ebp
     movl %esp, %ebp
 
-    $0
+    `%`$0
 
     movl %ebp, %esp
     pop %ebp

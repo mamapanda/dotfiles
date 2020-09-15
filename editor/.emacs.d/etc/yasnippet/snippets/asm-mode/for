@@ -7,7 +7,7 @@ for_${3:loop}:
     cmpl ${4:\$0}, $2
     ${5:jge} end_for_$3
 
-    $0
+    `%`$0
 
     ${6:incl} $2
     jmp for_$3

@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: begin itemize
-# key: bi
-# --
-\begin{itemize}
-  $0
-\end{itemize}

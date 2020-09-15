@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: cerr
-# key: ce
-# --
-std::cerr << ${1:0};

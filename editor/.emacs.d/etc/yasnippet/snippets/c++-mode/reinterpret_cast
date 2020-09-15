@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: reinterpret_cast
-# key: rc
+# name: reinterpret_cast<...>(...)
+# key: rcast
 # --
-reinterpret_cast<${1:int}>(${2:0});
+reinterpret_cast<${1:int}>(${2:`(or % 0)`});

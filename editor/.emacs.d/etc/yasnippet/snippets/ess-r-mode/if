@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
-# name: if
-# key: i
+# name: if (...) { ... }
+# key: if
 # --
 if (${1:FALSE}) {
-    $0
+    `%`$0
 }

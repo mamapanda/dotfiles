@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: cl-defmacro
-# key: cdm
-# --
-(cl-defmacro ${1:name} ($2)
-  "$3"
-  $0)

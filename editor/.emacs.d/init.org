@@ -1085,11 +1085,11 @@
 ** Completion
    #+BEGIN_SRC emacs-lisp
      (use-package company
-       :defer t
        :config
        (gsetq company-idle-delay 0.2
               company-minimum-prefix-length 2
-              company-tooltip-align-annotations t))
+              company-tooltip-align-annotations t)
+       (global-company-mode))
 
      (use-package company-box
        :ghook 'company-mode-hook
@@ -1221,7 +1221,7 @@
 ** Linting
    #+BEGIN_SRC emacs-lisp
      (use-package flycheck
-       :defer t
+       :demand t
        :general
        (flycheck-mode-map
         [remap previous-error] #'flycheck-previous-error
@@ -1229,7 +1229,8 @@
        :config
        (gsetq flycheck-display-errors-delay 0.5)
        (evil-declare-motion #'flycheck-previous-error)
-       (evil-declare-motion #'flycheck-next-error))
+       (evil-declare-motion #'flycheck-next-error)
+       (global-flycheck-mode))
 
      (use-package flycheck-posframe
        :ghook 'flycheck-mode-hook
@@ -1273,17 +1274,31 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package yasnippet
+       :demand t
+       :general (panda-space "y" #'yas-insert-snippet)
        :config
        (gsetq yas-triggers-in-field t
               yas-indent-line 'auto
               yas-also-auto-indent-first-line t)
        (yas-reload-all)
+
        (with-eval-after-load 'company
          (defun panda--company-yas-tab-advice (old-func &rest args)
            (unless (and yas-minor-mode (yas-expand))
              (call-interactively old-func args)))
          (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
-           (advice-add company-tab-func :around #'panda--company-yas-tab-advice))))
+           (advice-add company-tab-func :around #'panda--company-yas-tab-advice)))
+
+       (defun panda--insert-snippet-in-insert-mode (&rest _)
+         "Advice to enter insert mode before inserting a snippet."
+         (evil-insert-state))
+       (advice-add 'yas-insert-snippet :before #'panda--insert-snippet-in-insert-mode)
+
+       (yas-global-mode))
+
+     (use-package doom-snippets
+       :straight (:host github :repo "hlissner/doom-snippets" :files ("*.el" "*"))
+       :after yasnippet)
    #+END_SRC
 
 ** View / Layout
@@ -1307,7 +1322,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package asm-mode
        :defer t
-       :gfhook '(asmfmt-on-save-mode panda-set-asm-locals yas-minor-mode)
+       :gfhook '(asmfmt-on-save-mode panda-set-asm-locals)
        :config
        (gsetq asm-comment-char ?#)
        (defun panda-set-asm-locals ()
@@ -1322,7 +1337,7 @@
      (use-package cc-mode
        :defer t
        :gfhook ('(c-mode-hook c++-mode-hook)
-                '(clang-format-on-save-mode panda-set-c-locals yas-minor-mode))
+                '(clang-format-on-save-mode panda-set-c-locals))
        :config
        (defun panda-set-c-locals ()
          (c-set-offset 'innamespace 0))
@@ -1352,8 +1367,7 @@
      (use-package lisp-mode
        :straight nil
        :defer t
-       :gfhook '(company-mode
-                 lispyville-mode
+       :gfhook '(lispyville-mode
                  panda-format-on-save-mode
                  panda-set-lisp-locals)
        :config
@@ -1389,11 +1403,9 @@
      (use-package elisp-mode
        :straight nil
        :defer t
-       :gfhook ('emacs-lisp-mode-hook '(company-mode
-                                        lispyville-mode
+       :gfhook ('emacs-lisp-mode-hook '(lispyville-mode
                                         panda-format-on-save-mode
-                                        panda-set-elisp-locals
-                                        yas-minor-mode))
+                                        panda-set-elisp-locals))
        :mode-hydra
        ((emacs-lisp-mode lisp-interaction-mode)
         nil
@@ -1451,7 +1463,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package haskell-mode
        :defer t
-       :gfhook '(brittany-on-save-mode company-mode flycheck-mode)
+       :gfhook '(brittany-on-save-mode)
        :mode-hydra
        (("Eval"
          (("ef" haskell-process-load-file "file")
@@ -1561,8 +1573,7 @@
        :straight auctex
        :defer t
        :gfhook ('LaTeX-mode-hook '(lsp-deferred
-                                   panda-format-on-save-mode
-                                   yas-minor-mode))
+                                   panda-format-on-save-mode))
        :config
        (gsetq TeX-auto-save t
               TeX-parse-self t))
@@ -1674,9 +1685,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package ess
        :defer t
-       :gfhook ('ess-r-mode-hook '(company-mode
-                                   panda-format-on-save-mode
-                                   yas-minor-mode))
+       :gfhook ('ess-r-mode-hook '(panda-format-on-save-mode))
        :general
        ('normal ess-r-mode-map "K" #'ess-help)
        :mode-hydra

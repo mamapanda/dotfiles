@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: cl-destructuring-bind
-# key: cdb
-# --
-(cl-destructuring-bind ${1:x} ${2:nil}
-  $0)

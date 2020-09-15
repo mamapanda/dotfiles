@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: defvar
-# key: dv
-# --
-(defvar ${1:name} ${2:nil}
-  "$3")

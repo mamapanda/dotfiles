@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: remove-hook
-# key: rh
-# --
-(remove-hook '${1:some}-hook #'${2:fn})

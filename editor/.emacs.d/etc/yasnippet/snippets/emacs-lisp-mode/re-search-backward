@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: re-search-backward
-# key: rsb
-# --
-(re-search-backward ${1:"${2:pattern}"} ${3:nil} ${4:t})

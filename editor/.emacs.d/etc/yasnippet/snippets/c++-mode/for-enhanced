@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
-# name: for-enhanced
-# key: fe
+# name: for (... : ...) { ... }
+# key: fore
 # --
 for (${1:auto& ${2:x}} : ${3:std::vector<int>()}) {
-    $0
+    `%`$0
 }
