@@ -29,6 +29,7 @@ case $session in
         # xfce4-power-manager
 
         xautolock -time 10 -corners 0-0- -locker lockscreen &
+        xset s off -dpms
         xsetroot -cursor_name left_ptr &
 
         setxkbmap -option 'ctrl:swapcaps'
