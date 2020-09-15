@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+file="$(fd -tf ".*\.pdf" "$HOME" | sed "s|^$HOME|~|" | rofi -dmenu)"
+
+if [[ -n "$file" ]]; then
+    exec zathura "$file"
+fi

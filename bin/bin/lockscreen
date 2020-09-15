@@ -5,6 +5,7 @@ color() {
 }
 
 i3lock \
+    --nofork \
     --blur=8 \
     --insidevercolor="$(color background)" \
     --insidewrongcolor="$(color background)" \

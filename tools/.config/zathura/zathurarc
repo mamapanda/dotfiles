@@ -1,4 +1,5 @@
 map [normal] ; focus_inputbar :
+map [normal] , feedkeys ":exec rofi-zathura<Return>"
 
 set abort-clear-search true
 set selection-clipboard clipboard
