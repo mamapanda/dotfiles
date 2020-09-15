@@ -1,0 +1,20 @@
+[include]
+	path = ~/.gitconfig.local
+
+[alias]
+	# shorthand
+	aa = add -A
+	ai = add -i
+	ap = add -p
+	c = commit -m
+
+	# "commands"
+	amend = commit --amend
+	force-pull = !git fetch && git reset --hard FETCH_HEAD
+	ls-untracked = ls-files --others --exclude-standard
+	set = config --global
+	settings = config --global --includes --list
+	uncommit = reset --soft HEAD~1
+
+[pull]
+	rebase = false
