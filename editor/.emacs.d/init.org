@@ -20,8 +20,9 @@
   - [[#ex][Ex]]
   - [[#visual-aids][Visual Aids]]
   - [[#other][Other]]
-- [[#built-in-settings][Built-in Settings]]
+- [[#basic-configuration][Basic Configuration]]
   - [[#variables][Variables]]
+  - [[#hydras][Hydras]]
   - [[#minor-modes][Minor Modes]]
 - [[#global-packages][Global Packages]]
   - [[#appearance][Appearance]]
@@ -91,8 +92,8 @@
 
 ** Package Management
    Unlike ~package.el~, ~straight.el~ has a lockfile feature to ensure
-   near-perfect reproducibility, which is pretty nice for configuration
-   stability.  I grabbed the bootstrap code from ~straight.el~'s [[https://github.com/raxod502/straight.el#getting-started][readme]].
+   reproducibility, which is pretty nice for configuration stability.  I grabbed
+   the bootstrap code from ~straight.el~'s [[https://github.com/raxod502/straight.el#getting-started][readme]].
 
    #+BEGIN_SRC emacs-lisp
      (setq package-enable-at-startup nil
@@ -122,9 +123,8 @@
 
 ** Early Load Packages
    These are packages to load at the very beginning, since they're used
-   throughout my configuration.  I don't use ~hydra~ anymore outside of
-   ~major-mode-hydra~, but I figured I'd leave it in this section in case
-   that changes in the future.
+   throughout my configuration.  There's also ~evil~, but it's in its own
+   section.
 
    #+BEGIN_SRC emacs-lisp
      (require 'cl-lib)
@@ -140,6 +140,8 @@
      (use-package hydra
        :config
        (gsetq hydra-look-for-remap t))
+
+     (use-package pretty-hydra)
    #+END_SRC
 
 ** Custom File
@@ -204,16 +206,17 @@
    #+END_SRC
 
 ** Basic Keybindings
-   These are ~evil~ keybindings that don't depend on any other configuration.
-
-   The default ~s~ and ~S~ aren't that useful in my opinion, and ~s~ is slightly
-   easier to press than ~evil-ex~'s default binding of ~:~.
+   These are ~evil~ keybindings that don't depend on any additional packages.
 
    #+BEGIN_SRC emacs-lisp
      (general-def '(normal motion) override
-       "s" #'evil-ex
-       "S" #'execute-extended-command
-       ":" #'eval-expression)
+       ";" #'evil-ex
+       ":" #'eval-expression
+       "," #'execute-extended-command)
+
+     (panda-space
+       ";" #'evil-repeat-find-char
+       "," #'evil-repeat-find-char-reverse)
    #+END_SRC
 
    Swap ~`~ and ~​'​~ because I never use the default ~​'​~.
@@ -310,11 +313,14 @@
      (use-package evil-snipe
        :demand t
        :general
+       (general-unbind 'motion evil-snipe-override-local-mode-map ";" ",")
        ('(normal motion) evil-snipe-override-local-mode-map
         "f" #'evil-snipe-s
         "F" #'evil-snipe-S
         "t" #'evil-snipe-x
-        "T" #'evil-snipe-X)
+        "T" #'evil-snipe-X
+        [remap evil-repeat-find-char] #'evil-snipe-repeat
+        [remap evil-repeat-find-char-reverse] #'evil-snipe-repeat-reverse)
        :config
        (gsetq evil-snipe-smart-case t
               evil-snipe-scope 'visible
@@ -358,8 +364,8 @@
      (use-package evil-surround
        :config
        (general-def 'visual evil-surround-mode-map
-         "gs" #'evil-surround-region
-         "gS" #'evil-Surround-region)
+         "s" #'evil-surround-region
+         "S" #'evil-Surround-region)
        (global-evil-surround-mode 1))
    #+END_SRC
 
@@ -478,9 +484,9 @@
       (targets-define-to defun 'defun nil object :linewise t :bind t :keys "d")
     #+END_SRC
 
-*** Dollar
+*** Line
     #+BEGIN_SRC emacs-lisp
-      (targets-define-to dollar "$" nil quote :bind t :keys "$")
+      (targets-define-to line 'line nil object :bind t :keys "L")
     #+END_SRC
 
 *** Whitespace
@@ -628,7 +634,27 @@
                 "C-s" #'evil-numbers/dec-at-pt))
    #+END_SRC
 
-* Built-in Settings
+   Evil's markers aren't saved with ~desktop.el~ by default.  I tried to fix it,
+   but my solution isn't consistent.  Sometimes, the marks aren't saved or point
+   to the wrong locations.
+
+   #+BEGIN_SRC emacs-lisp
+     (with-eval-after-load 'desktop
+       (defvar panda--default-markers-alist nil)
+       (cl-pushnew 'evil-markers-alist desktop-locals-to-save)
+       (cl-pushnew 'panda--default-markers-alist desktop-globals-to-save)
+       (add-hook 'desktop-save-hook
+                 (lambda ()
+                   (setq panda--default-markers-alist (default-value 'evil-markers-alist))))
+       (add-hook 'desktop-after-read-hook
+                 (lambda ()
+                   (setf (default-value 'evil-markers-alist) panda--default-markers-alist))))
+   #+END_SRC
+
+* Basic Configuration
+  This section is for additional configuration that doesn't rely on packages
+  other than the ones in [[*Setup]["Setup"]].
+
 ** Variables
    #+BEGIN_SRC emacs-lisp
      (gsetq auto-save-default t
@@ -666,6 +692,32 @@
                     truncate-lines nil)
    #+END_SRC
 
+** Hydras
+   #+BEGIN_SRC emacs-lisp
+     (pretty-hydra-define panda-package-hydra (:title "Packages" :color teal :quit-key "<escape>")
+       ("Build"
+        (("r" straight-rebuild-package "rebuild package")
+         ("R" straight-rebuild-all "rebuild all")
+         ("m" straight-check-package "rebuild package if modified")
+         ("M" straight-check-all "rebuild all if modified")
+         ("p" straight-prune-build "prune build cache/dir"))
+        "Update"
+        (("p" straight-pull-package "pull package")
+         ("C-p" straight-pull-package-and-deps "pull package and deps")
+         ("P" straight-pull-all "pull all")
+         ("n" straight-normalize-package "normalize package")
+         ("N" straight-normalize-all "normalize all"))
+        "Install"
+        (("i" straight-use-package "install package"))
+        "Lockfile"
+        (("s" straight-freeze-versions "save versions")
+         ("a" straight-thaw-versions "apply versions"))
+        "Other"
+        (("w" straight-visit-package-website "visit package website"))))
+
+     (panda-space "z" #'panda-package-hydra/body)
+   #+END_SRC
+
 ** Minor Modes
    #+BEGIN_SRC emacs-lisp
      (blink-cursor-mode)
@@ -675,23 +727,6 @@
      (global-auto-revert-mode)
      (recentf-mode)
      (show-paren-mode)
-   #+END_SRC
-
-   Evil's markers aren't saved with ~desktop.el~ by default.  I tried to fix it,
-   but my solution isn't consistent.  Sometimes, the marks aren't saved or point
-   to the wrong locations.
-
-   #+BEGIN_SRC emacs-lisp
-     (cl-pushnew 'evil-markers-alist desktop-locals-to-save)
-
-     (defvar panda--default-markers-alist nil)
-     (cl-pushnew 'panda--default-markers-alist desktop-globals-to-save)
-     (add-hook 'desktop-save-hook
-               (lambda ()
-                 (setq panda--default-markers-alist (default-value 'evil-markers-alist))))
-     (add-hook 'desktop-after-read-hook
-               (lambda ()
-                 (setf (default-value 'evil-markers-alist) panda--default-markers-alist)))
    #+END_SRC
 
 * Global Packages
@@ -980,7 +1015,10 @@
 ** Git
    #+BEGIN_SRC emacs-lisp
      (use-package magit
-       :general (panda-space "g" #'magit-status)
+       :general
+       (panda-space
+         "g" #'magit-status
+         "G" #'magit-dispatch)
        :config
        (gsetq magit-auto-revert-mode nil))
 
@@ -995,7 +1033,7 @@
      (use-package evil-magit :after magit)
 
      (use-package git-timemachine
-       :general (panda-space "G" #'git-timemachine))
+       :general (panda-space "t" #'git-timemachine))
    #+END_SRC
 
 ** Readers
@@ -1106,7 +1144,10 @@
        :general
        ('(normal visual) "\\" 'major-mode-hydra)
        :config
-       (gsetq major-mode-hydra-invisible-quit-key "<escape>"))
+       (defun panda-major-mode-hydra-title (major-mode)
+         (format "Major Mode Hydra (%s)" major-mode))
+       (gsetq major-mode-hydra-invisible-quit-key "<escape>"
+              major-mode-hydra-title-generator #'panda-major-mode-hydra-title))
    #+END_SRC
 
 ** Language Server
