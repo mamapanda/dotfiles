@@ -7,3 +7,4 @@ straight/build-cache.el
 
 init.el
 etc/private.el
+srecode-map.el

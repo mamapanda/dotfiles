@@ -790,6 +790,8 @@
 
      (use-package rainbow-delimiters
        :ghook 'prog-mode-hook)
+
+     (use-package all-the-icons :defer t)
    #+END_SRC
 
 ** Help
@@ -1085,11 +1087,15 @@
      (use-package company
        :defer t
        :config
-       (gsetq company-backends (delete 'company-dabbrev company-backends)
-              company-dabbrev-code-modes nil
-              company-idle-delay 0.2
+       (gsetq company-idle-delay 0.2
               company-minimum-prefix-length 2
               company-tooltip-align-annotations t))
+
+     (use-package company-box
+       :ghook 'company-mode-hook
+       :config
+       (gsetq company-box-doc-enable nil
+              company-box-icons-alist 'company-box-icons-all-the-icons))
    #+END_SRC
 
 ** Formatting
@@ -1166,11 +1172,6 @@
               lsp-enable-indentation nil
               lsp-enable-on-type-formatting nil
               lsp-prefer-flymake nil))
-
-     (use-package company-lsp
-       :after company lsp-mode
-       :config
-       (gsetq company-lsp-cache-candidates 'auto))
 
      (use-package lsp-ui
        :after lsp-mode
@@ -1565,6 +1566,10 @@
        :config
        (gsetq TeX-auto-save t
               TeX-parse-self t))
+
+     (use-package evil-tex
+       :disabled t
+       :ghook 'LaTeX-mode-hook)
    #+END_SRC
 
 ** Matlab
@@ -1620,6 +1625,7 @@
        :after org
        :config
        (gsetq org-projectile-projects-file (expand-file-name "projects.org" org-directory)
+              org-projectile-counts-in-heading nil
               org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
        (add-to-list 'org-capture-templates (org-projectile-project-todo-entry) t #'equal))
 
@@ -1638,7 +1644,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package python
        :defer t
-       :gfhook '(black-on-save-mode lsp-deferred panda-set-python-locals)
+       :gfhook '(black-on-save-mode panda-set-python-locals)
        :mode-hydra
        (python-mode
         ("Eval"
@@ -1659,6 +1665,9 @@
          (reformatter-define black
            :program "black"
            :args (append '("-" "--quiet") black-args))))
+
+     (use-package lsp-pyright
+       :ghook ('(python-mode-hook) (lambda () (require 'lsp-pyright) (lsp-deferred))))
    #+END_SRC
 
 ** R
