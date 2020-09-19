@@ -24,26 +24,23 @@
   - [[#variables][Variables]]
   - [[#hydras][Hydras]]
   - [[#minor-modes][Minor Modes]]
-- [[#global-packages][Global Packages]]
+- [[#editor-packages][Editor Packages]]
   - [[#appearance][Appearance]]
+  - [[#completion][Completion]]
+  - [[#formatting][Formatting]]
+  - [[#helm][Helm]]
   - [[#help][Help]]
+  - [[#language-server][Language Server]]
+  - [[#linting][Linting]]
+  - [[#lisp][Lisp]]
   - [[#navigation][Navigation]]
-  - [[#ui][UI]]
+  - [[#snippets][Snippets]]
   - [[#windows][Windows]]
 - [[#tools][Tools]]
   - [[#file-manager][File Manager]]
   - [[#git][Git]]
   - [[#readers][Readers]]
   - [[#shell][Shell]]
-- [[#mode-specific-configuration][Mode-specific Configuration]]
-  - [[#completion][Completion]]
-  - [[#formatting][Formatting]]
-  - [[#keybindings][Keybindings]]
-  - [[#language-server][Language Server]]
-  - [[#linting][Linting]]
-  - [[#lisp][Lisp]]
-  - [[#snippets][Snippets]]
-  - [[#view--layout][View / Layout]]
 - [[#languages][Languages]]
   - [[#assembly][Assembly]]
   - [[#c--c][C / C++]]
@@ -729,7 +726,7 @@
      (show-paren-mode)
    #+END_SRC
 
-* Global Packages
+* Editor Packages
 ** Appearance
    #+BEGIN_SRC emacs-lisp
      (use-package doom-themes
@@ -794,51 +791,65 @@
      (use-package all-the-icons :defer t)
    #+END_SRC
 
-** Help
+** Completion
    #+BEGIN_SRC emacs-lisp
-     (use-package helpful
-       :general
-       (help-map "f" #'helpful-callable
-                 "k" #'helpful-key
-                 "v" #'helpful-variable))
+     (use-package company
+       :config
+       (gsetq company-idle-delay 0.2
+              company-minimum-prefix-length 2
+              company-tooltip-align-annotations t)
+       (global-company-mode))
+
+     (use-package company-box
+       :ghook 'company-mode-hook
+       :config
+       (gsetq company-box-doc-enable nil
+              company-box-icons-alist 'company-box-icons-all-the-icons))
    #+END_SRC
 
-** Navigation
+** Formatting
+   I like having my code auto-formatted on save so I don't have to think about
+   code style at all.  It's one less thing to worry about when programming.
+
+   For languages with formatters I like, I use ~reformatter~.  There are other
+   packages that already provide good integration, such as ~clang-format~, but I
+   prefer ~reformatter~'s simplicity.  When possible, I use external
+   configuration files so that options apply outside of Emacs as well.
+
    #+BEGIN_SRC emacs-lisp
-     (use-package avy
-       :general ('motion "g/" #'avy-goto-char-timer)
-       :config
-       (gsetq avy-all-windows nil
-              avy-all-windows-alt t
-              avy-background t))
-
-     (use-package deadgrep
-       :general (panda-space "s" #'deadgrep)
-       :config
-       (defun panda-deadgrep-project-root ()
-         "Find the root directory of the current project."
-         (require 'projectile)
-         (or (projectile-project-root) default-directory))
-       (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root))
-
-     (use-package imenu
-       :general (panda-space "i" #'imenu)
-       :config
-       (gsetq imenu-auto-rescan t))
-
-     (use-package projectile
-       :defer t
-       :general (panda-space "p" '(:keymap projectile-command-map))
-       :config
-       (gsetq projectile-enable-caching t
-              projectile-indexing-method 'alien)
-       (projectile-mode))
+     (use-package reformatter)
    #+END_SRC
 
-** UI
-   I used to use ~ivy~ but prefer ~helm~ now, mostly because splitting the
-   current window looks nicer than using the minibuffer to me.
+   For other languages, I have two simple minor modes.
 
+   #+BEGIN_SRC emacs-lisp
+     (defun panda-format-buffer ()
+       "Indent the entire buffer and delete trailing whitespace."
+       (interactive)
+       (let ((inhibit-message t))
+         (indent-region (point-min) (point-max))
+         (delete-trailing-whitespace)))
+
+     (panda-space "=" #'panda-format-buffer)
+
+     (define-minor-mode panda-format-on-save-mode
+       "Indents a buffer and trims whitespace on save."
+       :init-value nil
+       :lighter "panda-format"
+       (if panda-format-on-save-mode
+           (add-hook 'before-save-hook #'panda-format-buffer nil t)
+         (remove-hook 'before-save-hook #'panda-format-buffer t)))
+
+     (define-minor-mode panda-trim-on-save-mode
+       "Trims whitespace on save."
+       :init-value nil
+       :lighter "panda-trim"
+       (if panda-trim-on-save-mode
+           (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+         (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
+   #+END_SRC
+
+** Helm
    #+BEGIN_SRC emacs-lisp
      (use-package helm
        :demand t
@@ -890,6 +901,192 @@
        (helm-projectile-toggle 1))
 
      (use-package helm-xref :after helm xref)
+   #+END_SRC
+
+** Help
+   #+BEGIN_SRC emacs-lisp
+     (use-package helpful
+       :general
+       (help-map "f" #'helpful-callable
+                 "k" #'helpful-key
+                 "v" #'helpful-variable))
+   #+END_SRC
+
+** Language Server
+   ~lsp-ui~'s sideline diagnostics are disabled in favor of ~flycheck-posframe~
+   to keep the error UI consistent across all languages.  LSP formatting is also
+   disabled in favor of ~reformatter~.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package lsp-mode
+       :defer t
+       :general
+       ('normal lsp-mode-map "K" #'lsp-describe-thing-at-point)
+       :config
+       (gsetq lsp-auto-execute-action nil
+              lsp-before-save-edits nil
+              lsp-enable-indentation nil
+              lsp-enable-on-type-formatting nil
+              lsp-prefer-flymake nil))
+
+     (use-package lsp-ui
+       :after lsp-mode
+       :config
+       (gsetq lsp-ui-doc-position 'top
+              lsp-ui-peek-always-show t
+              lsp-ui-sideline-show-diagnostics nil))
+
+     (use-package dap-mode
+       :commands dap-debug dap-hydra
+       :config
+       (require 'dap-chrome)
+       (require 'dap-firefox)
+       (require 'dap-gdb-lldb)
+       (require 'dap-python)
+       (dap-mode 1)
+       (dap-ui-mode 1))
+
+     (with-eval-after-load 'major-mode-hydra
+       (defvar panda--lsp-hydra-enabled-modes nil
+         "Major modes that already have lsp hydra heads.")
+       (defun panda--add-lsp-hydra-heads ()
+         "Add `lsp' command heads to the current major mode's `major-mode-hydra'."
+         (unless (memq major-mode panda--lsp-hydra-enabled-modes)
+           (eval
+            `(major-mode-hydra-define+ ,major-mode nil
+               ("Find"
+                (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
+                "Refactor"
+                (("r" lsp-rename "rename")
+                 ("c" lsp-ui-sideline-apply-code-actions "code action")
+                 ("o" lsp-organize-imports "organize imports"))
+                "View"
+                (("i" lsp-ui-imenu "imenu")
+                 ("l" lsp-lens-mode "lens")
+                 ("E" lsp-ui-flycheck-list "errors"))
+                "Debug"
+                (("D" dap-debug "start")
+                 ("d" dap-hydra "hydra"))
+                "Workspace"
+                (("<backspace>" lsp-restart-workspace "restart")
+                 ("<delete>" lsp-shutdown-workspace "shutdown")))))
+           (push major-mode panda--lsp-hydra-enabled-modes)))
+       (add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads))
+   #+END_SRC
+
+** Linting
+   #+BEGIN_SRC emacs-lisp
+     (use-package flycheck
+       :demand t
+       :general
+       (flycheck-mode-map
+        [remap previous-error] #'flycheck-previous-error
+        [remap next-error] #'flycheck-next-error)
+       :config
+       (gsetq flycheck-display-errors-delay 0.5)
+       (evil-declare-motion #'flycheck-previous-error)
+       (evil-declare-motion #'flycheck-next-error)
+       (global-flycheck-mode))
+
+     (use-package flycheck-posframe
+       :ghook 'flycheck-mode-hook
+       :config
+       (flycheck-posframe-configure-pretty-defaults))
+   #+END_SRC
+
+** Lisp
+   #+BEGIN_SRC emacs-lisp
+     (use-package lispyville
+       :defer t
+       :config
+       (lispyville-set-key-theme '(c-w
+                                   commentary
+                                   operators
+                                   prettify
+                                   slurp/barf-cp))
+       (general-unbind 'motion lispyville-mode-map "{" "}")
+       (with-eval-after-load 'evil-goggles
+         (panda-evil-goggles-add #'lispyville-yank #'evil-yank)
+         (panda-evil-goggles-add #'lispyville-delete #'evil-delete)
+         (panda-evil-goggles-add #'lispyville-change #'evil-change)
+         (panda-evil-goggles-add #'lispyville-yank-line #'evil-yank-line)
+         (panda-evil-goggles-add #'lispyville-delete-line #'evil-delete-line)
+         (panda-evil-goggles-add #'lispyville-change-line #'evil-change-line)
+         (panda-evil-goggles-add #'lispyville-change-whole-line #'evil-change-whole-line)
+         (panda-evil-goggles-add #'lispyville-join #'evil-join)))
+
+     (use-package lispy
+       :ghook 'lispyville-mode-hook
+       :config
+       (lispy-set-key-theme '(lispy special))
+       (lispy-define-key lispy-mode-map-special "<" #'lispy-slurp-or-barf-left)
+       (lispy-define-key lispy-mode-map-special ">" #'lispy-slurp-or-barf-right)
+       (general-def lispy-mode-map-lispy "\"" #'lispy-doublequote))
+   #+END_SRC
+
+** Navigation
+   #+BEGIN_SRC emacs-lisp
+     (use-package avy
+       :general ('motion "g/" #'avy-goto-char-timer)
+       :config
+       (gsetq avy-all-windows nil
+              avy-all-windows-alt t
+              avy-background t))
+
+     (use-package deadgrep
+       :general (panda-space "s" #'deadgrep)
+       :config
+       (defun panda-deadgrep-project-root ()
+         "Find the root directory of the current project."
+         (require 'projectile)
+         (or (projectile-project-root) default-directory))
+       (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root))
+
+     (use-package imenu
+       :general (panda-space "i" #'imenu)
+       :config
+       (gsetq imenu-auto-rescan t))
+
+     (use-package projectile
+       :defer t
+       :general (panda-space "p" '(:keymap projectile-command-map))
+       :config
+       (gsetq projectile-enable-caching t
+              projectile-indexing-method 'alien)
+       (projectile-mode))
+   #+END_SRC
+
+** Snippets
+   ~company~'s tab key can conflict with ~yasnippet~.  The fix is from [[https://stackoverflow.com/questions/2087225/about-the-fix-for-the-interference-between-company-mode-and-yasnippet][Stack
+   Overflow]].
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package yasnippet
+       :demand t
+       :general (panda-space "y" #'yas-insert-snippet)
+       :config
+       (gsetq yas-triggers-in-field t
+              yas-indent-line 'auto
+              yas-also-auto-indent-first-line t)
+       (yas-reload-all)
+
+       (with-eval-after-load 'company
+         (defun panda--company-yas-tab-advice (old-func &rest args)
+           (unless (and yas-minor-mode (yas-expand))
+             (call-interactively old-func args)))
+         (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
+           (advice-add company-tab-func :around #'panda--company-yas-tab-advice)))
+
+       (defun panda--insert-snippet-in-insert-mode (&rest _)
+         "Advice to enter insert mode before inserting a snippet."
+         (evil-insert-state))
+       (advice-add 'yas-insert-snippet :before #'panda--insert-snippet-in-insert-mode)
+
+       (yas-global-mode))
+
+     (use-package doom-snippets
+       :straight (:host github :repo "hlissner/doom-snippets" :files ("*.el" "*"))
+       :after yasnippet)
    #+END_SRC
 
 ** Windows
@@ -1081,242 +1278,21 @@
        :ghook 'eshell-mode-hook)
    #+END_SRC
 
-* Mode-specific Configuration
-** Completion
-   #+BEGIN_SRC emacs-lisp
-     (use-package company
-       :config
-       (gsetq company-idle-delay 0.2
-              company-minimum-prefix-length 2
-              company-tooltip-align-annotations t)
-       (global-company-mode))
-
-     (use-package company-box
-       :ghook 'company-mode-hook
-       :config
-       (gsetq company-box-doc-enable nil
-              company-box-icons-alist 'company-box-icons-all-the-icons))
-   #+END_SRC
-
-** Formatting
-   I like having my code auto-formatted on save so I don't have to think about
-   code style at all.  It's one less thing to worry about when programming.
-
-   For languages with formatters I like, I use ~reformatter~.  There are other
-   packages that already provide good integration, such as ~clang-format~, but I
-   prefer ~reformatter~'s simplicity.  When possible, I use external
-   configuration files so that options apply outside of Emacs as well.
-
-   #+BEGIN_SRC emacs-lisp
-     (use-package reformatter)
-   #+END_SRC
-
-   For other languages, I have two simple minor modes.
-
-   #+BEGIN_SRC emacs-lisp
-     (defun panda-format-buffer ()
-       "Indent the entire buffer and delete trailing whitespace."
-       (interactive)
-       (let ((inhibit-message t))
-         (indent-region (point-min) (point-max))
-         (delete-trailing-whitespace)))
-
-     (panda-space "=" #'panda-format-buffer)
-
-     (define-minor-mode panda-format-on-save-mode
-       "Indents a buffer and trims whitespace on save."
-       :init-value nil
-       :lighter "panda-format"
-       (if panda-format-on-save-mode
-           (add-hook 'before-save-hook #'panda-format-buffer nil t)
-         (remove-hook 'before-save-hook #'panda-format-buffer t)))
-
-     (define-minor-mode panda-trim-on-save-mode
-       "Trims whitespace on save."
-       :init-value nil
-       :lighter "panda-trim"
-       (if panda-trim-on-save-mode
-           (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
-         (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
-   #+END_SRC
-
-** Keybindings
-   I bind all major-mode-specific commands through ~major-mode-hydra~, since I
-   sometimes forget a command's keybinding or even name.
-
-   #+BEGIN_SRC emacs-lisp
-     (use-package major-mode-hydra
-       :demand t
-       :general
-       ('(normal visual) "\\" 'major-mode-hydra)
-       :config
-       (defun panda-major-mode-hydra-title (major-mode)
-         (format "Major Mode Hydra (%s)" major-mode))
-       (gsetq major-mode-hydra-invisible-quit-key "<escape>"
-              major-mode-hydra-title-generator #'panda-major-mode-hydra-title))
-   #+END_SRC
-
-** Language Server
-   ~lsp-ui~'s sideline diagnostics are disabled in favor of ~flycheck-posframe~
-   to keep the error UI consistent across all languages.  LSP formatting is also
-   disabled in favor of ~reformatter~.
-
-   #+BEGIN_SRC emacs-lisp
-     (use-package lsp-mode
-       :defer t
-       :general
-       ('normal lsp-mode-map "K" #'lsp-describe-thing-at-point)
-       :config
-       (gsetq lsp-auto-execute-action nil
-              lsp-before-save-edits nil
-              lsp-enable-indentation nil
-              lsp-enable-on-type-formatting nil
-              lsp-prefer-flymake nil))
-
-     (use-package lsp-ui
-       :after lsp-mode
-       :config
-       (gsetq lsp-ui-doc-position 'top
-              lsp-ui-peek-always-show t
-              lsp-ui-sideline-show-diagnostics nil))
-
-     (use-package dap-mode
-       :commands dap-debug dap-hydra
-       :config
-       (require 'dap-chrome)
-       (require 'dap-firefox)
-       (require 'dap-gdb-lldb)
-       (require 'dap-python)
-       (dap-mode 1)
-       (dap-ui-mode 1))
-
-     (with-eval-after-load 'major-mode-hydra
-       (defvar panda--lsp-hydra-enabled-modes nil
-         "Major modes that already have lsp hydra heads.")
-       (defun panda--add-lsp-hydra-heads ()
-         "Add `lsp' command heads to the current major mode's `major-mode-hydra'."
-         (unless (memq major-mode panda--lsp-hydra-enabled-modes)
-           (eval
-            `(major-mode-hydra-define+ ,major-mode nil
-               ("Find"
-                (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
-                "Refactor"
-                (("r" lsp-rename "rename")
-                 ("c" lsp-ui-sideline-apply-code-actions "code action")
-                 ("o" lsp-organize-imports "organize imports"))
-                "View"
-                (("i" lsp-ui-imenu "imenu")
-                 ("l" lsp-lens-mode "lens")
-                 ("E" lsp-ui-flycheck-list "errors"))
-                "Debug"
-                (("D" dap-debug "start")
-                 ("d" dap-hydra "hydra"))
-                "Workspace"
-                (("<backspace>" lsp-restart-workspace "restart")
-                 ("<delete>" lsp-shutdown-workspace "shutdown")))))
-           (push major-mode panda--lsp-hydra-enabled-modes)))
-       (add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads))
-   #+END_SRC
-
-** Linting
-   #+BEGIN_SRC emacs-lisp
-     (use-package flycheck
-       :demand t
-       :general
-       (flycheck-mode-map
-        [remap previous-error] #'flycheck-previous-error
-        [remap next-error] #'flycheck-next-error)
-       :config
-       (gsetq flycheck-display-errors-delay 0.5)
-       (evil-declare-motion #'flycheck-previous-error)
-       (evil-declare-motion #'flycheck-next-error)
-       (global-flycheck-mode))
-
-     (use-package flycheck-posframe
-       :ghook 'flycheck-mode-hook
-       :config
-       (flycheck-posframe-configure-pretty-defaults))
-   #+END_SRC
-
-** Lisp
-   #+BEGIN_SRC emacs-lisp
-     (use-package lispyville
-       :defer t
-       :config
-       (lispyville-set-key-theme '(c-w
-                                   commentary
-                                   operators
-                                   prettify
-                                   slurp/barf-cp))
-       (general-unbind 'motion lispyville-mode-map "{" "}")
-       (with-eval-after-load 'evil-goggles
-         (panda-evil-goggles-add #'lispyville-yank #'evil-yank)
-         (panda-evil-goggles-add #'lispyville-delete #'evil-delete)
-         (panda-evil-goggles-add #'lispyville-change #'evil-change)
-         (panda-evil-goggles-add #'lispyville-yank-line #'evil-yank-line)
-         (panda-evil-goggles-add #'lispyville-delete-line #'evil-delete-line)
-         (panda-evil-goggles-add #'lispyville-change-line #'evil-change-line)
-         (panda-evil-goggles-add #'lispyville-change-whole-line #'evil-change-whole-line)
-         (panda-evil-goggles-add #'lispyville-join #'evil-join)))
-
-     (use-package lispy
-       :ghook 'lispyville-mode-hook
-       :config
-       (lispy-set-key-theme '(lispy special))
-       (lispy-define-key lispy-mode-map-special "<" #'lispy-slurp-or-barf-left)
-       (lispy-define-key lispy-mode-map-special ">" #'lispy-slurp-or-barf-right)
-       (general-def lispy-mode-map-lispy "\"" #'lispy-doublequote))
-   #+END_SRC
-
-** Snippets
-   ~company~'s tab key can conflict with ~yasnippet~.  The fix is from [[https://stackoverflow.com/questions/2087225/about-the-fix-for-the-interference-between-company-mode-and-yasnippet][Stack
-   Overflow]].
-
-   #+BEGIN_SRC emacs-lisp
-     (use-package yasnippet
-       :demand t
-       :general (panda-space "y" #'yas-insert-snippet)
-       :config
-       (gsetq yas-triggers-in-field t
-              yas-indent-line 'auto
-              yas-also-auto-indent-first-line t)
-       (yas-reload-all)
-
-       (with-eval-after-load 'company
-         (defun panda--company-yas-tab-advice (old-func &rest args)
-           (unless (and yas-minor-mode (yas-expand))
-             (call-interactively old-func args)))
-         (when-let ((company-tab-func (lookup-key company-active-map (kbd "<tab>"))))
-           (advice-add company-tab-func :around #'panda--company-yas-tab-advice)))
-
-       (defun panda--insert-snippet-in-insert-mode (&rest _)
-         "Advice to enter insert mode before inserting a snippet."
-         (evil-insert-state))
-       (advice-add 'yas-insert-snippet :before #'panda--insert-snippet-in-insert-mode)
-
-       (yas-global-mode))
-
-     (use-package doom-snippets
-       :straight (:host github :repo "hlissner/doom-snippets" :files ("*.el" "*"))
-       :after yasnippet)
-   #+END_SRC
-
-** View / Layout
-   #+BEGIN_SRC emacs-lisp
-     (use-package olivetti :defer t)
-
-     (use-package outshine
-       :defer t
-       :general
-       ('normal outshine-mode-map
-                "<tab>" #'outshine-cycle
-                "<backtab>" #'outshine-cycle-buffer)
-       :config
-       (gsetq outshine-org-style-global-cycling-at-bob-p t))
-   #+END_SRC
-
 * Languages
-  Some configuration may be out of date due to me not using the language much.
+  I bind all language-specific commands through ~major-mode-hydra~, since I
+  sometimes forget a command's keybinding or even name.
+
+  #+BEGIN_SRC emacs-lisp
+    (use-package major-mode-hydra
+      :demand t
+      :general
+      ('(normal visual) "\\" 'major-mode-hydra)
+      :config
+      (defun panda-major-mode-hydra-title (major-mode)
+        (format "Major Mode Hydra (%s)" major-mode))
+      (gsetq major-mode-hydra-invisible-quit-key "<escape>"
+             major-mode-hydra-title-generator #'panda-major-mode-hydra-title))
+  #+END_SRC
 
 ** Assembly
    #+BEGIN_SRC emacs-lisp
@@ -1649,6 +1625,8 @@
        (evil-org-set-key-theme '(additional calendar insert navigation))
        (require 'evil-org-agenda)
        (evil-org-agenda-set-keys))
+
+     (use-package olivetti :defer t)
    #+END_SRC
 
 ** Python
