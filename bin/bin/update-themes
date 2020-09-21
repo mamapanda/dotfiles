@@ -1,10 +1,10 @@
 #!/usr/bin/bash
-
 # For stuff that doesn't directly support Xresources
 
-case $1 in
-    dunst)
-        cat <<EOF
+###############################################################################
+#                                    dunst                                    #
+###############################################################################
+cat > "$XDG_CONFIG_HOME/dunst/theme.conf" <<EOF
 # automatically generated from Xresources
 
 [urgency_low]
@@ -25,9 +25,11 @@ foreground = "$(xrquery dunst.foreground)"
 frame_color = "$(xrquery dunst.critical-color)"
 timeout = $(xrquery dunst.critical-timeout)
 EOF
-        ;;
-    kitty)
-        cat <<EOF
+
+###############################################################################
+#                                    kitty                                    #
+###############################################################################
+cat > "$XDG_CONFIG_HOME/kitty/theme.conf" <<EOF
 # automatically generated from Xresources
 
 # cursor
@@ -64,9 +66,11 @@ color14              $(xrquery kitty.color14)
 color7               $(xrquery kitty.color7)
 color15              $(xrquery kitty.color15)
 EOF
-        ;;
-    zathura)
-        cat <<EOF
+
+###############################################################################
+#                                   zathura                                   #
+###############################################################################
+cat > "$XDG_CONFIG_HOME/zathura/theme" <<EOF
 # automatically generated from Xresources
 
 set completion-bg "$(xrquery zathura.background)"
@@ -88,9 +92,3 @@ set notification-warning-fg "$(xrquery zathura.warning-color)"
 set statusbar-bg "$(xrquery zathura.background-alt)"
 set statusbar-fg "$(xrquery zathura.foreground-alt)"
 EOF
-        ;;
-    *)
-        echo "Unsupported option: '$1'"
-        exit 1
-        ;;
-esac

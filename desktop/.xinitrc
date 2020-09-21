@@ -22,8 +22,7 @@ case $session in
         redshift &
         wallpaper restore
 
-        cat ~/.config/dunst/dunstrc <(xtheme dunst) > /tmp/dunstrc
-        restart dunst -config /tmp/dunstrc &
+        dunst-wrapper &
 
         clipit &
         # xfce4-power-manager

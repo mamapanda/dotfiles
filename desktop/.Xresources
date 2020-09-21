@@ -19,7 +19,7 @@ Xcursor.size:  0
 #define CYAN    #5cefff
 #define WHITE   #bbc2cf
 
-#define DARK_GRAY     #454b5c
+#define DARK_GRAY     #666f88
 #define LIGHT_RED     #ffaea9
 #define LIGHT_GREEN   #aed9aa
 #define LIGHT_YELLOW  #feeacb

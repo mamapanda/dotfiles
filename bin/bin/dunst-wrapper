@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+shopt -s nullglob
+
+cat "$XDG_CONFIG_HOME"/dunst/dunstrc "$XDG_CONFIG_HOME"/dunst/*.conf > /tmp/dunstrc
+exec restart dunst -config /tmp/dunstrc
