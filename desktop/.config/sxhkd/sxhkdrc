@@ -117,7 +117,7 @@ super + {_,shift + }period
     emacs{_, --no-desktop}
 
 super + slash
-    thunar
+    tdrop -ma -x 10% -y 10% -w 80% -h 80% thunar
 
 XF86Audio{Prev,Play,Next}
     cmus-remote -{r,u,n}
