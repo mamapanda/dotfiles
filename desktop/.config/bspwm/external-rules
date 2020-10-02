@@ -1,0 +1,37 @@
+#!/usr/bin/bash
+
+wid=$1
+class=$2
+instance=$3
+consequences=$4
+
+float_centered_window_with_size() {
+    window_width=$1
+    window_height=$2
+
+    screen_resolution=$(xrandr | head -n1 | sed "s/^.*current \([0-9]*\) x \([0-9]*\),.*$/\1x\2/")
+    screen_width=$(echo "$screen_resolution" | cut -f1 -dx)
+    screen_height=$(echo "$screen_resolution" | cut -f2 -dx)
+
+    window_x=$((($screen_width - $window_width) / 2))
+    window_y=$((($screen_height - $window_height) / 2))
+
+    echo "state=floating"
+    echo "rectangle=${window_width}x${window_height}+${window_x}+${window_y}"
+}
+
+if [[ $class = "Lxappearance" ]]; then
+    float_centered_window_with_size 1000 700
+elif [[ $class = "zoom" ]]; then
+    # Zoom is a weird case.  The instances are all "zoom", and some window
+    # titles aren't properly set right away.  Using the initial window size is a
+    # hack, but it seems to work alright so far.
+    window_width=$(xwininfo -id "$wid" | awk '$1 == "Width:" { print $2 }')
+    window_height=$(xwininfo -id "$wid" | awk '$1 == "Height:" { print $2 }')
+
+    if [[ $window_width -ge 800 && $window_height -ge 800 ]]; then
+        echo "state=tiled"
+    else
+        echo "state=floating"
+    fi
+fi

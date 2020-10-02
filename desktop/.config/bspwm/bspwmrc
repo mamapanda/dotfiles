@@ -20,7 +20,9 @@ bspc config focus_follows_pointer false
 
 bspc rule -a Emacs:emacs state=tiled private=on
 bspc rule -a firefox:Navigator private=on
-bspc rule -a Lxappearance state=floating
+bspc rule -a Nm-connection-editor:nm-connection-editor state=floating
 bspc rule -a Zathura state=tiled
+
+bspc config external_rules_command "$XDG_CONFIG_HOME/bspwm/external-rules"
 
 restart polybar main &
