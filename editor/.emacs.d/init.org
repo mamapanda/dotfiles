@@ -180,7 +180,10 @@
               evil-want-keybinding nil)
        :config
        (gsetq evil-disable-insert-state-bindings t
-              evil-jumps-cross-buffers nil
+              evil-ex-substitute-global t
+              evil-goto-definition-functions '(evil-goto-definition-xref
+                                               evil-goto-definition-imenu)
+              evil-jumps-cross-buffers t
               evil-move-beyond-eol t
               evil-toggle-key "C-s-+"
               evil-want-C-d-scroll t
@@ -228,7 +231,6 @@
 
    #+BEGIN_SRC emacs-lisp
      (general-def 'motion
-       "gD" #'xref-find-references
        "[e" #'previous-error
        "]e" #'next-error
        "M-h" #'beginning-of-defun
@@ -1038,9 +1040,12 @@
        :config
        (defun panda-deadgrep-project-root ()
          "Find the root directory of the current project."
-         (require 'projectile)
-         (or (projectile-project-root) default-directory))
-       (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root))
+         (or (and (require 'projectile nil t) (projectile-project-root))
+             default-directory))
+       (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root)
+
+       (evil-add-command-properties #'deadgrep-visit-result :jump t)
+       (evil-add-command-properties #'deadgrep-visit-result-other-window :jump t))
 
      (use-package imenu
        :general (panda-space "i" #'imenu)
@@ -1054,6 +1059,32 @@
        (gsetq projectile-enable-caching t
               projectile-indexing-method 'alien)
        (projectile-mode))
+
+     (use-package treemacs
+       :defer t
+       :general (panda-space "t" #'treemacs)
+       :config
+       (setq treemacs-follow-after-init t
+             treemacs-is-never-other-window t))
+
+     (use-package treemacs-all-the-icons
+       :after treemacs
+       :config
+       (treemacs-load-theme "all-the-icons"))
+
+     (use-package treemacs-evil :after treemacs evil)
+     (use-package treemacs-projectile :after treemacs projectile)
+     (use-package treemacs-magit :after treemacs magit)
+
+     (use-package xref
+       :general ('motion "gD" #'panda-xref-find-references)
+       :config
+       (evil-define-motion panda-xref-find-references ()
+         "Like `xref-find-references' but automatically uses the identifer at point."
+         :jump t
+         (if-let ((identifier (xref-backend-identifier-at-point (xref-find-backend))))
+             (xref-find-references identifier)
+           (user-error "No symbol under cursor"))))
    #+END_SRC
 
 ** Snippets
@@ -1164,9 +1195,12 @@
    [[https://github.com/Fuco1/dired-hacks/][dired-hacks]].
 
    #+BEGIN_SRC emacs-lisp
-     (panda-space
-       "j" #'dired-jump
-       "J" #'dired-jump-other-window)
+     (use-package dired-x
+       :straight nil
+       :general
+       (panda-space
+         "j" #'dired-jump
+         "J" #'dired-jump-other-window))
 
      (use-package image-dired
        :general (normal dired-mode-map "C-t h" #'panda-image-dired-here)
@@ -1334,8 +1368,9 @@
 
      (use-package highlight-doxygen
        :ghook ('(c-mode-hook c++-mode-hook) '(highlight-doxygen-mode))
-       :config
-       (custom-set-faces '(highlight-doxygen-comment ((t nil)))))
+       :custom-face
+       (highlight-doxygen-comment ((t nil)))
+       (highlight-doxygen-code-block ((t nil))))
    #+END_SRC
 
 ** Common Lisp
@@ -1656,6 +1691,7 @@
            :args (append '("-" "--quiet") black-args))))
 
      (use-package lsp-pyright
+       :defer t
        :ghook ('(python-mode-hook) (lambda () (require 'lsp-pyright) (lsp-deferred))))
    #+END_SRC
 

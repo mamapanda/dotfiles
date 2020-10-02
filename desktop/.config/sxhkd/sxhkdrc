@@ -99,7 +99,7 @@ XF86Audio{RaiseVolume,LowerVolume,Mute}
 # Applications
 #
 super + @space
-	rofi -show drun -show-icons
+	rofi -show drun -show-icons -theme-str 'element-icon \{ size: 1em; \}'
 
 super + Return
 	kitty
