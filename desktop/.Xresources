@@ -78,7 +78,7 @@ rofi.color-normal: BACKGROUND, FOREGROUND, BACKGROUND, BLUE,   BACKGROUND
 rofi.color-urgent: BACKGROUND, RED,        BACKGROUND, RED,    BACKGROUND
 
 rofi.modi:            window,run,combi,drun
-rofi.font:            Droid Sans 12
+rofi.font:            Noto Sans 12
 rofi.terminal:        kitty
 rofi.hide-scrollbar:  true
 rofi.disable-history: false
