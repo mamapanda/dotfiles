@@ -1,10 +1,13 @@
-var/
 elpa/
 quelpa/
 straight/build/
 straight/repos/
 straight/build-cache.el
 
+var/*
+!var/.dir-locals.el
+
 init.el
 etc/private.el
 srecode-map.el
+

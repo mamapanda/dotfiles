@@ -13,7 +13,6 @@
 - [[#evil][Evil]]
   - [[#base-packages][Base Packages]]
   - [[#basic-keybindings][Basic Keybindings]]
-  - [[#undo-tree-replacement][~undo-tree~ Replacement]]
   - [[#motions][Motions]]
   - [[#operators][Operators]]
   - [[#text-objects][Text Objects]]
@@ -35,7 +34,7 @@
   - [[#lisp][Lisp]]
   - [[#navigation][Navigation]]
   - [[#snippets][Snippets]]
-  - [[#windows][Windows]]
+  - [[#windows--buffers][Windows / Buffers]]
 - [[#tools][Tools]]
   - [[#file-manager][File Manager]]
   - [[#git][Git]]
@@ -57,6 +56,7 @@
   - [[#python][Python]]
   - [[#r][R]]
   - [[#other-1][Other]]
+- [[#stuff-to-check-out][Stuff To Check Out]]
 
 * Setup
 ** Lexical Binding
@@ -159,20 +159,6 @@
 
 * Evil
 ** Base Packages
-   Prevent ~goto-chg~ and ~undo-tree~ from even being installed, as ~undo-tree~
-   is pretty buggy.  Of course, this is a hack, as they're not built-in
-   packages.  I could instead disable ~goto-chg~ and ~undo-tree~ after ~evil~ is
-   loaded, but I'd rather the packages not be installed in the first place.
-
-   #+BEGIN_SRC emacs-lisp
-     (cl-pushnew 'goto-chg straight-built-in-pseudo-packages)
-     (cl-pushnew 'undo-tree straight-built-in-pseudo-packages)
-   #+END_SRC
-
-   Here is ~evil~ itself, along with ~evil-collection~ to set up more
-   keybindings.  I opted not to use ~evil-collection~'s ~company~ keybindings
-   because I prefer the defaults.
-
    #+BEGIN_SRC emacs-lisp
      (use-package evil
        :init
@@ -186,6 +172,7 @@
               evil-jumps-cross-buffers t
               evil-move-beyond-eol t
               evil-toggle-key "C-s-+"
+              evil-undo-system 'undo-fu
               evil-want-C-d-scroll t
               evil-want-C-u-scroll t
               evil-want-Y-yank-to-eol t)
@@ -197,11 +184,17 @@
        (add-hook 'prog-mode-hook #'hs-minor-mode)
        (evil-mode 1))
 
+     (use-package undo-fu
+       :general
+       (panda-space "u" #'undo-fu-disable-checkpoint)
+       :config
+       (gsetq undo-fu-ignore-keyboard-quit t))
+
      (use-package evil-collection
        :config
        (gsetq evil-collection-key-blacklist '("SPC"))
        (delete 'company evil-collection-mode-list)
-       (delete 'outline evil-collection-mode-list)
+       (delete 'ggtags evil-collection-mode-list)
        (evil-collection-init))
    #+END_SRC
 
@@ -225,6 +218,13 @@
      (general-def 'motion
        "`" #'evil-goto-mark-line
        "'" #'evil-goto-mark)
+   #+END_SRC
+
+   Move redo to ~U~, since ~U~ isn't even used.
+
+   #+BEGIN_SRC emacs-lisp
+     (general-unbind 'normal "C-r")
+     (general-def 'normal "U" #'evil-redo)
    #+END_SRC
 
    Additional navigation commands from Emacs.
@@ -285,26 +285,33 @@
        "C-x r i" #'evil-paste-from-register)
    #+END_SRC
 
-** ~undo-tree~ Replacement
-   I use my own fork of ~goto-last-change~ because there's a bug with
-   ~yasnippet~, and the maintainer hasn't merged my PR.
-
-   #+BEGIN_SRC emacs-lisp
-     (general-unbind 'normal "C-r" "g;" "g,")
-
-     (use-package goto-last-change
-       :straight (goto-last-change
-                  :host github
-                  :repo "camdez/goto-last-change.el"
-                  :fork (:host nil :repo "git@github.com:mamapanda/goto-last-change.el.git"))
-       :general ('normal "g;" #'goto-last-change))
-
-     (use-package undo-propose
-       :general ('normal "U" #'undo-propose))
-   #+END_SRC
-
 ** Motions
    #+BEGIN_SRC emacs-lisp
+     (use-package evil-easymotion
+       :general
+       ('motion "gs" '(:keymap evilem-map))
+       (evilem-map "f" #'panda-em-snipe-s
+                   "F" #'panda-em-snipe-S
+                   "t" #'panda-em-snipe-x
+                   "T" #'panda-em-snipe-X)
+       :config
+       (defmacro panda-make-snipe-easymotion (name snipe-motion)
+         `(evilem-make-motion ,name #'evil-snipe-repeat
+                              :pre-hook (save-excursion (call-interactively ,snipe-motion))
+                              :bind ((evil-snipe-enable-highlight nil)
+                                     (evil-snipe-enable-incremental-highlight nil))))
+       (panda-make-snipe-easymotion panda-em-snipe-s #'evil-snipe-s)
+       (panda-make-snipe-easymotion panda-em-snipe-S #'evil-snipe-S)
+       (panda-make-snipe-easymotion panda-em-snipe-x #'evil-snipe-x)
+       (panda-make-snipe-easymotion panda-em-snipe-X #'evil-snipe-X)
+       ;; Just redefine these instead of defining new motions and remapping
+       (evilem-make-motion evilem-motion-forward-word-begin #'evil-forward-word-begin)
+       (evilem-make-motion evilem-motion-forward-word-end #'evil-forward-word-end)
+       (evilem-make-motion evilem-motion-backward-word-begin #'evil-backward-word-begin)
+       (evilem-make-motion evilem-motion-forward-WORD-begin #'evil-forward-WORD-begin)
+       (evilem-make-motion evilem-motion-forward-WORD-end #'evil-forward-WORD-end)
+       (evilem-make-motion evilem-motion-backward-WORD-begin #'evil-backward-WORD-begin))
+
      (use-package evil-matchit
        :config
        (global-evil-matchit-mode 1))
@@ -628,9 +635,12 @@
 ** Other
    #+BEGIN_SRC emacs-lisp
      (use-package evil-numbers
+       :straight (:host github :repo "janpath/evil-numbers")
        :general
        ('normal "C-a" #'evil-numbers/inc-at-pt
-                "C-s" #'evil-numbers/dec-at-pt))
+                "C-s" #'evil-numbers/dec-at-pt
+                "g C-a" #'evil-numbers/inc-at-pt-incremental
+                "g C-s" #'evil-numbers/dec-at-pt-incremental))
    #+END_SRC
 
    Evil's markers aren't saved with ~desktop.el~ by default.  I tried to fix it,
@@ -805,8 +815,7 @@
      (use-package company-box
        :ghook 'company-mode-hook
        :config
-       (gsetq company-box-doc-enable nil
-              company-box-icons-alist 'company-box-icons-all-the-icons))
+       (gsetq company-box-icons-alist 'company-box-icons-all-the-icons))
    #+END_SRC
 
 ** Formatting
@@ -1120,7 +1129,14 @@
        :after yasnippet)
    #+END_SRC
 
-** Windows
+** Windows / Buffers
+   #+BEGIN_SRC emacs-lisp
+     (use-package all-the-icons-ibuffer
+       :after ibuffer
+       :config
+       (all-the-icons-ibuffer-mode))
+   #+END_SRC
+
    I've changed ~doom-modeline~'s eyebrowse segment to my own segment to show
    more information about non-current workspaces.  For example, if there are
    workspaces named config (number 1), scratch (number 3), and homework (number
@@ -1202,6 +1218,9 @@
          "j" #'dired-jump
          "J" #'dired-jump-other-window))
 
+     (use-package all-the-icons-dired
+       :ghook 'dired-mode-hook)
+
      (use-package image-dired
        :general (normal dired-mode-map "C-t h" #'panda-image-dired-here)
        :config
@@ -1249,9 +1268,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package magit
        :general
-       (panda-space
-         "g" #'magit-status
-         "G" #'magit-dispatch)
+       (panda-space "g" #'magit-status)
        :config
        (gsetq magit-auto-revert-mode nil))
 
@@ -1266,7 +1283,7 @@
      (use-package evil-magit :after magit)
 
      (use-package git-timemachine
-       :general (panda-space "t" #'git-timemachine))
+       :general (panda-space "G" #'git-timemachine))
    #+END_SRC
 
 ** Readers
@@ -1300,10 +1317,31 @@
    #+END_SRC
 
 ** Shell
+   I prefer using ~kitty~, but having access to ~zsh~ in Emacs can be useful for
+   one-off commands.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package vterm :defer t)
+
+     (use-package vterm-toggle
+       :general
+       (panda-space "<return>" #'vterm-toggle)
+       :config
+       (add-to-list 'display-buffer-alist
+                    '((lambda (buffer-name _)
+                        (with-current-buffer buffer-name
+                          (equal major-mode 'vterm-mode)))
+                      (display-buffer-in-side-window)
+                      (side . bottom)
+                      (window-height . 15)
+                      (dedicated . t))))
+   #+END_SRC
+
+   I don't really use ~eshell~ as much.
+
    #+BEGIN_SRC emacs-lisp
      (use-package eshell
-       :general
-       (panda-space "<return>" #'eshell)
+       :defer t
        :config
        (gsetq eshell-hist-ignoredups t
               eshell-history-size 1024))
@@ -1334,8 +1372,8 @@
        :defer t
        :gfhook '(asmfmt-on-save-mode panda-set-asm-locals)
        :config
-       (gsetq asm-comment-char ?#)
        (defun panda-set-asm-locals ()
+         (gsetq-local asm-comment-char ?#)
          (gsetq-local indent-tabs-mode t)
          (gsetq-local tab-always-indent t))
        (reformatter-define asmfmt
@@ -1361,7 +1399,7 @@
        ((c-mode c++-mode)
         nil
         ("View"
-         (("p" ccls-preprocess-file "preprocess file")
+         (("p" ccls-preprocess-file "preprocessed file")
           ("m" ccls-member-hierarchy "member hierarchy")
           ("C" ccls-call-hierarchy "call hierarchy")
           ("I" ccls-inheritance-hierarchy "inheritance hierarchy")))))
@@ -1371,6 +1409,25 @@
        :custom-face
        (highlight-doxygen-comment ((t nil)))
        (highlight-doxygen-code-block ((t nil))))
+
+     (use-package ggtags :defer t)
+
+     (use-package rmsbolt
+       :ghook ('(c-mode-hook c++-mode-hook) '(panda-turn-on-rmsbolt-with-llvm))
+       :mode-hydra
+       ((c-mode c++-mode)
+        nil
+        ("View"
+         (("z" rmsbolt-compile "LLVM IR"))))
+       :config
+       (gsetq rmsbolt-asm-format nil
+              rmsbolt-filter-comment-only nil
+              rmsbolt-filter-directives nil
+              rmsbolt-filter-labels nil)
+       (defun panda-turn-on-rmsbolt-with-llvm ()
+         "Enable `rmsbolt-mode' for LLVM IR."
+         (gsetq-local rmsbolt-command "clang -emit-llvm")
+         (rmsbolt-mode)))
    #+END_SRC
 
 ** Common Lisp
@@ -1723,12 +1780,32 @@
        :after ess
        :config
        (ess-smart-equals-activate))
+
+     (use-package ess-view-data
+       :mode-hydra
+       (ess-r-mode
+        ("View"
+         (("d" ess-view-data-print "data"))))
+       :general
+       ('normal ess-view-data-mode-map
+                "C-j" #'ess-view-data-goto-next-page
+                "C-k" #'ess-view-data-goto-previous-page
+                ;; TODO: would be better as a pretty-hydra
+                "zc" #'ess-view-data-count
+                "zf" #'ess-view-data-filter
+                "zn" #'ess-view-data-select
+                "zN" #'ess-view-data-unselect
+                "zo" #'ess-view-data-overview
+                "zr" #'ess-view-data-reset
+                "zs" #'ess-view-data-sort
+                "zu" #'ess-view-data-unique))
    #+END_SRC
 
 ** Other
    These are languages I only need syntax highlighting for.
 
    #+BEGIN_SRC emacs-lisp
+     (use-package bazel-mode :defer t)
      (use-package cmake-mode :defer t)
      (use-package csv-mode :defer t)
      (use-package d-mode :defer t)
@@ -1737,8 +1814,38 @@
      (use-package gitconfig-mode :defer t)
      (use-package gitignore-mode :defer t)
      (use-package kotlin-mode :defer t)
+     (use-package llvm-mode
+       :straight (llvm-mode
+                  :host github
+                  :repo "llvm/llvm-project"
+                  :files ("llvm/utils/emacs/llvm-mode.el")
+                  :depth 1
+                  :nonrecursive t)
+       :defer t)
      (use-package markdown-mode :defer t)
+     (use-package protobuf-mode
+       :straight (protobuf-mode
+                  :host github
+                  :repo "protocolbuffers/protobuf"
+                  :files ("editors/protobuf-mode.el")
+                  :depth 1
+                  :nonrecursive t)
+       :defer t)
      (use-package rust-mode :defer t)
      (use-package vimrc-mode :defer t)
      (use-package yaml-mode :defer t)
    #+END_SRC
+
+* Stuff To Check Out
+  Packages:
+
+  - exato
+  - lsp-origami
+  - poly-org
+  - project.el
+  - undo-fu-session
+
+  Tools:
+
+  - bash-language-server
+  - shfmt
