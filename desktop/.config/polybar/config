@@ -28,7 +28,7 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 1
 
-modules-left = wireless-network xbacklight cmus alsa
+modules-left = wireless-network fcitx xbacklight cmus alsa
 modules-center = bspwm-desktops
 modules-right = bspwm-info memory cpu battery date
 
@@ -162,4 +162,9 @@ ramp-capacity-3 = 
 [module/cmus]
 type = custom/script
 exec = ~/.config/polybar/cmus-status
+interval = 1
+
+[module/fcitx]
+type = custom/script
+exec = ~/.config/polybar/fcitx-status
 interval = 1

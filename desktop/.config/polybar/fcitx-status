@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+# https://unix.stackexchange.com/questions/387538/query-current-input-method-in-fcitx-for-xmobar
+current_input_method=$(qdbus "org.fcitx.Fcitx" "/inputmethod" "GetCurrentIM")
+
+echo -n " "
+case $current_input_method in
+    fcitx-keyboard-us) echo "US" ;;
+    mozc) echo "JP" ;;
+    unikey) echo "VN" ;;
+    *) echo "$current_input_method" ;;
+esac
