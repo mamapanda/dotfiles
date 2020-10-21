@@ -717,7 +717,7 @@
          ("n" straight-normalize-package "normalize package")
          ("N" straight-normalize-all "normalize all"))
         "Install"
-        (("i" straight-use-package "install package"))
+        (("u" straight-use-package "use package"))
         "Lockfile"
         (("s" straight-freeze-versions "save versions")
          ("a" straight-thaw-versions "apply versions"))
@@ -1300,7 +1300,7 @@
        :defer t
        :config
        (gsetq elfeed-search-title-max-width 100
-              elfeed-search-filter "@1-month-ago +unread"))
+              elfeed-search-filter "@1-month-ago"))
 
      (use-package nov
        :mode ("\\.epub$" . nov-mode)
@@ -1647,7 +1647,6 @@
               TeX-parse-self t))
 
      (use-package evil-tex
-       :disabled t
        :ghook 'LaTeX-mode-hook)
    #+END_SRC
 
@@ -1673,6 +1672,18 @@
          "a" 'org-agenda
          "A" 'org-capture)
        :config
+       (defun panda-goto-agenda-top-level-heading ()
+         "Go to a top\-level agenda heading that isn't a TODO."
+         (interactive)
+         (let* ((file (completing-read "Select agenda file: " (org-agenda-files)))
+                (headings (org-map-entries (lambda () (org-entry-get (point) "ITEM"))
+                                           "LEVEL=1+TODO=\"\""
+                                           (list file)))
+                (selected-heading (completing-read "Select heading: " headings nil t)))
+           (find-file file)
+           (goto-char (point-min))
+           (re-search-forward (format "^\\*[[:space:]]+%s[[:space:]]*$" selected-heading))))
+
        (gsetq org-directory "~/org")
        (gsetq org-agenda-custom-commands
               '(("n" "Agenda and unscheduled tasks"
@@ -1682,14 +1693,14 @@
                                 '(org-agenda-skip-entry-if 'timestamp)))))))
               org-agenda-files (list (expand-file-name "agenda" org-directory))
               org-capture-templates
-              '(("d" "Deadline" entry (file "agenda/refile.org")
-                 "* TODO %?\n  DEADLINE: %t")
-                ("s" "Scheduled Task" entry (file "agenda/refile.org")
-                 "* TODO %?\n  SCHEDULED: %t")
-                ("S" "Scheduled Task (Next Day)" entry (file "agenda/refile.org")
-                 "* TODO %?\n  SCHEDULED: <%(org-read-date nil nil \"+1\")>")
-                ("t" "Undated Task" entry (file "agenda/refile.org")
-                 "* TODO %?"))
+              '(("e" "Event" entry (function panda-goto-agenda-top-level-heading)
+                 "** %?\n   SCHEDULED: <%(org-read-date nil nil \"+1\")>")
+                ("d" "Deadline" entry (function panda-goto-agenda-top-level-heading)
+                 "** TODO %?\n   DEADLINE: <%(org-read-date nil nil \"+1\")>")
+                ("s" "Scheduled Task" entry (function panda-goto-agenda-top-level-heading)
+                 "** TODO %?\n   SCHEDULED: <%(org-read-date nil nil \"+1\")>")
+                ("t" "Undated Task" entry (function panda-goto-agenda-top-level-heading)
+                 "** TODO %?"))
               org-catch-invisible-edits 'error
               org-src-fontify-natively t
               org-src-tab-acts-natively t))
