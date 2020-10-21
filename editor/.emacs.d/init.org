@@ -27,8 +27,8 @@
   - [[#appearance][Appearance]]
   - [[#completion][Completion]]
   - [[#formatting][Formatting]]
-  - [[#helm][Helm]]
   - [[#help][Help]]
+  - [[#ivy][Ivy]]
   - [[#language-server][Language Server]]
   - [[#linting][Linting]]
   - [[#lisp][Lisp]]
@@ -860,60 +860,6 @@
          (remove-hook 'before-save-hook #'delete-trailing-whitespace t)))
    #+END_SRC
 
-** Helm
-   #+BEGIN_SRC emacs-lisp
-     (use-package helm
-       :demand t
-       :general
-       ([remap execute-extended-command] #'helm-M-x
-        [remap find-file] #'helm-find-files
-        [remap switch-to-buffer] #'helm-mini)
-       (panda-space "S" #'helm-grep-do-git-grep)
-       ('normal "g?" #'helm-occur)
-       (helm-map "<escape>" #'helm-keyboard-quit)
-       :config
-       (gsetq helm-echo-input-in-header-line t
-              ;; helm-ff-DEL-up-one-level-maybe t ; doesn't update the prompt
-              helm-ff-fuzzy-matching nil
-              helm-ff-skip-boring-files t
-              helm-split-window-inside-p t
-              helm-mini-default-sources '(helm-source-buffers-list
-                                          helm-source-projectile-files-list
-                                          helm-source-recentf
-                                          helm-source-buffer-not-found)
-              helm-window-prefer-horizontal-split 'decide)
-       (set-face-foreground 'helm-ff-directory (face-foreground 'font-lock-builtin-face))
-       (with-eval-after-load 'projectile
-         (gsetq projectile-completion-system 'helm))
-       (helm-mode 1))
-
-     (use-package helm-company
-       :after company helm
-       :general
-       (company-active-map "M-h" #'helm-company)
-       :init
-       (gsetq helm-company-fuzzy-match nil))
-
-     (use-package helm-lsp
-       :after helm lsp-ui
-       :general
-       (lsp-ui-mode-map [remap lsp-ui-find-workspace-symbol] #'helm-lsp-workspace-symbol))
-
-     (use-package helm-make
-       :after helm
-       :general
-       (panda-space "C" #'helm-make))
-
-     (use-package helm-projectile
-       :after helm
-       :init
-       (gsetq helm-projectile-fuzzy-match nil)
-       :config
-       (helm-projectile-toggle 1))
-
-     (use-package helm-xref :after helm xref)
-   #+END_SRC
-
 ** Help
    #+BEGIN_SRC emacs-lisp
      (use-package helpful
@@ -921,6 +867,76 @@
        (help-map "f" #'helpful-callable
                  "k" #'helpful-key
                  "v" #'helpful-variable))
+   #+END_SRC
+
+** Ivy
+   #+BEGIN_SRC emacs-lisp
+     (use-package ivy
+       :demand t
+       :general
+       (ivy-minibuffer-map
+        "<return>" #'ivy-alt-done
+        "C-<return>" #'ivy-immediate-done)
+       :config
+       (gsetq ivy-wrap t
+              ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                                      (t . ivy--regex-fuzzy))
+              ivy-use-virtual-buffers t
+              ivy-count-format "(%d/%d) ")
+       (with-eval-after-load 'projectile
+         (gsetq projectile-completion-system 'ivy))
+       (ivy-mode))
+
+     (use-package counsel
+       :demand t
+       :general
+       (panda-space "S" #'counsel-git-grep)
+       :config
+       (counsel-mode))
+
+     (use-package swiper
+       :general ('normal "g?" #'swiper))
+
+     (use-package ivy-hydra :defer t)
+
+     (use-package ivy-prescient
+       :after ivy
+       :config
+       (gsetq ivy-prescient-retain-classic-highlighting t)
+       (prescient-persist-mode)
+       (ivy-prescient-mode))
+
+     (use-package ivy-rich
+       :after ivy
+       :config
+       (gsetq ivy-rich-parse-remote-buffer nil
+              ivy-rich-parse-remote-file-path nil)
+       (ivy-rich-mode))
+
+     (use-package ivy-posframe
+       :disabled t
+       :after ivy
+       :config
+       (gsetq ivy-posframe-border-width 1
+              ivy-posframe-display-functions-alist
+              '((swiper . ivy-display-function-fallback)
+                (t . ivy-posframe-display-at-point)))
+       (ivy-posframe-mode))
+
+     (use-package counsel-projectile
+       :after counsel projectile
+       :config
+       (counsel-projectile-mode))
+
+     (use-package lsp-ivy
+       :after ivy lsp-mode
+       :general
+       (lsp-ui-mode-map [remap lsp-ui-find-workspace-symbol] #'lsp-ivy-workspace-symbol))
+
+     (use-package ivy-xref
+       :after ivy xref
+       :config
+       (gsetq xref-show-xrefs-function #'ivy-xref-show-xrefs))
    #+END_SRC
 
 ** Language Server
@@ -1566,10 +1582,6 @@
           ("<delete>" dante-destroy "shutdown"))))
        :config
        (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint)))
-
-     (use-package helm-hoogle
-       :mode-hydra
-       (haskell-mode nil ("Find" (("h" helm-hoogle "hoogle")))))
    #+END_SRC
 
 ** HTML / CSS
@@ -1718,8 +1730,6 @@
               org-projectile-counts-in-heading nil
               org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
        (add-to-list 'org-capture-templates (org-projectile-project-todo-entry) t #'equal))
-
-     (use-package helm-org-rifle :defer t)
 
      (use-package evil-org
        :demand :after org
