@@ -981,22 +981,22 @@
          (unless (memq major-mode panda--lsp-hydra-enabled-modes)
            (eval
             `(major-mode-hydra-define+ ,major-mode nil
-               ("Find"
-                (("s" lsp-ui-find-workspace-symbol "workspace symbol"))
+               ("Navigate"
+                (("s" lsp-ui-find-workspace-symbol "Workspace Symbol")
+                 ("i" lsp-ui-imenu "Imenu"))
                 "Refactor"
-                (("r" lsp-rename "rename")
-                 ("c" lsp-ui-sideline-apply-code-actions "code action")
-                 ("o" lsp-organize-imports "organize imports"))
+                (("r" lsp-rename "Rename")
+                 ("c" lsp-ui-sideline-apply-code-actions "Code Action")
+                 ("o" lsp-organize-imports "Organize Imports"))
                 "View"
-                (("i" lsp-ui-imenu "imenu")
-                 ("l" lsp-lens-mode "lens")
-                 ("E" lsp-ui-flycheck-list "errors"))
+                (("l" lsp-lens-mode "Lens")
+                 ("E" lsp-ui-flycheck-list "Errors"))
                 "Debug"
-                (("D" dap-debug "start")
-                 ("d" dap-hydra "hydra"))
+                (("D" dap-debug "Start")
+                 ("d" dap-hydra "Hydra"))
                 "Workspace"
-                (("<backspace>" lsp-restart-workspace "restart")
-                 ("<delete>" lsp-shutdown-workspace "shutdown")))))
+                (("<backspace>" lsp-restart-workspace "Restart")
+                 ("<delete>" lsp-shutdown-workspace "Shutdown")))))
            (push major-mode panda--lsp-hydra-enabled-modes)))
        (add-hook 'lsp-mode-hook #'panda--add-lsp-hydra-heads))
    #+END_SRC
@@ -1415,10 +1415,11 @@
        ((c-mode c++-mode)
         nil
         ("View"
-         (("p" ccls-preprocess-file "preprocessed file")
-          ("m" ccls-member-hierarchy "member hierarchy")
-          ("C" ccls-call-hierarchy "call hierarchy")
-          ("I" ccls-inheritance-hierarchy "inheritance hierarchy")))))
+         (("m" ccls-member-hierarchy "Member Hierarchy")
+          ("C" ccls-call-hierarchy "Call Hierarchy")
+          ("I" ccls-inheritance-hierarchy "Inheritance Hierarchy"))
+         "Preview"
+         (("p" ccls-preprocess-file "Preprocessed File")))))
 
      (use-package highlight-doxygen
        :ghook ('(c-mode-hook c++-mode-hook) '(highlight-doxygen-mode))
@@ -1433,8 +1434,8 @@
        :mode-hydra
        ((c-mode c++-mode)
         nil
-        ("View"
-         (("z" rmsbolt-compile "LLVM IR"))))
+        ("Preview"
+         (("a" rmsbolt-compile "LLVM IR"))))
        :config
        (gsetq rmsbolt-asm-format nil
               rmsbolt-filter-comment-only nil
@@ -1464,13 +1465,13 @@
        (lisp-mode
         nil
         ("Eval"
-         (("eb" slime-eval-buffer "buffer")
-          ("ed" slime-eval-defun "defun")
-          ("ee" slime-eval-last-expression "expression")
-          ("er" slime-eval-region "region")
-          ("eo" slime "open repl"))
+         (("eb" slime-eval-buffer "Buffer")
+          ("ed" slime-eval-defun "Defun")
+          ("ee" slime-eval-last-expression "Expression")
+          ("er" slime-eval-region "Region")
+          ("eo" slime "Open REPL"))
          "Debug"
-         (("m" macrostep-expand "macrostep"))))
+         (("m" macrostep-expand "Macrostep"))))
        :config
        (gsetq inferior-lisp-program "sbcl"
               slime-contribs '(slime-fancy))
@@ -1494,22 +1495,22 @@
        ((emacs-lisp-mode lisp-interaction-mode)
         nil
         ("Eval"
-         (("eb" eval-buffer "buffer")
-          ("ed" eval-defun "defun")
-          ("ee" eval-last-sexp "expression")
-          ("er" eval-region "region")
-          ("eo" ielm "open repl"))
+         (("eb" eval-buffer "Buffer")
+          ("ed" eval-defun "Defun")
+          ("ee" eval-last-sexp "Expression")
+          ("er" eval-region "Region")
+          ("eo" ielm "Open REPL"))
          "Compile"
-         (("c" byte-compile-file "file"))
+         (("c" byte-compile-file "File"))
          "Check"
-         (("C" checkdoc "checkdoc"))
+         (("C" checkdoc "Checkdoc"))
          "Debug"
-         (("E" toggle-debug-on-error "on error")
-          ("q" toggle-debug-on-quit "on quit")
-          ("d" debug-on-entry "on entry")
-          ("D" cancel-debug-on-entry "cancel on entry"))
+         (("E" toggle-debug-on-error "On Error")
+          ("q" toggle-debug-on-quit "On Quit")
+          ("d" debug-on-entry "On Entry")
+          ("D" cancel-debug-on-entry "Cancel On Entry"))
          "Test"
-         (("t" ert "run"))))
+         (("t" ert "Run"))))
        :config
        (defun panda-set-elisp-locals ()
          (gsetq panda-inner-defun-bounds '("(" . ")"))))
@@ -1519,7 +1520,7 @@
        ((emacs-lisp-mode lisp-interaction-mode)
         nil
         ("Debug"
-         (("m" macrostep-expand "macrostep")))))
+         (("m" macrostep-expand "Macrostep")))))
 
      (use-package package-lint
        :mode-hydra
@@ -1550,12 +1551,12 @@
        :gfhook '(brittany-on-save-mode)
        :mode-hydra
        (("Eval"
-         (("ef" haskell-process-load-file "file")
-          ("eo" haskell-interactive-switch "open repl"))
-         "Find"
-         (("i" haskell-navigate-imports "imports"))
+         (("ef" haskell-process-load-file "File")
+          ("eo" haskell-interactive-switch "Open REPL"))
+         "Navigate"
+         (("i" haskell-navigate-imports "Imports"))
          "Compile"
-         (("c" haskell-compile "project"))))
+         (("c" haskell-compile "Project"))))
        :config
        (gsetq haskell-ask-also-kill-buffers nil
               haskell-compile-cabal-build-command "stack build"
@@ -1565,7 +1566,7 @@
 
      (use-package attrap
        :mode-hydra
-       (haskell-mode nil ("Refactor" (("f" attrap-attrap "fix error")))))
+       (haskell-mode nil ("Refactor" (("f" attrap-attrap "Fix Error")))))
 
      (use-package dante
        :ghook 'haskell-mode-hook
@@ -1573,13 +1574,13 @@
        (haskell-mode
         nil
         ("Eval"
-         (("ee" dante-eval-block "block"))
+         (("ee" dante-eval-block "Block"))
          "View"
-         (("I" dante-info "info")
-          ("t" dante-type-at "type"))
+         (("I" dante-info "Info")
+          ("t" dante-type-at "Type"))
          "Dante Process"
-         (("<backspace>" dante-restart "restart")
-          ("<delete>" dante-destroy "shutdown"))))
+         (("<backspace>" dante-restart "Restart")
+          ("<delete>" dante-destroy "Shutdown"))))
        :config
        (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint)))
    #+END_SRC
@@ -1669,9 +1670,9 @@
        :gfhook '(panda-format-on-save-mode)
        :mode-hydra
        (("Eval"
-         (("ec" matlab-shell-run-cell "cell")
-          ("el" matlab-shell-run-region-or-line "line or region")
-          ("eo" matlab-shell "open repl")))))
+         (("ec" matlab-shell-run-cell "Cell")
+          ("el" matlab-shell-run-region-or-line "Line or Region")
+          ("eo" matlab-shell "Open REPL")))))
    #+END_SRC
 
 ** Org
@@ -1750,11 +1751,11 @@
        :mode-hydra
        (python-mode
         ("Eval"
-         (("eb" python-shell-send-buffer "buffer")
-          ("ed" python-shell-send-defun "defun")
-          ("ef" python-shell-send-file "file")
-          ("er" python-shell-send-region "region")
-          ("eo" run-python "open repl"))))
+         (("eb" python-shell-send-buffer "Buffer")
+          ("ed" python-shell-send-defun "Defun")
+          ("ef" python-shell-send-file "File")
+          ("er" python-shell-send-region "Region")
+          ("eo" run-python "Open REPL"))))
        :config
        (gsetq python-indent-offset 4)
        (defun panda-set-python-locals ()
@@ -1783,13 +1784,13 @@
        :mode-hydra
        (ess-r-mode
         ("Eval"
-         (("eb" ess-eval-buffer "buffer")
-          ("ed" ess-eval-function "function")
-          ("ef" ess-load-file "file")
-          ("el" ess-eval-line "line")
-          ("ep" ess-eval-paragraph "paragraph")
-          ("er" ess-eval-region "region")
-          ("eo" R "open repl"))))
+         (("eb" ess-eval-buffer "Buffer")
+          ("ed" ess-eval-function "Function")
+          ("ef" ess-load-file "File")
+          ("el" ess-eval-line "Line")
+          ("ep" ess-eval-paragraph "Paragraph")
+          ("er" ess-eval-region "Region")
+          ("eo" R "Open REPL"))))
        :config
        (gsetq ess-ask-for-ess-directory nil))
 
@@ -1806,7 +1807,7 @@
        :mode-hydra
        (ess-r-mode
         ("View"
-         (("d" ess-view-data-print "data"))))
+         (("d" ess-view-data-print "Data"))))
        :general
        ('normal ess-view-data-mode-map
                 "C-j" #'ess-view-data-goto-next-page
