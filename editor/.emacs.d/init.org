@@ -289,7 +289,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package evil-easymotion
        :general
-       ('motion "gs" '(:keymap evilem-map))
+       ('(normal motion) "s" '(:keymap evilem-map))
        (evilem-map "f" #'panda-em-snipe-s
                    "F" #'panda-em-snipe-S
                    "t" #'panda-em-snipe-x
@@ -369,9 +369,13 @@
 
      (use-package evil-surround
        :config
+       (setf (cdr evil-surround-mode-map) nil)
+       (general-def 'operator evil-surround-mode-map
+         "gs" #'evil-surround-edit
+         "gS" #'evil-Surround-edit)
        (general-def 'visual evil-surround-mode-map
-         "s" #'evil-surround-region
-         "S" #'evil-Surround-region)
+         "gs" #'evil-surround-region
+         "gS" #'evil-Surround-region)
        (global-evil-surround-mode 1))
    #+END_SRC
 
