@@ -730,6 +730,7 @@
 ** Minor Modes
    #+BEGIN_SRC emacs-lisp
      (blink-cursor-mode)
+     (column-number-mode)
      (delete-selection-mode)
      (desktop-save-mode)
      (electric-pair-mode)
@@ -746,35 +747,7 @@
        (load-theme 'doom-vibrant t))
 
      (use-package display-line-numbers
-       :demand t
-       :general (panda-space "l" #'panda-toggle-line-numbers)
-       :config
-       (progn
-         (gsetq display-line-numbers-type 'visual)
-         (defun panda-toggle-line-numbers ()
-           "Toggle between `display-line-numbers-type' and absolute line numbers.
-     The changes are local to the current buffer."
-           (interactive)
-           (gsetq display-line-numbers
-                  (if (eq display-line-numbers display-line-numbers-type)
-                      t
-                    display-line-numbers-type))))
-       (progn
-         (defun panda--evil-ex-relative-lines (old-fn &optional initial-input)
-           "Enable relative line numbers for `evil-ex'."
-           (let ((current-display-line-numbers display-line-numbers)
-                 (buffer (current-buffer)))
-             (unwind-protect
-                 (progn
-                   (gsetq display-line-numbers 'relative)
-                   (funcall old-fn initial-input))
-               (when (buffer-live-p buffer)
-                 (with-current-buffer buffer
-                   (gsetq display-line-numbers current-display-line-numbers))))))
-         (advice-add 'evil-ex :around #'panda--evil-ex-relative-lines))
-       (progn
-         (global-display-line-numbers-mode 1)
-         (column-number-mode 1)))
+       :general (panda-space "l" #'global-display-line-numbers-mode))
 
      (use-package doom-modeline
        :config
@@ -1069,6 +1042,7 @@
              default-directory))
        (gsetq deadgrep-project-root-function #'panda-deadgrep-project-root)
 
+       ;; FIXME: probably need to also modify `evil--jumps-buffer-targets'
        (evil-add-command-properties #'deadgrep-visit-result :jump t)
        (evil-add-command-properties #'deadgrep-visit-result-other-window :jump t))
 
@@ -1861,8 +1835,10 @@
 * Stuff To Check Out
   Packages:
 
+  - better-jumper
   - exato
   - lsp-origami
+  - org-superstar
   - poly-org
   - project.el
   - undo-fu-session
