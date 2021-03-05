@@ -3,6 +3,8 @@ export EDITOR=em
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
+export SXHKD_SHELL="/bin/sh"
+
 export GTK2_RC_FILES="$HOME/.gtkrc-2.0"
 export QT_QPA_PLATFORMTHEME="qt5ct"
 
