@@ -28,16 +28,22 @@ alias debug="gdb -ex='set confirm on' -ex=run -ex=quit --args"
 alias grep="grep --color=auto -i"
 alias la="ls -a"
 alias ll="ls -l"
+alias lock="lockscreen"
 alias ls="ls --color=auto"
 alias sxiv="sxiv -a -o"
+alias x="xclip"
 alias xclip="xclip -selection clipboard"
 
 alias -g D="&!"
+alias -g E="| entr"
 alias -g G="| grep"
+alias -g H="| head"
 alias -g L="| less"
 alias -g N="> /dev/null"
 alias -g N2="2> /dev/null"
 alias -g NN=">& /dev/null"
+alias -g T="| tail"
+alias -g X="| xclip"
 
 compile-and-run() {
     local compiler=$1
@@ -61,7 +67,7 @@ alias -s lisp="sbcl --script"
 alias -s pdf=zathura
 alias -s py=python
 alias -s R=Rscript
-alias -s sh=sh
+# alias -s sh=sh  # quite a few .sh files have a bash shebang...
 
 take() {
     mkdir -p "$1" && cd "$1"
@@ -92,6 +98,62 @@ diff-sorted() {
     local file_2="$2"
 
     diff <(sort "$file_1") <(sort "$file_2")
+}
+
+uri() {
+    if [[ -n "$1" ]]; then
+        echo "file://$(realpath "$1")"
+    else
+        echo "file://$PWD"
+    fi
+}
+
+glog-last() {
+    local app="$1"
+    local level=$(echo "${2:-info}" | awk '{print toupper($0)}')
+
+    local log_dir="${GLOG_log_dir:-/tmp}"
+    local log_prefix="${app}.$(hostname).$(whoami).log.${level}."
+    local last_log="$(find ${log_dir} -name "${log_prefix}*" 2> /dev/null | sort | tail -n1)"
+
+    if [[ ! -f "$last_log" ]]; then
+        echo >&2 "${0}: No ${level} log files found for ${app}"
+        return 1
+    fi
+
+    "${EDITOR:-vi}" "$last_log"
+}
+
+send-linux-patch() {
+    local patch="$1"
+    local args="${@:2}"
+    local get_maintainer_script="./scripts/get_maintainer.pl"
+
+    if [[ ! -f "$patch" ]]; then
+        echo >&2 "${0}: '$patch' is not a file"
+        return 1
+    elif ! git config user.email >& /dev/null; then
+        echo >&2 "${0}: user.email not configured for git"
+        return 1
+    elif [[ ! -f "$get_maintainer_script" ]]; then
+        echo >&2 "${0}: '$get_maintainer_script' not found"
+        return 1
+    fi
+
+    git send-email \
+        --cc-cmd="$get_maintainer_script --norolestats $patch" \
+        --cc "$(git config user.email)" \
+        "$args" \
+        "$patch"
+}
+
+rxclip() {
+    local remote_file="$1"
+    local local_copy="$(mktemp)"
+
+    rsync "$remote_file" "$local_copy"
+    xclip -selection clipboard "$local_copy"
+    rm "$local_copy"
 }
 
 if [[ ! -f ~/.zgen/zgen.zsh ]]; then
