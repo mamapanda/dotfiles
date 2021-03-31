@@ -43,6 +43,7 @@
 - [[#languages][Languages]]
   - [[#assembly][Assembly]]
   - [[#c--c][C / C++]]
+  - [[#c][C#]]
   - [[#common-lisp][Common Lisp]]
   - [[#emacs-lisp][Emacs Lisp]]
   - [[#go][Go]]
@@ -199,7 +200,8 @@
    #+END_SRC
 
 ** Basic Keybindings
-   These are ~evil~ keybindings that don't depend on any additional packages.
+   These are ~evil~ keybindings that don't depend on any additional
+   packages/configuration.
 
    #+BEGIN_SRC emacs-lisp
      (general-def '(normal motion) override
@@ -381,9 +383,6 @@
 
 ** Text Objects
 *** Packages
-    At the moment, the author of ~targets.el~ is working on a rewrite called
-    ~things.el~.
-
     #+BEGIN_SRC emacs-lisp
       (use-package evil-args
         :general
@@ -931,6 +930,7 @@
               lsp-before-save-edits nil
               lsp-enable-indentation nil
               lsp-enable-on-type-formatting nil
+              lsp-headerline-breadcrumb-enable nil
               lsp-prefer-flymake nil))
 
      (use-package lsp-ui
@@ -1031,11 +1031,23 @@
 ** Navigation
    #+BEGIN_SRC emacs-lisp
      (use-package avy
-       :general ('motion "g/" #'avy-goto-char-timer)
+       :general
+       ('motion "g/" #'avy-goto-char-timer)
+       (evil-ex-completion-map "C-l" #'panda-ex-avy-insert-line)
        :config
        (gsetq avy-all-windows nil
               avy-all-windows-alt t
-              avy-background t))
+              avy-background t)
+       (defun panda-ex-avy-insert-line ()
+         "Use avy to select a line number, then insert the line number as text.
+     For use with `evil-ex'."
+         (interactive)
+         (when-let ((line
+                     (with-selected-window (get-mru-window)
+                       (save-excursion
+                         (when (avy-goto-line)
+                           (line-number-at-pos))))))
+           (insert (format "%d" line)))))
 
      (use-package deadgrep
        :general (panda-space "s" #'deadgrep)
@@ -1425,6 +1437,13 @@
          (rmsbolt-mode)))
    #+END_SRC
 
+** C#
+   #+BEGIN_SRC emacs-lisp
+     (use-package csharp-mode
+       :defer t
+       :gfhook '(lsp-deferred panda-format-on-save-mode))
+   #+END_SRC
+
 ** Common Lisp
    #+BEGIN_SRC emacs-lisp
      (use-package lisp-mode
@@ -1694,7 +1713,8 @@
                  "** TODO %?"))
               org-catch-invisible-edits 'error
               org-src-fontify-natively t
-              org-src-tab-acts-natively t))
+              org-src-tab-acts-natively t)
+       (plist-put org-format-latex-options :scale 1.5))
 
      (use-package toc-org
        :ghook 'org-mode-hook)
@@ -1769,6 +1789,8 @@
           ("ep" ess-eval-paragraph "Paragraph")
           ("er" ess-eval-region "Region")
           ("eo" R "Open REPL"))))
+       :init
+       (gsetq ess-indent-with-fancy-comments nil)
        :config
        (gsetq ess-ask-for-ess-directory nil))
 
@@ -1840,6 +1862,7 @@
   Packages:
 
   - better-jumper
+  - evil-cleverparens
   - exato
   - lsp-origami
   - org-superstar
