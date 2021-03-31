@@ -2,8 +2,12 @@ PROMPT="%B%F{blue}%n@%M %F{yellow}%~ %(?.%F{green}.%F{red})(%?)
 %F{yellow}> %f%b"
 
 setopt auto_cd
+setopt auto_pushd
 setopt cd_silent
+setopt pushd_ignore_dups
 setopt pushd_silent
+
+setopt interactive_comments
 
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
@@ -112,7 +116,7 @@ FAST_HIGHLIGHT[chroma-bash]=
 FAST_HIGHLIGHT[chroma-perl]=
 FAST_HIGHLIGHT[chroma-sh]=
 
-YSU_HARDCORE=1
+# YSU_HARDCORE=1
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=blue"
 
