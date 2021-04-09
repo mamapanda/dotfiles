@@ -56,6 +56,7 @@
   - [[#org][Org]]
   - [[#python][Python]]
   - [[#r][R]]
+  - [[#shell-script][Shell Script]]
   - [[#other-1][Other]]
 - [[#stuff-to-check-out][Stuff To Check Out]]
 
@@ -1823,6 +1824,25 @@
                 "zu" #'ess-view-data-unique))
    #+END_SRC
 
+** Shell Script
+   #+BEGIN_SRC emacs-lisp
+     (use-package sh-script
+       :straight (:type built-in)
+       :defer t
+       :gfhook ('sh-mode-hook '(panda-set-up-sh-mode))
+       :config
+       (progn
+         (defvar shfmt-args '("-ci" "-i" "4")
+           "Arguments for shfmt.")
+         (reformatter-define shfmt
+           :program "shfmt"
+           :args shfmt-args))
+       (defun panda-set-up-sh-mode ()
+         (unless (eq sh-shell 'zsh)
+           (lsp-deferred)
+           (shfmt-on-save-mode))))
+   #+END_SRC
+
 ** Other
    These are languages I only need syntax highlighting for.
 
@@ -1861,16 +1881,14 @@
 * Stuff To Check Out
   Packages:
 
-  - better-jumper
   - evil-cleverparens
   - exato
+  - go-impl
+  - go-tag
+  - gorepl-mode
+  - gotest
   - lsp-origami
   - org-superstar
   - poly-org
   - project.el
   - undo-fu-session
-
-  Tools:
-
-  - bash-language-server
-  - shfmt
