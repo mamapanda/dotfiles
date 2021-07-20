@@ -1,0 +1,26 @@
+set cleaner ~/.config/lf/clean.bash
+set drawbox on
+set ifs "\n"
+set incsearch on
+set previewer ~/.config/lf/preview.bash
+set promptfmt "\033[34;1m%u@%h\033[0m \033[33;1m%d\033[0m"
+set ratios 2:5:5
+set shell bash
+
+cmd open ${{
+    case $(file --mime-type --brief $f) in
+        text/*) $EDITOR $f ;;
+        *) $OPENER $f ;;
+    esac
+}}
+
+map D $trash-put $fx
+map o &xdg-open $f
+map <enter> shell
+
+map gd cd ~/Downloads
+map gD cd ~/Documents
+map gm cd ~/Music
+map gp cd ~/Pictures
+map gs cd ~/Pictures/Screenshots
+map gt cd /tmp
