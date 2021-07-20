@@ -39,9 +39,9 @@ alias -g E="| entr"
 alias -g G="| grep"
 alias -g H="| head"
 alias -g L="| less"
-alias -g N="> /dev/null"
-alias -g N2="2> /dev/null"
-alias -g NN=">& /dev/null"
+alias -g N=">/dev/null"
+alias -g N2="2>/dev/null"
+alias -g NN=">&/dev/null"
 alias -g T="| tail"
 alias -g X="| xclip"
 
@@ -114,7 +114,7 @@ glog-last() {
 
     local log_dir="${GLOG_log_dir:-/tmp}"
     local log_prefix="${app}.$(hostname).$(whoami).log.${level}."
-    local last_log="$(find ${log_dir} -name "${log_prefix}*" 2> /dev/null | sort | tail -n1)"
+    local last_log="$(find ${log_dir} -name "${log_prefix}*" 2>/dev/null | sort | tail -n1)"
 
     if [[ ! -f "$last_log" ]]; then
         echo >&2 "${0}: No ${level} log files found for ${app}"
