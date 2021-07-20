@@ -7,15 +7,15 @@ color() {
 i3lock \
     --nofork \
     --blur=8 \
-    --insidevercolor="$(color background)" \
-    --insidewrongcolor="$(color background)" \
-    --insidecolor="$(color background)" \
-    --ringvercolor="$(color verify-color)" \
-    --ringwrongcolor="$(color error-color)" \
-    --ringcolor="$(color ring-color)" \
+    --insidever-color="$(color background)" \
+    --insidewrong-color="$(color background)" \
+    --inside-color="$(color background)" \
+    --ringver-color="$(color verify-color)" \
+    --ringwrong-color="$(color error-color)" \
+    --ring-color="$(color ring-color)" \
     --line-uses-inside \
-    --keyhlcolor="$(color key-hl-color)" \
-    --bshlcolor="$(color error-color)" \
-    --separatorcolor="$(color background)" \
-    --verifcolor="$(color verify-color)" \
-    --wrongcolor="$(color error-color)"
+    --keyhl-color="$(color key-hl-color)" \
+    --bshl-color="$(color error-color)" \
+    --separator-color="$(color background)" \
+    --verif-color="$(color verify-color)" \
+    --wrong-color="$(color error-color)"
