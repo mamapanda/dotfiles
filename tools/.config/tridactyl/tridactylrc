@@ -17,7 +17,7 @@ set allowautofocus false
 set editorcmd emacs
 set hintuppercase false
 set modeindicator false
-set newtab https://duckduckgo.com/
+set newtab https://www.startpage.com/
 set smoothscroll true
 set theme dark
 

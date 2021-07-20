@@ -26,10 +26,12 @@ bindkey -M menuselect '^[[Z' reverse-menu-complete
 # https://stackoverflow.com/questions/8657648
 alias debug="gdb -ex='set confirm on' -ex=run -ex=quit --args"
 alias grep="grep --color=auto -i"
+alias icat="kitty +kitten icat"
 alias la="ls -a"
 alias ll="ls -l"
 alias lock="lockscreen"
 alias ls="ls --color=auto"
+alias patch="patch --backup"
 alias sxiv="sxiv -a -o"
 alias x="xclip"
 alias xclip="xclip -selection clipboard"
@@ -151,8 +153,17 @@ rxclip() {
     local remote_file="$1"
     local local_copy="$(mktemp)"
 
-    rsync "$remote_file" "$local_copy"
+    scp "$remote_file" "$local_copy" >/dev/null
     xclip -selection clipboard "$local_copy"
+    rm "$local_copy"
+}
+
+rcat() {
+    local remote_file="$1"
+    local local_copy="$(mktemp)"
+
+    scp "$remote_file" "$local_copy" >/dev/null
+    cat "$local_copy"
     rm "$local_copy"
 }
 

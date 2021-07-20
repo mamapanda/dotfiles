@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+DIR_TO_FILE="$1"
+DEST_BASE_DIR="$2"
+DUPE_DIR="$3"
+
+if [[ $# -ne 2 && $# -ne 3 ]]; then
+    echo "Usage: file-images DIR_TO_FILE DEST_BASE_DIR [DUPE_DIR]"
+    exit 1
+elif [[ ! -d "$DIR_TO_FILE" ]]; then
+    echo "$DIR_TO_FILE is not a valid directory"
+    exit 1
+elif [[ ! -d "$DEST_BASE_DIR" ]]; then
+    echo "$DEST_BASE_DIR is not a valid directory"
+    exit 1
+elif [[ -n "$DUPE_DIR" && ! -d "$DUPE_DIR" ]]; then
+    echo "$DUPE_DIR is not a valid directory"
+    exit 1
+fi
+
+while [[ -n "$(ls "$DIR_TO_FILE")" ]]; do
+    images_to_file=($(sxiv -a -o -t "$DIR_TO_FILE"))
+    if [[ ${#images_to_file[@]} -eq 0 ]]; then
+        continue
+    fi
+
+    dest_dir="$(fd -td . "$DEST_BASE_DIR" | rofi -dmenu -i)"
+    if [[ $? != 0 ]]; then
+        continue
+    fi
+
+    for image_to_file in "${images_to_file[@]}"; do
+        if [[ -e "$dest_dir/$image_to_file" && -d "$DUPE_DIR" ]]; then
+            echo "$image_to_file already exists in $dest_dir" >>"$DUPE_DIR/log.txt"
+            mv -v "$image_to_file" "$DUPE_DIR"
+        else
+            mv -v "$image_to_file" "$dest_dir"
+        fi
+    done
+done

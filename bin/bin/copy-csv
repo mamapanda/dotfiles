@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+import argparse
+import csv
+import sys
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "src_csv", type=str, help="Path to the CSV file to copy data from"
+    )
+    parser.add_argument(
+        "dest_csv", type=str, help="Path to the CSV file to copy data to"
+    )
+    parser.add_argument(
+        "--keys",
+        type=str,
+        required=True,
+        help="Comma-separated list of fields to use to determine row equivalency",
+    )
+    parser.add_argument(
+        "--copy",
+        type=str,
+        required=True,
+        help="Comma-separated list of fields to copy",
+    )
+
+    parsed_args = parser.parse_args()
+    parsed_args.keys = parsed_args.keys.split(",")
+    parsed_args.copy = parsed_args.copy.split(",")
+
+    return parsed_args
+
+
+def load_csv(filepath):
+    with open(filepath, "r") as csv_file:
+        rows = [[x.strip() for x in row] for row in csv.reader(csv_file)]
+        return rows[0], rows[1:]
+
+
+def make_keyset_map(csv_header, csv_data, key_fields):
+    counters = {}
+    keyset_lookup = {}
+    key_columns = [csv_header.index(col) for col in key_fields]
+
+    for row in csv_data:
+        keyset = tuple(row[i] for i in key_columns)
+        counter = counters.get(keyset, 0)
+
+        counters[keyset] = counter + 1
+        keyset_lookup[keyset + (counter,)] = row  # copy by reference
+
+    return keyset_lookup
+
+
+def main():
+    args = parse_args()
+
+    src_header, src_data = load_csv(args.src_csv)
+    dest_header, dest_data = load_csv(args.dest_csv)
+    key_fields = args.keys
+    copy_fields = args.copy
+
+    src_keysets = make_keyset_map(src_header, src_data, key_fields)
+    dest_keysets = make_keyset_map(dest_header, dest_data, key_fields)
+
+    for keyset, data in src_keysets.items():
+        if keyset not in dest_keysets:
+            print("No match in destination data:", keyset, file=sys.stderr)
+            continue
+
+        for field in copy_fields:
+            dest_keysets[keyset][dest_header.index(field)] = data[
+                src_header.index(field)
+            ]
+
+    writer = csv.writer(sys.stdout)
+    writer.writerow(dest_header)
+    writer.writerows(dest_data)
+
+
+if __name__ == "__main__":
+    main()
