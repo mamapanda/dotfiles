@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-exec emacs --no-desktop -nw "$@"
+exec emacsclient -c -nw "$@"

@@ -23,6 +23,7 @@
   - [[#variables][Variables]]
   - [[#hydras][Hydras]]
   - [[#minor-modes][Minor Modes]]
+  - [[#server][Server]]
 - [[#editor-packages][Editor Packages]]
   - [[#appearance][Appearance]]
   - [[#completion][Completion]]
@@ -127,6 +128,8 @@
 
    #+BEGIN_SRC emacs-lisp
      (require 'cl-lib)
+
+     (use-package el-patch)
 
      (use-package general
        :config
@@ -549,6 +552,8 @@
 
      (general-def [remap evil-ex] #'panda-static-evil-ex)
 
+     (evil-ex-define-cmd "n" "normal")
+
      (defun panda-kill-this-buffer ()
        "Kill the current buffer."
        (interactive)
@@ -586,6 +591,27 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package evil-goggles
+       :config/el-patch
+       ;; The = register prompt will linger without this patch.
+       ;; Probably warrants a PR.
+       (el-patch-defun evil-goggles--paste-vert-block-p (register yank-handler)
+         "Return t if the paste is a vertical block.
+
+     Argument REGISTER is the evil register.
+     Argument YANK-HANDLER is the yank hanler."
+         (let* ((text (el-patch-swap
+                        (if register
+                            (evil-get-register register)
+                          (current-kill 0))
+                        (cond
+                         ((eq register ?=) evil-last-=-register-input)
+                         (register (evil-get-register register))
+                         (t (current-kill 0)))))
+                (yh (or yank-handler
+                        (when (stringp text)
+                          (car-safe (get-text-property
+                                     0 'yank-handler text))))))
+           (eq yh 'evil-yank-block-handler)))
        :config
        (gsetq evil-goggles-pulse nil)
        (defun panda-evil-goggles-add (cmd based-on-cmd)
@@ -600,8 +626,7 @@
      (use-package evil-owl
        :straight (evil-owl
                   :host nil
-                  :repo "git@github.com:mamapanda/evil-owl.git"
-                  :local-repo "~/code/emacs-lisp/evil-owl")
+                  :repo "git@github.com:mamapanda/evil-owl.git")
        :custom-face
        (evil-owl-group-name ((t (
                                  :inherit font-lock-function-name-face
@@ -625,8 +650,7 @@
      (use-package evil-traces
        :straight (evil-traces
                   :host nil
-                  :repo "git@github.com:mamapanda/evil-traces.git"
-                  :local-repo "~/code/emacs-lisp/evil-traces")
+                  :repo "git@github.com:mamapanda/evil-traces.git")
        :config
        (defun panda-no-ex-range-and-arg-p ()
          "Return non-nil if both `evil-ex-range' and `evil-ex-argument' are nil."
@@ -741,6 +765,13 @@
      (global-auto-revert-mode)
      (recentf-mode)
      (show-paren-mode)
+   #+END_SRC
+
+** Server
+   #+BEGIN_SRC emacs-lisp
+     (require 'server)
+     (unless (server-running-p)
+       (server-start))
    #+END_SRC
 
 * Editor Packages
@@ -1316,6 +1347,7 @@
        (gsetq nov-text-width most-positive-fixnum))
 
      (use-package pdf-tools
+       :disabled t
        :mode ("\\.pdf$" . pdf-view-mode)
        :gfhook ('pdf-view-mode-hook '(panda-configure-image-view))
        :config
@@ -1332,7 +1364,7 @@
 
      (use-package vterm-toggle
        :general
-       (panda-space "<return>" #'vterm-toggle)
+       (panda-space "<return>" #'panda-vterm-toggle-cd)
        :config
        (add-to-list 'display-buffer-alist
                     '((lambda (buffer-name _)
@@ -1341,7 +1373,12 @@
                       (display-buffer-in-side-window)
                       (side . bottom)
                       (window-height . 15)
-                      (dedicated . t))))
+                      (dedicated . t)))
+       ;; `vterm-toggle-cd' doesn't cd sometimes
+       (defun panda-vterm-toggle-cd ()
+         (interactive)
+         (call-interactively #'vterm-toggle)
+         (vterm-toggle-insert-cd)))
    #+END_SRC
 
    I don't really use ~eshell~ as much.
@@ -1397,7 +1434,9 @@
        (defun panda-set-c-locals ()
          (c-set-offset 'innamespace 0))
        (reformatter-define clang-format
-         :program "clang-format"))
+         :program "clang-format"
+         :args (when-let ((file (buffer-file-name)))
+                 (list "--assume-filename" file))))
 
      (use-package ccls
        :ghook ('(c-mode-hook c++-mode-hook)
@@ -1532,12 +1571,15 @@
    #+BEGIN_SRC emacs-lisp
      (use-package go-mode
        :defer t
-       :gfhook '(gofmt-on-save-mode lsp-deferred panda-set-go-locals)
+       :gfhook '(golines-on-save-mode lsp-deferred panda-set-go-locals)
        :config
        (defun panda-set-go-locals ()
          (gsetq indent-tabs-mode t))
-       (reformatter-define gofmt
-         :program "gofmt"))
+       (defvar golines-args '("--max-len" "80")
+         "Arguments for golines.")
+       (reformatter-define golines
+         :program "golines"
+         :args golines-args))
    #+END_SRC
 
 ** Haskell
@@ -1651,8 +1693,7 @@
      (use-package tex
        :straight auctex
        :defer t
-       :gfhook ('LaTeX-mode-hook '(lsp-deferred
-                                   panda-format-on-save-mode))
+       :gfhook ('LaTeX-mode-hook '(panda-format-on-save-mode))
        :config
        (gsetq TeX-auto-save t
               TeX-parse-self t))
