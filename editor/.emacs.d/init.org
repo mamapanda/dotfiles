@@ -1578,7 +1578,7 @@
        :config
        (defun panda-set-go-locals ()
          (gsetq indent-tabs-mode t))
-       (defvar golines-args '("--max-len" "80")
+       (defvar golines-args '("--max-len" "120")
          "Arguments for golines.")
        (reformatter-define golines
          :program "golines"
