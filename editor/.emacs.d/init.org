@@ -956,7 +956,10 @@
      (use-package lsp-mode
        :defer t
        :general
-       ('normal lsp-mode-map "K" #'lsp-describe-thing-at-point)
+       ('normal lsp-mode-map
+                "gd" #'lsp-find-definition
+                "gD" #'lsp-find-references
+                "K" #'lsp-describe-thing-at-point)
        :config
        (gsetq lsp-auto-execute-action nil
               lsp-before-save-edits nil
