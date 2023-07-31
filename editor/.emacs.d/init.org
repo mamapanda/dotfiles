@@ -1310,6 +1310,8 @@
      (use-package magit
        :general
        (panda-space "g" #'magit-status)
+       ;; hopefully temporary
+       (general-unbind magit-status-mode-map "j")
        :config
        (gsetq magit-auto-revert-mode nil))
 

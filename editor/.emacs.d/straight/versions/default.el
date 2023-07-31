@@ -61,7 +61,7 @@
  ("evil-surround" . "346d4d85fcf1f9517e9c4991c1efe68b4130f93a")
  ("evil-tex" . "03c014d63373c21c511506f36763a355e566eb01")
  ("evil-textobj-column" . "835d7036d0bc9a6e44fc9b7c54ccf2a7c01428cd")
- ("evil-traces" . "9c96de587872b254f573fad55cb8b9ca5b3697d9")
+ ("evil-traces" . "d4c53bd6addbe1bce7c77fdc10314f24451a2ecf")
  ("eyebrowse" . "e483d35e905c2e26fac63f33c77b9e764729a364")
  ("f.el" . "1814209e2ff43cf2e6d38c4cd476218915f550fb")
  ("flycheck" . "5dc37cf32ece034e2537f9c770029269ced11800")
