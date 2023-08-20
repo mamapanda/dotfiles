@@ -31,7 +31,7 @@ case $session in
         xset s off -dpms
         xsetroot -cursor_name left_ptr &
 
-        setxkbmap -option 'ctrl:swapcaps'
+        # setxkbmap -option 'ctrl:swapcaps'
         xcape -e 'Control_L=Escape'
         sxhkd &
         ;;
